@@ -1,0 +1,6 @@
+{
+  "name": "Space Hub",
+  "description": "Real-time space and Earth intelligence monitor for satellites, space weather, asteroids, and launches.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
