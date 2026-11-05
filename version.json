@@ -1,8 +1,0 @@
-{
-  "versionCode": 2,
-  "versionName": "1.1.0",
-  "minRequiredVersion": 1,
-  "apkUrl": "https://tastyandcomfort.github.io/T-C-Space-Hub/SpaceHub.apk",
-  "releaseNotes": "Official release of Space Hub: Real-time SGP4 satellite tracking, upcoming rocket launches, NASA DONKI space weather, asteroid radar, USGS earthquakes, and in-app auto updates.",
-  "releasedDate": "2026-11-05"
-}
