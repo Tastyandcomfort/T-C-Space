@@ -1,55 +1,47 @@
-// --- T&C Space Hub Service Worker ---
-const CACHE_NAME = 'tc-space-v1.0.0';
+importScripts('https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging-compat.js');
 
-// Files to cache for offline access
-const PRECACHE_ASSETS = [
-  '/T-C-Space/',
-  '/T-C-Space/index.html',
-  '/T-C-Space/styles.css',
-  '/T-C-Space/app.js',
-  '/T-C-Space/manifest.webmanifest'
-];
-
-// 1. Force the new version to take over immediately
-self.addEventListener('install', (event) => {
-  self.skipWaiting();
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE_ASSETS))
-  );
+// 1. Initialize Firebase inside Service Worker
+firebase.initializeApp({
+  apiKey: "AIzaSyAOn8eFL_CMGuYVeEa9hfpdkhrxZpjacqU",
+  authDomain: "news-61e62.firebaseapp.com",
+  projectId: "news-61e62",
+  storageBucket: "news-61e62.firebasestorage.app",
+  messagingSenderId: "1054060055660",
+  appId: "1:1054060055660:web:e192c256c82facb9af1c49"
 });
 
-// 2. Wipe old caches and claim all open tabs
-self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    caches.keys().then((keys) => {
-      return Promise.all(
-        keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
-      );
-    }).then(() => self.clients.claim())
-  );
-});
+const messaging = firebase.messaging();
 
-// 3. Network-First strategy (always fetch latest news/telemetry if online)
-self.addEventListener('fetch', (event) => {
-  if (event.request.mode === 'navigate') {
-    event.respondWith(
-      fetch(event.request).catch(() => caches.match('/T-C-Space/index.html'))
-    );
-    return;
-  }
-  event.respondWith(
-    caches.match(event.request).then((cached) => cached || fetch(event.request))
-  );
-});
+// 2. Lifecycle hooks for auto-updating
+self.addEventListener('install', () => self.skipWaiting());
+self.addEventListener('activate', (e) => e.waitUntil(self.clients.claim()));
 
-// 4. Handle incoming push notifications
-self.addEventListener('push', (event) => {
-  const data = event.data ? event.data.json() : {};
-  const title = data.title || 'Space Hub Alert 🚀';
+// 3. Catch background pushes and display with full pictures (APOD, Asteroids, Storms)
+messaging.onBackgroundMessage((payload) => {
+  const title = payload.notification?.title || payload.data?.title || 'T&C Space Alert 🚀';
   const options = {
-    body: data.body || 'New space telemetry available.',
-    icon: '/T-C-Space/assets/space-hub-icon-192.png',
-    badge: '/T-C-Space/assets/space-hub-icon-192.png'
+    body: payload.notification?.body || payload.data?.body || 'New space telemetry available.',
+    icon: 'assets/space-hub-icon-192.png?v=1',
+    badge: 'assets/space-hub-icon-192.png?v=1',
+    image: payload.notification?.image || payload.notification?.imageUrl || null,
+    data: { url: payload.data?.url || '/T-C-Space/' }
   };
-  event.waitUntil(self.registration.showNotification(title, options));
+  self.registration.showNotification(title, options);
+});
+
+// 4. Open app when notification is clicked
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const url = event.notification.data?.url || '/T-C-Space/';
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
+      for (const client of windowClients) {
+        if (client.url.includes('/T-C-Space/') && 'focus' in client) {
+          return client.focus();
+        }
+      }
+      if (clients.openWindow) return clients.openWindow(url);
+    })
+  );
 });
