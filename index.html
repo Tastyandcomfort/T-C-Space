@@ -994,27 +994,41 @@
   <script src="https://unpkg.com/globe.gl"></script>
   <script src="app.js"></script>
 
-  <!-- Service Worker, Auto-Update & PWA Install Engine -->
+<!-- Firebase App & Messaging SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging-compat.js"></script>
+
+  <!-- Complete Service Worker, Auto-Update, PWA & Space Alert Engine -->
   <script>
+    // 1. Initialize Firebase
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "news-61e62.firebaseapp.com",
+      projectId: "news-61e62",
+      storageBucket: "news-61e62.appspot.com",
+      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const messaging = firebase.messaging();
+
     let deferredInstallPrompt = null;
 
-    // 1. REGISTER SERVICE WORKER WITH AUTO-UPDATE ENGINE
+    // 2. Register Service Worker with Auto-Update
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', async () => {
         try {
           const reg = await navigator.serviceWorker.register('/T-C-Space/sw.js', {
-            updateViaCache: 'none' // Ensures browser checks GitHub Pages for fresh code
+            updateViaCache: 'none'
           });
 
-          // Check for updates when app opens
           reg.update();
 
-          // Check for updates whenever user returns to the app
           document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'visible') reg.update();
           });
 
-          // Auto-reload to latest version when new worker claims control
           let refreshing = false;
           navigator.serviceWorker.addEventListener('controllerchange', () => {
             if (!refreshing) {
@@ -1028,13 +1042,12 @@
       });
     }
 
-    // 2. CAPTURE PWA INSTALL PROMPT
+    // 3. PWA 1-Click Install Handler
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredInstallPrompt = e;
     });
 
-    // 3. TRIGGER 1-CLICK PWA INSTALL
     async function triggerPWAInstall() {
       if (deferredInstallPrompt) {
         deferredInstallPrompt.prompt();
@@ -1045,7 +1058,6 @@
           if (modal) modal.setAttribute('aria-hidden', 'true');
         }
       } else {
-        // If already installed or browser requires manual step (e.g. Safari on iOS)
         const modal = document.getElementById('install-modal');
         if (modal) {
           modal.removeAttribute('aria-hidden');
@@ -1062,32 +1074,38 @@
       if (modal) modal.setAttribute('aria-hidden', 'true');
     });
 
-    // 4. SPACE ALERT NOTIFICATION TEST ENGINE
+    // 4. Space Alert Notification Engine
     const alertBtn = document.getElementById('test-alert-btn');
     if (alertBtn) {
       alertBtn.addEventListener('click', async () => {
         if (!('Notification' in window)) {
-          alert('This browser does not support desktop or mobile notifications.');
+          alert('This browser does not support notifications.');
           return;
         }
 
-        const permission = await Notification.requestPermission();
-        if (permission === 'granted') {
-          if ('serviceWorker' in navigator) {
-            const reg = await navigator.serviceWorker.ready;
-            reg.showNotification('T&C Space Hub Alert 🚀', {
-              body: 'ISS orbital pass detected overhead. Space weather telemetry nominal.',
-              icon: 'assets/space-hub-icon-192.png?v=1',
-              badge: 'assets/space-hub-icon-192.png?v=1'
-            });
-          } else {
-            new Notification('T&C Space Hub Alert 🚀', {
-              body: 'ISS orbital pass detected overhead. Space weather telemetry nominal.',
-              icon: 'assets/space-hub-icon-192.png?v=1'
-            });
+        try {
+          const permission = await Notification.requestPermission();
+          if (permission !== 'granted') {
+            alert('Notification permission denied. Please allow it in browser site settings.');
+            return;
           }
-        } else {
-          alert('Notification permission denied. Please allow notifications in your browser site settings.');
+
+          const swReg = await navigator.serviceWorker.ready;
+          const token = await messaging.getToken({
+            serviceWorkerRegistration: swReg
+          });
+
+          console.log('✅ Device Registered to Firebase! Token:', token);
+
+          swReg.showNotification('T&C Space Hub Alert 🚀', {
+            body: 'Connected! Your device is now registered to receive APOD photos, asteroid radar, and storm alerts.',
+            icon: 'assets/space-hub-icon-192.png?v=1',
+            badge: 'assets/space-hub-icon-192.png?v=1'
+          });
+
+        } catch (err) {
+          console.error('Firebase registration error:', err);
+          alert('Error connecting to Firebase: ' + err.message);
         }
       });
     }
