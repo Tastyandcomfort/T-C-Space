@@ -136,9 +136,20 @@ async function run() {
 
   console.log('Sending alert:', alertToSend.title);
 
-  // 7. Format Web Push Notification (supports images on locked phones)
+  // 7. Read all registered space tokens from Firestore
+  const tokensSnapshot = await admin.firestore().collection('space_fcm_tokens').get();
+  const tokens = tokensSnapshot.docs.map(doc => doc.id);
+
+  if (tokens.length === 0) {
+    console.log('No registered devices found in space_fcm_tokens! Please click Test Alert on the site first.');
+    return;
+  }
+
+  console.log(`Found ${tokens.length} registered device(s). Sending alert...`);
+
+  // 8. Dispatch notification directly to all registered devices
   const message = {
-    topic: TOPIC_NAME,
+    tokens: tokens,
     notification: {
       title: alertToSend.title,
       body: alertToSend.body,
@@ -153,7 +164,7 @@ async function run() {
         body: alertToSend.body,
         icon: 'https://tastyandcomfort.github.io/T-C-Space/assets/space-hub-icon-192.png?v=1',
         badge: 'https://tastyandcomfort.github.io/T-C-Space/assets/space-hub-icon-192.png?v=1',
-        image: alertToSend.image || undefined, // Displays full-res APOD image on phone lock screens
+        image: alertToSend.image || undefined, // Displays APOD picture on lock screen
         requireInteraction: true,
         data: {
           url: alertToSend.url
@@ -166,8 +177,8 @@ async function run() {
   };
 
   try {
-    const response = await admin.messaging().send(message);
-    console.log('Successfully dispatched space push notification:', response);
+    const response = await admin.messaging().sendEachForMulticast(message);
+    console.log(`Successfully delivered: ${response.successCount} | Failed: ${response.failureCount}`);
   } catch (error) {
     console.error('Failed to send FCM message:', error);
     process.exit(1);
