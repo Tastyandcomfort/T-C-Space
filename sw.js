@@ -12,35 +12,42 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
+// 1. Lifecycle management for auto-updating
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', (e) => e.waitUntil(self.clients.claim()));
 
-// ONLY ONE HANDLER: Prevents double notifications
+// 2. Display incoming space alerts (Guarantees 1 single notification)
 messaging.onBackgroundMessage((payload) => {
-  const title = payload.notification?.title || payload.data?.title || 'T&C Space Alert 🚀';
+  const data = payload.data || {};
+  const title = data.title || payload.notification?.title || 'T&C Space Alert 🚀';
+  
   const options = {
-    body: payload.notification?.body || payload.data?.body || 'New space telemetry available.',
+    body: data.body || payload.notification?.body || 'New space telemetry available.',
     icon: 'assets/space-hub-icon-192.png?v=1',
     badge: 'assets/space-hub-icon-192.png?v=1',
-    image: payload.notification?.image || payload.notification?.imageUrl || null,
-    tag: payload.data?.tag || 'space-alert', // Collapses duplicates
-    renotify: false,
-    data: { url: payload.data?.url || '/T-C-Space/' }
+    image: data.image || payload.notification?.image || null,
+    tag: data.tag || 'space-hub-alert',
+    renotify: true,
+    data: { url: data.url || '/T-C-Space/' }
   };
+
   self.registration.showNotification(title, options);
 });
 
+// 3. Click notification: Opens app and scrolls directly to that specific subject section
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-  const url = event.notification.data?.url || '/T-C-Space/';
+  const targetUrl = event.notification.data?.url || '/T-C-Space/';
+
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
       for (const client of windowClients) {
-        if (client.url.includes('/T-C-Space/') && 'focus' in client) {
+        if (client.url.includes('/T-C-Space/')) {
+          client.navigate(targetUrl);
           return client.focus();
         }
       }
-      if (clients.openWindow) return clients.openWindow(url);
+      if (clients.openWindow) return clients.openWindow(targetUrl);
     })
   );
 });
