@@ -1,7 +1,6 @@
 importScripts('https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging-compat.js');
 
-// 1. Initialize Firebase inside Service Worker
 firebase.initializeApp({
   apiKey: "AIzaSyAOn8eFL_CMGuYVeEa9hfpdkHRxZpjacqU",
   authDomain: "news-61e62.firebaseapp.com",
@@ -13,11 +12,10 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
-// 2. Lifecycle hooks for auto-updating
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', (e) => e.waitUntil(self.clients.claim()));
 
-// 3. Catch background pushes and display with full pictures (APOD, Asteroids, Storms)
+// ONLY ONE HANDLER: Prevents double notifications
 messaging.onBackgroundMessage((payload) => {
   const title = payload.notification?.title || payload.data?.title || 'T&C Space Alert 🚀';
   const options = {
@@ -25,12 +23,13 @@ messaging.onBackgroundMessage((payload) => {
     icon: 'assets/space-hub-icon-192.png?v=1',
     badge: 'assets/space-hub-icon-192.png?v=1',
     image: payload.notification?.image || payload.notification?.imageUrl || null,
+    tag: payload.data?.tag || 'space-alert', // Collapses duplicates
+    renotify: false,
     data: { url: payload.data?.url || '/T-C-Space/' }
   };
   self.registration.showNotification(title, options);
 });
 
-// 4. Open app when notification is clicked
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   const url = event.notification.data?.url || '/T-C-Space/';
