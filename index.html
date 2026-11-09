@@ -991,5 +991,70 @@
   <script src="https://cdn.jsdelivr.net/npm/satellite.js@6.0.1/dist/satellite.min.js"></script>
   <script src="https://unpkg.com/globe.gl"></script>
   <script src="app.js"></script>
+
+  <script>
+  let deferredInstallPrompt = null;
+
+  // 1. REGISTER SERVICE WORKER WITH AUTO-UPDATE ENGINE
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', async () => {
+      try {
+        const reg = await navigator.serviceWorker.register('/T-C-Space/sw.js', {
+          updateViaCache: 'none' // Always fetch fresh code from GitHub Pages
+        });
+
+        // Check for updates on startup
+        reg.update();
+
+        // Check for updates whenever user returns to the app
+        document.addEventListener('visibilitychange', () => {
+          if (document.visibilityState === 'visible') reg.update();
+        });
+
+        // Automatically reload when a new version takes over
+        let refreshing = false;
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          if (!refreshing) {
+            refreshing = true;
+            window.location.reload();
+          }
+        });
+      } catch (e) {
+        console.error('Service Worker registration failed:', e);
+      }
+    });
+  }
+
+  // 2. CAPTURE PWA INSTALL PROMPT (Replaces APK downloads)
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredInstallPrompt = e;
+    
+    // Show any install buttons on the page
+    document.querySelectorAll('.pwa-install-trigger').forEach(btn => {
+      btn.style.display = 'inline-flex';
+    });
+  });
+
+  // Global function to trigger native PWA installation
+  async function triggerPWAInstall() {
+    if (!deferredInstallPrompt) {
+      alert("Space Hub is already installed or your browser doesn't support 1-click install. Tap your browser menu (⋮ or ⎋) and select 'Add to Home Screen'.");
+      return;
+    }
+    deferredInstallPrompt.prompt();
+    const { outcome } = await deferredInstallPrompt.userChoice;
+    if (outcome === 'accepted') {
+      deferredInstallPrompt = null;
+      document.querySelectorAll('.pwa-install-trigger').forEach(btn => btn.style.display = 'none');
+    }
+  }
+
+  window.addEventListener('appinstalled', () => {
+    deferredInstallPrompt = null;
+    document.querySelectorAll('.pwa-install-trigger').forEach(btn => btn.style.display = 'none');
+  });
+</script>
+  
 </body>
 </html>
