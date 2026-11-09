@@ -5,9 +5,9 @@
   <meta name="theme-color" content="#f5f5f7" id="theme-color-meta">
   <meta name="description" content="T&C Space Hub — Complete real-time space intelligence: orbital satellite tracking, rocket launches, solar weather, asteroids, earthquakes and deep space telemetry.">
   <meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="icon" type="image/png" sizes="192x192" href="assets/space-hub-icon-192.png">
-  <link rel="apple-touch-icon" href="assets/space-hub-icon-512.png">
-  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/png" sizes="192x192" href="assets/space-hub-icon-192.png?v=1">
+  <link rel="apple-touch-icon" href="assets/space-hub-icon-512.png?v=1">
+  <link rel="manifest" href="manifest.webmanifest?v=1">
   <title>T&C Space Hub — Real-Time Space Intelligence Platform</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <link rel="stylesheet" href="styles.css">
@@ -17,7 +17,7 @@
     <!-- Sidebar Navigation (Desktop / Tablet) -->
     <aside class="sidebar" id="sidebar">
       <a class="brand" href="#overview">
-        <img class="brand-icon" src="assets/space-hub-icon-192.png" alt="T&C Space Hub logo">
+        <img class="brand-icon" src="assets/space-hub-icon-192.png?v=1" alt="T&C Space Hub logo">
         <span class="brand-copy">
           <b>SPACE HUB</b>
           <small id="brand-tag">MISSION CONTROL</small>
@@ -69,10 +69,10 @@
           <span class="nav-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></span>
           <span class="nav-text" data-i18n="nav_about">About</span>
         </a>
-        <a href="#install" id="side-install-nav" class="side-install-highlight">
+        <a href="javascript:void(0)" onclick="triggerPWAInstall()" id="side-install-nav" class="side-install-highlight">
           <span class="nav-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></span>
           <b class="nav-text" data-i18n="nav_install">Install</b>
-          <small class="badge-pill">APK</small>
+          <small class="badge-pill green">APP</small>
         </a>
       </nav>
       <div class="sidebar-bottom">
@@ -90,14 +90,14 @@
     <main class="main-area">
       <header class="topbar">
         <div class="mobile-brand">
-          <img class="brand-icon" src="assets/space-hub-icon-192.png" alt="Space Hub">
+          <img class="brand-icon" src="assets/space-hub-icon-192.png?v=1" alt="Space Hub">
           <b>SPACE HUB</b>
         </div>
         <div class="breadcrumb">
           <span>Space Hub</span><i>/</i><b id="current-section-label">Overview</b>
         </div>
         <div class="top-actions">
-          <button id="open-install-modal" class="install-pill-btn" aria-label="Install Space Hub App">
+          <button id="open-install-modal" onclick="triggerPWAInstall()" class="install-pill-btn" aria-label="Install Space Hub App">
             <span class="install-pill-icon">⬇</span>
             <span class="install-pill-text" data-i18n="install_app_btn">Install App</span>
           </button>
@@ -148,26 +148,28 @@
         <section class="app-banner-card" aria-label="Install Space Hub Application">
           <div class="app-banner-left">
             <div class="app-banner-badge">
-              <span class="live-dot"></span> <span data-i18n="banner_badge">NATIVE ANDROID & PWA READY</span>
+              <span class="live-dot"></span> <span data-i18n="banner_badge">NATIVE APP &amp; PWA READY</span>
             </div>
-            <h2 data-i18n="banner_title">Space Hub for Mobile & Tablet</h2>
-            <p data-i18n="banner_sub">Get the full-speed offline Keplerian orbit propagator, push alerts, and telemetry ticker directly on your Android phone or browser home screen.</p>
+            <h2 data-i18n="banner_title">Space Hub for Mobile &amp; Desktop</h2>
+            <p data-i18n="banner_sub">Get the full-speed offline Keplerian orbit propagator, push alerts, and telemetry ticker directly on your phone or computer home screen.</p>
           </div>
           <div class="app-banner-buttons">
-            <a href="SpaceHub.apk" download="SpaceHub.apk" class="banner-btn primary" id="banner-download-btn">
+            <!-- PWA Install Button (Primary) -->
+            <button type="button" class="banner-btn primary" id="banner-pwa-btn" onclick="triggerPWAInstall()">
+              <span class="btn-glyph">📲</span>
+              <span>
+                <b data-i18n="install_pwa">Install Space Hub</b>
+                <small>Instant Install · No App Store Needed</small>
+              </span>
+            </button>
+            <!-- Native APK Button (Preserved in code for future use, hidden from view) -->
+            <a href="SpaceHub.apk" download="SpaceHub.apk" class="banner-btn secondary" id="banner-download-btn" style="display: none !important;">
               <span class="btn-glyph">⚡</span>
               <span>
                 <b data-i18n="download_apk">Download Android App</b>
                 <small>v1.0.0 · 23 MB · Direct Install</small>
               </span>
             </a>
-            <button type="button" class="banner-btn secondary" id="banner-pwa-btn">
-              <span class="btn-glyph">📲</span>
-              <span>
-                <b data-i18n="install_pwa">Install Web App</b>
-                <small>Add to Home Screen (PWA)</small>
-              </span>
-            </button>
           </div>
         </section>
 
@@ -199,7 +201,7 @@
             <div class="metric-bottom" id="hero-launch-provider">TheSpaceDevs LL2 Feed</div>
           </article>
           <article class="metric-card">
-            <div class="metric-top"><span>SOLAR WIND & STORMS</span><span class="metric-symbol teal">☼</span></div>
+            <div class="metric-top"><span>SOLAR WIND &amp; STORMS</span><span class="metric-symbol teal">☼</span></div>
             <strong id="hero-solar-status">Normal</strong>
             <small id="hero-solar-count">DONKI reports loaded</small>
             <div class="metric-bottom"><span class="tiny-dot green"></span> Space Weather Watch</div>
@@ -212,7 +214,7 @@
           <div class="section-title">
             <div>
               <div class="eyebrow">ORBITAL INTELLIGENCE</div>
-              <h2 data-i18n="section_satellites_title">Global Satellite Tracking & Planetary View</h2>
+              <h2 data-i18n="section_satellites_title">Global Satellite Tracking &amp; Planetary View</h2>
               <p>Real-time SGP4 Keplerian orbital calculations with 2D ground track projections and 3D WebGL Earth globe.</p>
             </div>
             <span class="section-count">01 / ORBIT</span>
@@ -339,7 +341,7 @@
         <section class="section-block" id="space-weather">
           <div class="section-title">
             <div>
-              <div class="eyebrow">HELIOPHYSICS & SUN-EARTH CONNECTION</div>
+              <div class="eyebrow">HELIOPHYSICS &amp; SUN-EARTH CONNECTION</div>
               <h2 data-i18n="section_weather_title">Space Weather Watch</h2>
               <p>Solar flares, coronal mass ejections (CMEs) and geomagnetic storms reported by NASA DONKI.</p>
             </div>
@@ -366,7 +368,7 @@
           <article class="surface weather-panel">
             <div class="card-heading">
               <div>
-                <h3>Recent Solar & Geomagnetic Events</h3>
+                <h3>Recent Solar &amp; Geomagnetic Events</h3>
                 <p>NASA Space Weather Database Of Notifications, Knowledge, Information (DONKI).</p>
               </div>
               <button id="refresh-weather" class="subtle-button">Refresh Events ↻</button>
@@ -375,7 +377,7 @@
               <p class="muted">Loading live space weather observations…</p>
             </div>
           </article>
-          <p class="data-note">Space weather telemetry is provided by NASA DONKI & NOAA SWPC. Geomagnetic storms can affect satellite operations, high-latitude radio, and generate auroral displays.</p>
+          <p class="data-note">Space weather telemetry is provided by NASA DONKI &amp; NOAA SWPC. Geomagnetic storms can affect satellite operations, high-latitude radio, and generate auroral displays.</p>
         </section>
 
         <!-- SECTION 4: COSMOS & ASTEROIDS -->
@@ -383,7 +385,7 @@
           <div class="section-title">
             <div>
               <div class="eyebrow">THE UNIVERSE, DAILY</div>
-              <h2 data-i18n="section_astronomy_title">Astronomy Picture & Asteroid Watch</h2>
+              <h2 data-i18n="section_astronomy_title">Astronomy Picture &amp; Asteroid Watch</h2>
               <p>NASA's Astronomy Picture of the Day (APOD) and Near-Earth Objects (NeoWs) close approaches.</p>
             </div>
             <span class="section-count">04 / DISCOVERY</span>
@@ -425,7 +427,7 @@
         <section class="section-block" id="earth-monitor">
           <div class="section-title">
             <div>
-              <div class="eyebrow">PLANETARY HAZARDS & GEOPHYSICS</div>
+              <div class="eyebrow">PLANETARY HAZARDS &amp; GEOPHYSICS</div>
               <h2 data-i18n="section_earth_title">Real-time Earth Monitoring</h2>
               <p>USGS global seismic network (M2.5+ earthquakes) and NASA EONET active natural hazard events.</p>
             </div>
@@ -469,7 +471,7 @@
         <section class="section-block" id="intel-brief">
           <div class="section-title">
             <div>
-              <div class="eyebrow">REGIONAL ENVIRONMENTAL & RESOURCE INTELLIGENCE</div>
+              <div class="eyebrow">REGIONAL ENVIRONMENTAL &amp; RESOURCE INTELLIGENCE</div>
               <h2 data-i18n="section_intel_title">Area-Wise Intelligence Brief</h2>
               <p>Live groundwater levels, air quality, greenery, pollution, radiation, and natural resources for any region.</p>
             </div>
@@ -687,8 +689,8 @@
         <section class="section-block" id="settings">
           <div class="section-title">
             <div>
-              <div class="eyebrow">PREFERENCES & NOTIFICATION THRESHOLDS</div>
-              <h2 data-i18n="section_settings_title">Settings & Space Alerts</h2>
+              <div class="eyebrow">PREFERENCES &amp; NOTIFICATION THRESHOLDS</div>
+              <h2 data-i18n="section_settings_title">Settings &amp; Space Alerts</h2>
               <p>Customize telemetry preferences, localization, and critical alert notification thresholds.</p>
             </div>
             <span class="section-count">08 / PREFERENCES</span>
@@ -696,7 +698,7 @@
 
           <div class="settings-grid">
             <article class="surface settings-card">
-              <h3>Display & Localization</h3>
+              <h3>Display &amp; Localization</h3>
               <div class="setting-item">
                 <div>
                   <b>Interface Language</b>
@@ -726,7 +728,7 @@
             </article>
 
             <article class="surface settings-card">
-              <h3>Real-Time Alerts & Notification Engine</h3>
+              <h3>Real-Time Alerts &amp; Notification Engine</h3>
               <p class="muted">Configured threshold alerts for critical space and geophysical phenomena.</p>
               <div class="toggle-list">
                 <label class="toggle-row">
@@ -770,7 +772,7 @@
           <div class="section-title">
             <div>
               <div class="eyebrow">OPEN SCIENCE TRANSPARENCY</div>
-              <h2>Data Sources & Public APIs</h2>
+              <h2>Data Sources &amp; Public APIs</h2>
               <p>100% Real-time public endpoints used by Space Hub.</p>
             </div>
             <span class="section-count">09 / SOURCES</span>
@@ -789,7 +791,7 @@
             <a class="source-card" href="https://api.nasa.gov/" target="_blank" rel="noopener">
               <b>NASA Open APIs</b>
               <span>APOD · DONKI · NeoWs</span>
-              <small>Solar flares, asteroids & cosmic imagery</small>
+              <small>Solar flares, asteroids &amp; cosmic imagery</small>
             </a>
             <a class="source-card" href="https://earthquake.usgs.gov/" target="_blank" rel="noopener">
               <b>USGS Earthquake Hazards</b>
@@ -819,12 +821,12 @@
           <div class="ecosystem-badges">
             <a class="ecosystem-badge" href="https://tastyandcomfort.github.io/T-C/" target="_blank" rel="noopener">
               <span class="ecosystem-icon">T&C</span>
-              <span><b>T&C Stall</b><small>Tasty & Comfort · 1st website</small></span>
+              <span><b>T&C Stall</b><small>Tasty &amp; Comfort · 1st website</small></span>
               <span class="ecosystem-arrow">↗</span>
             </a>
             <a class="ecosystem-badge" href="https://tastyandcomfort.github.io/news/" target="_blank" rel="noopener">
               <span class="ecosystem-icon news-icon">N</span>
-              <span><b>T&C News Hub</b><small>News, updates & information</small></span>
+              <span><b>T&C News Hub</b><small>News, updates &amp; information</small></span>
               <span class="ecosystem-arrow">↗</span>
             </a>
           </div>
@@ -909,13 +911,13 @@
 
         <!-- Footer -->
         <footer class="footer">
-          <img class="footer-icon" src="assets/space-hub-icon-192.png" alt="T&C Space Hub">
+          <img class="footer-icon" src="assets/space-hub-icon-192.png?v=1" alt="T&C Space Hub">
           <div>
             <b>T&C SPACE HUB · MISSION CONTROL</b>
             <p>Curiosity has no borders · Real-time space intelligence platform.</p>
           </div>
           <div class="footer-right">
-            An independent T&C project · Powered by public science APIs from NASA, CelesTrak, TheSpaceDevs, USGS & Wikipedia.
+            An independent T&C project · Powered by public science APIs from NASA, CelesTrak, TheSpaceDevs, USGS &amp; Wikipedia.
           </div>
         </footer>
       </div>
@@ -927,29 +929,50 @@
     <div class="install-modal-sheet" role="dialog" aria-labelledby="modal-title" aria-modal="true">
       <button class="modal-close-btn" id="modal-close" aria-label="Close install dialog">✕</button>
       <div class="modal-head">
-        <img src="assets/space-hub-icon-192.png" alt="Space Hub Logo" class="modal-app-icon">
+        <img src="assets/space-hub-icon-192.png?v=1" alt="Space Hub Logo" class="modal-app-icon">
         <div>
           <div class="eyebrow"><span class="tiny-dot green"></span> DIRECT INSTALLATION</div>
           <h3 id="modal-title">Get Space Hub</h3>
-          <p>Choose your preferred installation method below:</p>
+          <p>Instant installation for Android, Windows, Mac &amp; iOS:</p>
         </div>
       </div>
 
       <div class="modal-options">
-        <!-- Option 1: Native Android APK -->
+        <!-- Progressive Web App (Now Promoted as Recommended Option) -->
         <div class="install-option-card recommended">
           <div class="option-header">
             <div class="option-title">
-              <span class="option-icon">🤖</span>
+              <span class="option-icon">🌐</span>
               <div>
-                <b>Android Native App (Recommended)</b>
-                <small>Full performance · Offline Keplerian propagator · Push alerts</small>
+                <b>Space Hub Web App (Official)</b>
+                <small>Works on Android, Windows, macOS, iOS &amp; Linux</small>
               </div>
             </div>
             <span class="badge-pill green">RECOMMENDED</span>
           </div>
+          <p class="option-desc">Instant 1-tap install directly to your device home screen with full offline capability and auto-updates.</p>
+          <button type="button" class="option-cta primary" id="modal-trigger-pwa" onclick="triggerPWAInstall()">
+            <span>📲 Install Space Hub Now</span>
+          </button>
+          <div id="pwa-help-text" class="pwa-hint">
+            <span>💡 <b>Tip for iPhone/iPad:</b> Tap the Share button ⎋ in Safari, then choose <b>"Add to Home Screen ⊞"</b>.</span>
+          </div>
+        </div>
+
+        <!-- Option: Native Android APK (Preserved in code for future use, hidden from view) -->
+        <div class="install-option-card" style="display: none !important;">
+          <div class="option-header">
+            <div class="option-title">
+              <span class="option-icon">🤖</span>
+              <div>
+                <b>Android Native App (Direct APK)</b>
+                <small>Full performance · Offline Keplerian propagator · Push alerts</small>
+              </div>
+            </div>
+            <span class="badge-pill">STANDALONE</span>
+          </div>
           <p class="option-desc">Direct download for any Android phone or tablet (Android 8.0+). No Google Play store login required.</p>
-          <a href="SpaceHub.apk" download="SpaceHub.apk" class="option-cta primary" id="modal-download-apk">
+          <a href="SpaceHub.apk" download="SpaceHub.apk" class="option-cta secondary" id="modal-download-apk">
             <span>⬇ Download Android App (23 MB)</span>
             <span class="cta-arrow">↗</span>
           </a>
@@ -957,27 +980,6 @@
             <div class="step-item"><span class="step-num">1</span><span>Tap <b>Download Android APK</b> above</span></div>
             <div class="step-item"><span class="step-num">2</span><span>Open the downloaded file from your notification bar or Files app</span></div>
             <div class="step-item"><span class="step-num">3</span><span>Tap <b>Install</b> (if prompted, enable "Allow from this source")</span></div>
-          </div>
-        </div>
-
-        <!-- Option 2: Progressive Web App -->
-        <div class="install-option-card">
-          <div class="option-header">
-            <div class="option-title">
-              <span class="option-icon">🌐</span>
-              <div>
-                <b>Web App (PWA)</b>
-                <small>Works in Chrome, Safari, Edge, Firefox on any device</small>
-              </div>
-            </div>
-            <span class="badge-pill">INSTANT</span>
-          </div>
-          <p class="option-desc">Add directly to your device home screen without downloading an APK file.</p>
-          <button type="button" class="option-cta secondary" id="modal-trigger-pwa">
-            <span>📲 Add to Home Screen</span>
-          </button>
-          <div id="pwa-help-text" class="pwa-hint">
-            <span>💡 <b>Tip for iPhone/iPad:</b> Tap the Share button ⎋ in Safari, then choose <b>"Add to Home Screen ⊞"</b>.</span>
           </div>
         </div>
       </div>
@@ -992,69 +994,103 @@
   <script src="https://unpkg.com/globe.gl"></script>
   <script src="app.js"></script>
 
+  <!-- Service Worker, Auto-Update & PWA Install Engine -->
   <script>
-  let deferredInstallPrompt = null;
+    let deferredInstallPrompt = null;
 
-  // 1. REGISTER SERVICE WORKER WITH AUTO-UPDATE ENGINE
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', async () => {
-      try {
-        const reg = await navigator.serviceWorker.register('/T-C-Space/sw.js', {
-          updateViaCache: 'none' // Always fetch fresh code from GitHub Pages
-        });
+    // 1. REGISTER SERVICE WORKER WITH AUTO-UPDATE ENGINE
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', async () => {
+        try {
+          const reg = await navigator.serviceWorker.register('/T-C-Space/sw.js', {
+            updateViaCache: 'none' // Ensures browser checks GitHub Pages for fresh code
+          });
 
-        // Check for updates on startup
-        reg.update();
+          // Check for updates when app opens
+          reg.update();
 
-        // Check for updates whenever user returns to the app
-        document.addEventListener('visibilitychange', () => {
-          if (document.visibilityState === 'visible') reg.update();
-        });
+          // Check for updates whenever user returns to the app
+          document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') reg.update();
+          });
 
-        // Automatically reload when a new version takes over
-        let refreshing = false;
-        navigator.serviceWorker.addEventListener('controllerchange', () => {
-          if (!refreshing) {
-            refreshing = true;
-            window.location.reload();
-          }
-        });
-      } catch (e) {
-        console.error('Service Worker registration failed:', e);
+          // Auto-reload to latest version when new worker claims control
+          let refreshing = false;
+          navigator.serviceWorker.addEventListener('controllerchange', () => {
+            if (!refreshing) {
+              refreshing = true;
+              window.location.reload();
+            }
+          });
+        } catch (e) {
+          console.error('Service Worker registration failed:', e);
+        }
+      });
+    }
+
+    // 2. CAPTURE PWA INSTALL PROMPT
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredInstallPrompt = e;
+    });
+
+    // 3. TRIGGER 1-CLICK PWA INSTALL
+    async function triggerPWAInstall() {
+      if (deferredInstallPrompt) {
+        deferredInstallPrompt.prompt();
+        const { outcome } = await deferredInstallPrompt.userChoice;
+        if (outcome === 'accepted') {
+          deferredInstallPrompt = null;
+          const modal = document.getElementById('install-modal');
+          if (modal) modal.setAttribute('aria-hidden', 'true');
+        }
+      } else {
+        // If already installed or browser requires manual step (e.g. Safari on iOS)
+        const modal = document.getElementById('install-modal');
+        if (modal) {
+          modal.removeAttribute('aria-hidden');
+          modal.classList.add('open');
+        } else {
+          alert("Space Hub is ready to install! On Chrome/Android, tap menu (⋮) -> 'Install App'. On iPhone/Safari, tap Share (⎋) -> 'Add to Home Screen'.");
+        }
       }
-    });
-  }
-
-  // 2. CAPTURE PWA INSTALL PROMPT (Replaces APK downloads)
-  window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredInstallPrompt = e;
-    
-    // Show any install buttons on the page
-    document.querySelectorAll('.pwa-install-trigger').forEach(btn => {
-      btn.style.display = 'inline-flex';
-    });
-  });
-
-  // Global function to trigger native PWA installation
-  async function triggerPWAInstall() {
-    if (!deferredInstallPrompt) {
-      alert("Space Hub is already installed or your browser doesn't support 1-click install. Tap your browser menu (⋮ or ⎋) and select 'Add to Home Screen'.");
-      return;
     }
-    deferredInstallPrompt.prompt();
-    const { outcome } = await deferredInstallPrompt.userChoice;
-    if (outcome === 'accepted') {
+
+    window.addEventListener('appinstalled', () => {
       deferredInstallPrompt = null;
-      document.querySelectorAll('.pwa-install-trigger').forEach(btn => btn.style.display = 'none');
-    }
-  }
+      const modal = document.getElementById('install-modal');
+      if (modal) modal.setAttribute('aria-hidden', 'true');
+    });
 
-  window.addEventListener('appinstalled', () => {
-    deferredInstallPrompt = null;
-    document.querySelectorAll('.pwa-install-trigger').forEach(btn => btn.style.display = 'none');
-  });
-</script>
-  
+    // 4. SPACE ALERT NOTIFICATION TEST ENGINE
+    const alertBtn = document.getElementById('test-alert-btn');
+    if (alertBtn) {
+      alertBtn.addEventListener('click', async () => {
+        if (!('Notification' in window)) {
+          alert('This browser does not support desktop or mobile notifications.');
+          return;
+        }
+
+        const permission = await Notification.requestPermission();
+        if (permission === 'granted') {
+          if ('serviceWorker' in navigator) {
+            const reg = await navigator.serviceWorker.ready;
+            reg.showNotification('T&C Space Hub Alert 🚀', {
+              body: 'ISS orbital pass detected overhead. Space weather telemetry nominal.',
+              icon: 'assets/space-hub-icon-192.png?v=1',
+              badge: 'assets/space-hub-icon-192.png?v=1'
+            });
+          } else {
+            new Notification('T&C Space Hub Alert 🚀', {
+              body: 'ISS orbital pass detected overhead. Space weather telemetry nominal.',
+              icon: 'assets/space-hub-icon-192.png?v=1'
+            });
+          }
+        } else {
+          alert('Notification permission denied. Please allow notifications in your browser site settings.');
+        }
+      });
+    }
+  </script>
 </body>
 </html>
