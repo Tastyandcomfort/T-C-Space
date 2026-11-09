@@ -1078,39 +1078,43 @@
 
     // 4. Space Alert Notification Engine
     const alertBtn = document.getElementById('test-alert-btn');
-    if (alertBtn) {
-      alertBtn.addEventListener('click', async () => {
-        if (!('Notification' in window)) {
-          alert('This browser does not support notifications.');
+  if (alertBtn) {
+    alertBtn.addEventListener('click', async () => {
+      try {
+        const permission = await Notification.requestPermission();
+        if (permission !== 'granted') {
+          alert('Notification permission denied. Please allow it in browser site settings.');
           return;
         }
 
-        try {
-          const permission = await Notification.requestPermission();
-          if (permission !== 'granted') {
-            alert('Notification permission denied. Please allow it in browser site settings.');
-            return;
-          }
+        const swReg = await navigator.serviceWorker.ready;
+        const token = await messaging.getToken({
+          serviceWorkerRegistration: swReg
+        });
 
-          const swReg = await navigator.serviceWorker.ready;
-          const token = await messaging.getToken({
-            serviceWorkerRegistration: swReg
+        if (token) {
+          // SAVE TOKEN INTO FIRESTORE
+          await db.collection('space_fcm_tokens').doc(token).set({
+            token: token,
+            subscribedAt: firebase.firestore.FieldValue.serverTimestamp(),
+            userAgent: navigator.userAgent
           });
 
-          console.log('✅ Device Registered to Firebase! Token:', token);
+          console.log('✅ Device saved to Firestore! Token:', token);
 
           swReg.showNotification('T&C Space Hub Alert 🚀', {
-            body: 'Connected! Your device is now registered to receive APOD photos, asteroid radar, and storm alerts.',
+            body: 'Connected! Device registered in space_fcm_tokens. You will now receive APOD and asteroid alerts!',
             icon: 'assets/space-hub-icon-192.png?v=1',
             badge: 'assets/space-hub-icon-192.png?v=1'
           });
-
-        } catch (err) {
-          console.error('Firebase registration error:', err);
-          alert('Error connecting to Firebase: ' + err.message);
         }
-      });
-    }
+      } catch (err) {
+        console.error('Firebase registration error:', err);
+        alert('Error: ' + err.message);
+      }
+    });
+  }
+    
   </script>
 </body>
 </html>
