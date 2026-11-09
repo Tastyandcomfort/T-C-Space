@@ -3,7 +3,7 @@ importScripts('https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging-comp
 
 // 1. Initialize Firebase inside Service Worker
 firebase.initializeApp({
-  apiKey: "AIzaSyAOn8eFL_CMGuYVeEa9hfpdkhrxZpjacqU",
+  apiKey: "AIzaSyAOn8eFL_CMGuYVeEa9hfpdkHRxZpjacqU",
   authDomain: "news-61e62.firebaseapp.com",
   projectId: "news-61e62",
   storageBucket: "news-61e62.firebasestorage.app",
