@@ -997,21 +997,23 @@
 <!-- Firebase App & Messaging SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
   <!-- Complete Service Worker, Auto-Update, PWA & Space Alert Engine -->
   <script>
     // 1. Initialize Firebase
     const firebaseConfig = {
-      apiKey: "AIzaSyAOn8eFL_CMGuYVeEa9hfpdkhrxZpjacqU",
+      apiKey: "AIzaSyAOn8eFL_CMGuYVeEa9hfpdkHRxZpjacqU",
       authDomain: "news-61e62.firebaseapp.com",
       projectId: "news-61e62",
       storageBucket: "news-61e62.firebasestorage.app",
-      messagingSenderId: "105460055660",
+      messagingSenderId: "1054060055660",
       appId: "1:1054060055660:web:e192c256c82facb9af1c49"
     };
 
     firebase.initializeApp(firebaseConfig);
     const messaging = firebase.messaging();
+    const db = firebase.firestore();
 
     let deferredInstallPrompt = null;
 
