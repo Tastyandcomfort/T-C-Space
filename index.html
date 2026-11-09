@@ -1015,8 +1015,20 @@
     const messaging = firebase.messaging();
     const db = firebase.firestore();
 
-    let deferredInstallPrompt = null;
+    // Shows alert even if you are currently using the app
+    messaging.onMessage((payload) => {
+      navigator.serviceWorker.ready.then((reg) => {
+        reg.showNotification(payload.notification?.title || 'T&C Space Alert 🚀', {
+          body: payload.notification?.body || 'New space telemetry available.',
+          icon: 'assets/space-hub-icon-192.png?v=1',
+          badge: 'assets/space-hub-icon-192.png?v=1',
+          image: payload.notification?.image || payload.notification?.imageUrl || null
+        });
+      });
+    });
 
+    let deferredInstallPrompt = null;
+    // ... the rest of your code continues below ...
     // 2. Register Service Worker with Auto-Update
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', async () => {
