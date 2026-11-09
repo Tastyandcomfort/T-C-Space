@@ -21,5 +21,12 @@
       "type": "image/png", 
       "purpose": "any maskable" 
     }
+  ],
+  "related_applications": [
+    {
+      "platform": "webapp",
+      "url": "https://tastyandcomfort.github.io/T-C-Space/manifest.webmanifest",
+      "id": "/T-C-Space/"
+    }
   ]
 }
