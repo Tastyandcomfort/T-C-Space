@@ -300,7 +300,7 @@
           <span class="nav-text">About</span>
         </a>
 
-        <!-- Install Link (Smart text updated dynamically) -->
+        <!-- Install Link -->
         <a href="javascript:void(0)" onclick="triggerPWAInstall()" id="side-install-nav" class="side-install-highlight">
           <span class="nav-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></span>
           <b class="nav-text" id="side-install-text">Install</b>
@@ -334,7 +334,7 @@
             <span class="install-pill-text" id="install-btn-text">Install App</span>
           </button>
 
-          <!-- Real-Time Timezone Selector Clock (UTC & IST) -->
+          <!-- Dual Timezone Selector Clock -->
           <div class="clock-pill-wrap" title="Toggle UTC / IST Time">
             <span class="pulse-ring"></span>
             <span id="live-clock-digits">--:--:--</span>
@@ -500,7 +500,7 @@
               </p>
             </article>
 
-            <!-- 3. EPIC: Earth from 1 Million Miles (Download & Share) -->
+            <!-- 3. EPIC: Earth from 1 Million Miles -->
             <article class="surface card">
               <div class="card-heading">
                 <div>
@@ -540,7 +540,7 @@
           </div>
         </section>
 
-        <!-- SECTION 1: SATELLITES & INTERACTIVE 3D GLOBE THEATER (WORLDMONITOR-STYLE) -->
+        <!-- SECTION 1: SATELLITES & INTERACTIVE 3D GLOBE THEATER -->
         <section class="section-block" id="satellites">
           <div class="section-title">
             <div>
@@ -551,7 +551,7 @@
             <span class="section-count">01 / ORBIT</span>
           </div>
 
-          <!-- Interactive Layer Filters (WorldMonitor Style) -->
+          <!-- Interactive Layer Filters -->
           <div class="globe-layer-toolbar">
             <span style="font-size:0.8rem; font-weight:bold; color:var(--muted); margin-right:4px;">ACTIVE LAYERS:</span>
             <button class="globe-layer-chip active" data-layer="satellites" type="button">🛰️ Satellites</button>
@@ -590,7 +590,6 @@
             </article>
 
             <article class="surface globe-card" style="position:relative;">
-              <!-- Interactive Clickable HUD Card on 3D Globe -->
               <div class="globe-hud-overlay" id="globe-hud-overlay">
                 <h4>
                   <span id="globe-hud-title">Telemetry Target</span>
@@ -641,7 +640,7 @@
           </article>
         </section>
 
-        <!-- SECTION 2: ROCKET LAUNCHES & LIVE ASCENT JOURNEY PROFILE -->
+        <!-- SECTION 2: ROCKET LAUNCHES & ASCENT PROFILE -->
         <section class="section-block" id="launches">
           <div class="section-title">
             <div>
@@ -652,7 +651,6 @@
             <span class="section-count">02 / FLIGHTS</span>
           </div>
 
-          <!-- Next Launch Spotlight Hero -->
           <article class="surface launch-spotlight-card" id="launch-spotlight">
             <div class="spotlight-left">
               <div class="spotlight-tags">
@@ -668,7 +666,7 @@
                 <div><small>TARGET ORBIT</small><b id="spotlight-orbit">Low Earth Orbit</b></div>
               </div>
 
-              <!-- Live Ascent Flight Profile (Journey Telemetry) -->
+              <!-- Live Ascent Flight Profile -->
               <div class="flight-journey-box">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                   <b style="font-size:0.85rem;"><span class="pulse-ring"></span> FLIGHT ASCENT TELEMETRY PROFILE</b>
@@ -762,7 +760,6 @@
             <span class="section-count">04 / RADAR</span>
           </div>
 
-          <!-- APOD Showcase -->
           <article class="surface apod-layout">
             <div id="apod-media" class="apod-media">
               <div class="media-placeholder">✧</div>
@@ -779,7 +776,6 @@
             </div>
           </article>
 
-          <!-- Full Scientific Asteroid Radar -->
           <article class="surface neo-panel">
             <div class="card-heading">
               <div>
@@ -1012,7 +1008,7 @@
           </article>
         </section>
 
-        <!-- SECTION 8: SETTINGS & SPACE ALERTS -->
+        <!-- SECTION 8: SETTINGS & PREFERENCES -->
         <section class="section-block" id="settings">
           <div class="section-title">
             <div>
@@ -1044,7 +1040,7 @@
               </div>
             </article>
 
-              <article class="surface settings-card">
+            <article class="surface settings-card">
               <div style="display:flex; justify-content:space-between; align-items:center;">
                 <h3>Real-Time Alerts &amp; Notification Engine</h3>
                 <button type="button" class="subtle-button" id="toggle-all-alerts-btn" style="font-size:0.75rem;">Deselect All</button>
@@ -1175,7 +1171,7 @@
     </main>
   </div>
 
-  <!-- Apple-Style Install Modal Sheet -->
+  <!-- Install Modal Sheet -->
   <div id="install-modal" class="install-modal-backdrop" aria-hidden="true">
     <div class="install-modal-sheet" role="dialog" aria-labelledby="modal-title" aria-modal="true">
       <button class="modal-close-btn" id="modal-close" aria-label="Close install dialog">✕</button>
@@ -1415,55 +1411,52 @@
 
     const $ = (id) => document.getElementById(id);
 
-  // 1. Listen for tab navigation message from service worker when notification is clicked
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.addEventListener('message', (event) => {
-      if (event.data?.action === 'NAVIGATE_TAB') {
-        const hash = event.data.url?.split('#')[1];
-        if (hash) {
-          // Trigger smooth tab switch
-          const targetNav = document.querySelector(`.side-nav a[data-nav="${hash}"]`);
-          if (targetNav) targetNav.click();
+    // 5. Deep-Linking Tab Switcher on Notification Click
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.addEventListener('message', (event) => {
+        if (event.data?.action === 'NAVIGATE_TAB') {
+          const hash = event.data.url?.split('#')[1];
+          if (hash) {
+            const targetNav = document.querySelector(`.side-nav a[data-nav="${hash}"]`);
+            if (targetNav) targetNav.click();
+          }
         }
-      }
-    });
-  }
-
-  // 2. Master Toggle All / Deselect All
-  let allAlertsSelected = true;
-  $("toggle-all-alerts-btn")?.addEventListener("click", () => {
-    allAlertsSelected = !allAlertsSelected;
-    document.querySelectorAll("#alerts-toggle-list input[type='checkbox']").forEach(cb => {
-      cb.checked = allAlertsSelected;
-    });
-    const btn = $("toggle-all-alerts-btn");
-    if (btn) btn.textContent = allAlertsSelected ? "Deselect All" : "Select All";
-  });
-
-  // 3. Save Selected Categories to Firestore
-  async function saveAlertPreferences() {
-    const prefs = {};
-    document.querySelectorAll("#alerts-toggle-list input[data-category]").forEach(cb => {
-      prefs[cb.getAttribute("data-category")] = cb.checked;
-    });
-
-    try {
-      const swReg = await navigator.serviceWorker.ready;
-      const token = await messaging.getToken({ serviceWorkerRegistration: swReg });
-      if (token) {
-        await db.collection('space_fcm_tokens').doc(token).set({
-          preferences: prefs,
-          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-        }, { merge: true });
-        alert("✅ Preferences Saved! You will only receive alerts for your chosen categories.");
-      }
-    } catch (e) {
-      alert("Please enable notification permissions first by clicking 'Test Notification'.");
+      });
     }
-  }
-  $("save-alert-prefs-btn")?.addEventListener("click", saveAlertPreferences);
 
-    
+    // 6. Master Toggle All / Deselect All
+    let allAlertsSelected = true;
+    $("toggle-all-alerts-btn")?.addEventListener("click", () => {
+      allAlertsSelected = !allAlertsSelected;
+      document.querySelectorAll("#alerts-toggle-list input[type='checkbox']").forEach(cb => {
+        cb.checked = allAlertsSelected;
+      });
+      const btn = $("toggle-all-alerts-btn");
+      if (btn) btn.textContent = allAlertsSelected ? "Deselect All" : "Select All";
+    });
+
+    // 7. Save Selected Categories to Firestore Token Document
+    async function saveAlertPreferences() {
+      const prefs = {};
+      document.querySelectorAll("#alerts-toggle-list input[data-category]").forEach(cb => {
+        prefs[cb.getAttribute("data-category")] = cb.checked;
+      });
+
+      try {
+        const swReg = await navigator.serviceWorker.ready;
+        const token = await messaging.getToken({ serviceWorkerRegistration: swReg });
+        if (token) {
+          await db.collection('space_fcm_tokens').doc(token).set({
+            preferences: prefs,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+          }, { merge: true });
+          alert("✅ Preferences Saved! You will only receive alerts for your chosen categories.");
+        }
+      } catch (e) {
+        alert("Please enable notification permissions first by clicking 'Test Notification'.");
+      }
+    }
+    $("save-alert-prefs-btn")?.addEventListener("click", saveAlertPreferences);
   </script>
 </body>
 </html>
