@@ -14,7 +14,7 @@
   <link rel="stylesheet" href="styles.css">
 
   <style>
-    /* PURE CSS: If running inside the installed PWA, HIDE ALL install/open buttons */
+    /* Pure CSS: Hide install UI when running inside installed standalone PWA */
     @media (display-mode: standalone), (display-mode: fullscreen), (display-mode: minimal-ui) {
       #open-install-modal, #side-install-nav, .app-banner-card, #install-modal {
         display: none !important;
@@ -39,6 +39,81 @@
       100% { box-shadow: 0 0 0 0 rgba(0, 245, 155, 0); }
     }
 
+    /* Interactive 3D Globe Layer Toolbar */
+    .globe-layer-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+      align-items: center;
+    }
+    .globe-layer-chip {
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.05);
+      color: var(--muted);
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .globe-layer-chip.active {
+      background: rgba(41, 151, 255, 0.2);
+      border-color: #2997ff;
+      color: #fff;
+      box-shadow: 0 0 10px rgba(41, 151, 255, 0.3);
+    }
+
+    /* Interactive Globe HUD Telemetry Card */
+    .globe-hud-overlay {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      max-width: 310px;
+      background: rgba(11, 13, 18, 0.92);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(41, 151, 255, 0.4);
+      border-radius: 10px;
+      padding: 12px 14px;
+      color: #fff;
+      z-index: 20;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+      display: none;
+      animation: fadeInHud 0.25s ease-out;
+    }
+    @keyframes fadeInHud {
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .globe-hud-overlay h4 {
+      margin: 0 0 4px 0;
+      font-size: 0.92rem;
+      color: #00d2ff;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .globe-hud-overlay p {
+      margin: 0;
+      font-size: 0.78rem;
+      color: #bbb;
+      line-height: 1.45;
+    }
+    .globe-hud-close {
+      cursor: pointer;
+      background: none;
+      border: none;
+      color: #888;
+      font-size: 1rem;
+      padding: 0 4px;
+    }
+    .globe-hud-close:hover { color: #fff; }
+
     /* Flight Ascent Journey Profile */
     .flight-journey-box {
       margin-top: 14px;
@@ -57,7 +132,7 @@
     }
     .flight-progress-fill {
       height: 100%;
-      width: 35%;
+      width: 0%;
       background: linear-gradient(90deg, #ff9f0a, #00d2ff);
       border-radius: 3px;
       transition: width 0.5s ease;
@@ -70,7 +145,7 @@
       text-transform: uppercase;
     }
 
-    /* Deep Labs Grid & Photo Actions */
+    /* T&C Deep Labs Grid & Photo Actions */
     .deep-labs-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -122,7 +197,7 @@
       background: rgba(255,255,255,0.15);
     }
 
-    /* Clock Selector Pill */
+    /* Real-Time Clock Pill with Timezone Select */
     .clock-pill-wrap {
       display: flex;
       align-items: center;
@@ -132,7 +207,6 @@
       padding: 3px 10px;
       font-family: monospace;
       font-size: 0.85rem;
-      cursor: pointer;
     }
     .clock-pill-wrap select {
       background: transparent;
@@ -142,7 +216,21 @@
       font-family: inherit;
       cursor: pointer;
       outline: none;
-      margin-left: 4px;
+      margin-left: 5px;
+    }
+    .tc-highlight-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      background: rgba(41, 151, 255, 0.12);
+      border: 1px solid rgba(41, 151, 255, 0.3);
+      color: var(--accent, #2997ff);
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
     }
   </style>
 </head>
@@ -168,12 +256,12 @@
         <a href="#deep-labs" data-nav="deep-labs" style="border-left: 3px solid #2997ff; background: rgba(41, 151, 255, 0.08);">
           <span class="nav-icon">🪐</span>
           <span class="nav-text"><b>T&C Deep Labs</b></span>
-          <small class="badge-pill green" style="font-size: 8px;">FLAGSHIP</small>
+          <small class="badge-pill green" style="font-size: 8px;">TOP PICK</small>
         </a>
 
         <a href="#satellites" data-nav="satellites">
           <span class="nav-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
-          <span class="nav-text">Satellites</span>
+          <span class="nav-text">Satellites &amp; 3D</span>
         </a>
         <a href="#launches" data-nav="launches">
           <span class="nav-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg></span>
@@ -247,7 +335,7 @@
           </button>
 
           <!-- Real-Time Timezone Selector Clock (UTC & IST) -->
-          <div class="clock-pill-wrap" title="Click to toggle timezone">
+          <div class="clock-pill-wrap" title="Toggle UTC / IST Time">
             <span class="pulse-ring"></span>
             <span id="live-clock-digits">--:--:--</span>
             <select id="time-zone-select" aria-label="Select Timezone">
@@ -351,9 +439,7 @@
           </section>
         </section>
 
-        <!-- ============================================================== -->
-        <!-- BRAND NEW SECTION: T&C DEEP LABS                               -->
-        <!-- ============================================================== -->
+        <!-- SECTION: T&C DEEP LABS -->
         <section class="section-block" id="deep-labs">
           <div class="section-title">
             <div>
@@ -414,7 +500,7 @@
               </p>
             </article>
 
-            <!-- 3. EPIC: Earth from 1 Million Miles (With Download & Share) -->
+            <!-- 3. EPIC: Earth from 1 Million Miles (Download & Share) -->
             <article class="surface card">
               <div class="card-heading">
                 <div>
@@ -431,7 +517,6 @@
                 <span id="epic-date-label">Downlink: DSCOVR L1 Orbit</span>
                 <span>Natural Color Full-Disk</span>
               </div>
-              <!-- Download & Share Action Buttons -->
               <div class="photo-actions-strip">
                 <button class="action-btn-sm" id="btn-download-epic" type="button">⬇ Download HD Image</button>
                 <button class="action-btn-sm" id="btn-share-epic" type="button">🔗 Share Planetary View</button>
@@ -455,15 +540,25 @@
           </div>
         </section>
 
-        <!-- SECTION 1: SATELLITES & 3D GLOBE -->
+        <!-- SECTION 1: SATELLITES & INTERACTIVE 3D GLOBE THEATER (WORLDMONITOR-STYLE) -->
         <section class="section-block" id="satellites">
           <div class="section-title">
             <div>
-              <div class="eyebrow">ORBITAL INTELLIGENCE</div>
-              <h2>Global Satellite Tracking &amp; Planetary View</h2>
-              <p>Real-time SGP4 Keplerian orbital calculations with 2D ground track projections and 3D WebGL Earth globe.</p>
+              <div class="eyebrow">ORBITAL INTELLIGENCE &amp; MULTI-LAYER THEATER</div>
+              <h2>Interactive 3D Planetary Command Theater</h2>
+              <p>Explore real-time satellites, USGS earthquake shockwaves, NASA EONET wildfires, and near-Earth asteroids mapped simultaneously in 3D WebGL.</p>
             </div>
             <span class="section-count">01 / ORBIT</span>
+          </div>
+
+          <!-- Interactive Layer Filters (WorldMonitor Style) -->
+          <div class="globe-layer-toolbar">
+            <span style="font-size:0.8rem; font-weight:bold; color:var(--muted); margin-right:4px;">ACTIVE LAYERS:</span>
+            <button class="globe-layer-chip active" data-layer="satellites" type="button">🛰️ Satellites</button>
+            <button class="globe-layer-chip active" data-layer="earthquakes" type="button">⚡ Earthquakes (USGS)</button>
+            <button class="globe-layer-chip active" data-layer="fires" type="button">🔥 Fires &amp; Volcanoes (EONET)</button>
+            <button class="globe-layer-chip active" data-layer="launches" type="button">🚀 Spaceports</button>
+            <button class="globe-layer-chip active" data-layer="asteroids" type="button">☄️ Asteroids</button>
           </div>
 
           <div class="dashboard-grid">
@@ -494,17 +589,26 @@
               </div>
             </article>
 
-            <article class="surface globe-card">
+            <article class="surface globe-card" style="position:relative;">
+              <!-- Interactive Clickable HUD Card on 3D Globe -->
+              <div class="globe-hud-overlay" id="globe-hud-overlay">
+                <h4>
+                  <span id="globe-hud-title">Telemetry Target</span>
+                  <button class="globe-hud-close" id="btn-close-globe-hud" type="button">✕</button>
+                </h4>
+                <p id="globe-hud-desc">Tap any object on the globe to inspect real-time coordinates, velocity, or seismic magnitude.</p>
+              </div>
+
               <div class="card-heading">
                 <div>
-                  <div class="eyebrow">3D WEBGL ENGINE</div>
-                  <h3>Interactive 3D Earth &amp; Asteroids</h3>
-                  <p>Rotate, zoom and follow satellites and near-Earth objects in orbital space.</p>
+                  <div class="eyebrow">INTERACTIVE 3D WEBGL</div>
+                  <h3>Planetary &amp; Celestial Globe</h3>
+                  <p>Rotate, drag, zoom, and tap any event to inspect full telemetry.</p>
                 </div>
                 <span class="small-chip">WEBGL 3D</span>
               </div>
-              <div id="globe-view" class="globe-view">
-                <div class="globe-loading">Loading 3D Earth…</div>
+              <div id="globe-view" class="globe-view" style="min-height: 420px;">
+                <div class="globe-loading">Loading 3D Earth &amp; Telemetry layers…</div>
               </div>
               <div class="globe-caption">
                 <span>EARTH · ORBITAL PERSPECTIVE</span>
@@ -537,7 +641,7 @@
           </article>
         </section>
 
-        <!-- SECTION 2: ROCKET LAUNCHES & LIVE ASCENT JOURNEY -->
+        <!-- SECTION 2: ROCKET LAUNCHES & LIVE ASCENT JOURNEY PROFILE -->
         <section class="section-block" id="launches">
           <div class="section-title">
             <div>
@@ -582,7 +686,7 @@
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-top:10px; font-size:0.85rem;">
                   <div><small style="color:var(--muted)">TELEMETRY VELOCITY: </small><b id="flight-velocity-val">0 m/s (0 km/h)</b></div>
-                  <div><small style="color:var(--muted)">ALTITUDE: </small><b id="flight-alt-val">0 km (Sea Level)</b></div>
+                  <div><small style="color:var(--muted)">ALTITUDE: </small><b id="flight-alt-val">0 km (Ground Level)</b></div>
                 </div>
               </div>
 
@@ -600,7 +704,6 @@
             </div>
           </article>
 
-          <!-- Upcoming Launch List Grid -->
           <div class="launches-grid" id="launches-list">
             <div class="surface loading-box"><p class="muted">Loading live orbital flight manifest…</p></div>
           </div>
@@ -676,7 +779,7 @@
             </div>
           </article>
 
-          <!-- Restored Full Scientific Asteroid Radar -->
+          <!-- Full Scientific Asteroid Radar -->
           <article class="surface neo-panel">
             <div class="card-heading">
               <div>
@@ -1116,7 +1219,6 @@
     const messaging = firebase.messaging();
     const db = firebase.firestore();
 
-    // Foreground alert listener (if browsing site when alert arrives)
     messaging.onMessage((payload) => {
       const data = payload.data || {};
       navigator.serviceWorker.ready.then((reg) => {
