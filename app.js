@@ -20,7 +20,6 @@
       earthquakes: `https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_day.geojson`,
       eonet: `https://eonet.gsfc.nasa.gov/api/v3/events?status=open&limit=16`,
       wikipedia: (q) => `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(q.trim().replace(/\s+/g, "_"))}`,
-      // T&C DEEP LABS APIS
       marsPhotos: (rover = "perseverance") => `https://api.nasa.gov/mars-photos/api/v1/rovers/${rover}/latest_photos?api_key=fLRTKjpmtJGRWqzFKG8NrtmwbbkwBnPnWKNzn8Gd`,
       epicEarth: `https://api.nasa.gov/EPIC/api/natural?api_key=fLRTKjpmtJGRWqzFKG8NrtmwbbkwBnPnWKNzn8Gd`,
       techport: `https://api.nasa.gov/techport/api/projects?api_key=fLRTKjpmtJGRWqzFKG8NrtmwbbkwBnPnWKNzn8Gd`
@@ -29,144 +28,11 @@
 
   const I18N = {
     en: {
-      nav_overview: "Overview", nav_satellites: "Satellites & Earth", nav_launches: "Rocket Launches",
-      nav_weather: "Solar & Weather", nav_astronomy: "Cosmos & Asteroids", nav_earth: "Earth Monitoring",
-      nav_missions: "Deep Space", nav_wiki: "Wiki Explorer", nav_settings: "Settings & Alerts",
-      nav_install: "Install App", install_app_btn: "Install App",
+      nav_overview: "Overview", nav_satellites: "Satellites", nav_launches: "Rocket Flights",
+      nav_weather: "Solar Storms", nav_astronomy: "Asteroids & APOD", nav_earth: "Earth Monitor",
+      nav_missions: "Deep Space", nav_wiki: "Wiki Hub", nav_settings: "Settings",
       eyebrow_platform: "SPACE INTELLIGENCE PLATFORM",
-      welcome_sub: "100% Real-time public space telemetry: orbital satellite tracking, rocket countdowns, solar storms, asteroids and planetary monitoring.",
-      systems_operational: "SYSTEMS OPERATIONAL", latest_update: "LATEST TELEMETRY",
-      telemetry_live: "Real-time Telemetry", download_apk: "Download Android APK", install_pwa: "Install Web App",
-      banner_badge: "NATIVE ANDROID & PWA READY", banner_title: "Space Hub for Mobile & Tablet",
-      banner_sub: "Get the full-speed offline Keplerian orbit propagator, push alerts, and telemetry ticker directly on your Android phone or browser home screen.",
-      section_satellites_title: "Global Satellite Tracking & Planetary View",
-      section_launches_title: "Upcoming Rocket Launches",
-      section_weather_title: "Space Weather Watch",
-      section_astronomy_title: "Astronomy Picture & Asteroid Watch",
-      section_earth_title: "Real-time Earth Monitoring",
-      section_missions_title: "Deep Space Telemetry",
-      section_wiki_title: "Space Knowledge Hub",
-      section_settings_title: "Settings & Space Alerts"
-    },
-    es: {
-      nav_overview: "Inicio", nav_satellites: "Satélites y Tierra", nav_launches: "Lanzamientos",
-      nav_weather: "Solar y Clima", nav_astronomy: "Cosmos y Asteroides", nav_earth: "Monitoreo Terrestre",
-      nav_missions: "Espacio Profundo", nav_wiki: "Explorador Wiki", nav_settings: "Ajustes y Alertas",
-      nav_install: "Instalar App", install_app_btn: "Instalar App",
-      eyebrow_platform: "PLATAFORMA DE INTELIGENCIA ESPACIAL",
-      welcome_sub: "Telemetría espacial 100% en tiempo real: seguimiento de satélites, lanzamientos, clima solar y sismos.",
-      systems_operational: "SISTEMAS OPERATIVOS", latest_update: "ÚLTIMA TELEMETRÍA",
-      telemetry_live: "Telemetría en Vivo", download_apk: "Descargar APK Android", install_pwa: "Instalar App Web",
-      banner_badge: "ANDROID NATIVO Y PWA LISTO", banner_title: "Space Hub para Móvil y Tableta",
-      banner_sub: "Propagador orbital Kepleriano fuera de línea, alertas automáticas y cuenta regresiva de cohetes.",
-      section_satellites_title: "Seguimiento Global de Satélites y Vista Planetaria",
-      section_launches_title: "Próximos Lanzamientos de Cohetes",
-      section_weather_title: "Vigilancia del Clima Espacial",
-      section_astronomy_title: "Imagen Astronómica y Radar de Asteroides",
-      section_earth_title: "Monitoreo Terrestre en Tiempo Real",
-      section_missions_title: "Telemetría del Espacio Profundo",
-      section_wiki_title: "Centro de Conocimiento Espacial",
-      section_settings_title: "Ajustes y Alertas Espaciales"
-    },
-    fr: {
-      nav_overview: "Aperçu", nav_satellites: "Satellites & Terre", nav_launches: "Fusées & Vols",
-      nav_weather: "Solaire & Météo", nav_astronomy: "Cosmos & Astéroïdes", nav_earth: "Surveillance Terre",
-      nav_missions: "Espace Lointain", nav_wiki: "Explorateur Wiki", nav_settings: "Paramètres & Alertes",
-      nav_install: "Installer l'App", install_app_btn: "Installer l'App",
-      eyebrow_platform: "PLATEFORME D'INTELLIGENCE SPATIALE",
-      welcome_sub: "Télémétrie spatiale 100% en direct : suivi orbital, décomptes de lancements, tempêtes solaires et séismes.",
-      systems_operational: "SYSTÈMES OPÉRATIONNELS", latest_update: "DERNIÈRE TÉLÉMÉTRIE",
-      telemetry_live: "Télémétrie en Direct", download_apk: "Télécharger l'APK Android", install_pwa: "Installer l'App Web",
-      banner_badge: "ANDROID NATIF & PWA PRÊTS", banner_title: "Space Hub sur Mobile & Tablette",
-      banner_sub: "Moteur orbital Keplerian SGP4 hors-ligne, notifications d'alerte et suivi des sondes interstellaires.",
-      section_satellites_title: "Suivi Mondial des Satellites & Globe 3D",
-      section_launches_title: "Prochains Lancements Spatiaux",
-      section_weather_title: "Météorologie Spatiale & Soleil",
-      section_astronomy_title: "Image du Cosmos & Astéroïdes",
-      section_earth_title: "Surveillance Géophysique en Direct",
-      section_missions_title: "Télémétrie de l'Espace Lointain",
-      section_wiki_title: "Base de Connaissances Spatiales",
-      section_settings_title: "Paramètres & Alertes Spatiales"
-    },
-    de: {
-      nav_overview: "Übersicht", nav_satellites: "Satelliten & Erde", nav_launches: "Raketenstarts",
-      nav_weather: "Sonne & Wetter", nav_astronomy: "Kosmos & Asteroiden", nav_earth: "Erdüberwachung",
-      nav_missions: "Tiefenraum", nav_wiki: "Wiki-Explorer", nav_settings: "Einstellungen & Alarme",
-      nav_install: "App Installieren", install_app_btn: "App Installieren",
-      eyebrow_platform: "RAUMFAHRT-INTELLIGENZ-PLATTFORM",
-      welcome_sub: "100% Echtzeit-Weltraumtelemetrie: Satellitenbahnen, Raketen-Countdowns, Sonnenstürme und Erdbeben.",
-      systems_operational: "SYSTEME BEREIT", latest_update: "AKTUELLE TELEMETRIE",
-      telemetry_live: "Echtzeit-Telemetrie", download_apk: "Android-APK Herunterladen", install_pwa: "Web-App Installieren",
-      banner_badge: "NATIVES ANDROID & PWA BEREIT", banner_title: "Space Hub für Smartphone & Tablet",
-      banner_sub: "Offline-Kepler-Bahnberechnung, Warnungen bei geomagnetischen Stürmen und Live-ISS-Tracking.",
-      section_satellites_title: "Globale Satellitenverfolgung & 3D-Globus",
-      section_launches_title: "Bevorstehende Raketenstarts",
-      section_weather_title: "Weltraumwetter-Beobachtung",
-      section_astronomy_title: "Astronomiebild & Asteroiden-Radar",
-      section_earth_title: "Echtzeit-Erdbeben & Naturereignisse",
-      section_missions_title: "Tiefenraum-Telemetrie (Voyager)",
-      section_wiki_title: "Weltraum-Wissensdatenbank",
-      section_settings_title: "Einstellungen & Alarme"
-    },
-    zh: {
-      nav_overview: "概览", nav_satellites: "卫星与地球", nav_launches: "火箭发射",
-      nav_weather: "太阳与空间天气", nav_astronomy: "天文与小行星", nav_earth: "地球监测",
-      nav_missions: "深空探测", nav_wiki: "太空百科", nav_settings: "设置与警报",
-      nav_install: "安装应用", install_app_btn: "安装应用",
-      eyebrow_platform: "太空空间智能平台",
-      welcome_sub: "100% 实时公共空间遥测数据：轨道卫星跟踪、火箭发射倒计时、太阳风暴和地球灾害监测。",
-      systems_operational: "系统运行正常", latest_update: "最新实时遥测",
-      telemetry_live: "实时遥测在线", download_apk: "下载安卓 APK", install_pwa: "安装网页应用",
-      banner_badge: "原生安卓与 PWA 已就绪", banner_title: "手机与平板 Space Hub",
-      banner_sub: "全速开普勒轨道计算引擎、空间天气预警与深空旅行者号实时距离推算。",
-      section_satellites_title: "全球卫星实时追踪与三维地球",
-      section_launches_title: "全球轨道火箭发射计划",
-      section_weather_title: "太阳活动与空间天气监测",
-      section_astronomy_title: "每日天文图与近地小行星雷达",
-      section_earth_title: "全球地震与自然灾害实时监测",
-      section_missions_title: "深空星际任务实时遥测",
-      section_wiki_title: "太空百科全书知识库",
-      section_settings_title: "系统设置与空间警报"
-    },
-    ja: {
-      nav_overview: "概要", nav_satellites: "人工衛星と地球", nav_launches: "ロケット打上げ",
-      nav_weather: "宇宙天気・太陽", nav_astronomy: "宇宙画像と小惑星", nav_earth: "地球モニタリング",
-      nav_missions: "深宇宙探査", nav_wiki: "宇宙百科", nav_settings: "設定とアラート",
-      nav_install: "アプリをインストール", install_app_btn: "アプリ導入",
-      eyebrow_platform: "宇宙インテリジェンス・プラットフォーム",
-      welcome_sub: "100%リアルタイムの宇宙公開データ：衛星追跡、打上げカウントダウン、宇宙天気および地震観測。",
-      systems_operational: "システム正常稼働中", latest_update: "最新テレメトリ",
-      telemetry_live: "リアルタイムデータ受信中", download_apk: "Android APKをダウンロード", install_pwa: "Webアプリを追加",
-      banner_badge: "ネイティブAndroid & PWA対応", banner_title: "スマホ・タブレット向けSpace Hub",
-      banner_sub: "オフラインSGP4軌道計算、プッシュ通知、ボイジャー深宇宙追跡機能を完備。",
-      section_satellites_title: "全球衛星リアルタイム追跡＆3D地球",
-      section_launches_title: "今後のロケット打上げスケジュール",
-      section_weather_title: "太陽活動と宇宙天気予報",
-      section_astronomy_title: "今日の天文写真と地球接近天体",
-      section_earth_title: "リアルタイム地震・自然災害モニタリング",
-      section_missions_title: "深宇宙探査テレメトリ (ボイジャー)",
-      section_wiki_title: "宇宙知識エクスプローラー",
-      section_settings_title: "設定とアラートしきい値"
-    },
-    hi: {
-      nav_overview: "अवलोकन", nav_satellites: "उपग्रह और पृथ्वी", nav_launches: "रॉकेट प्रक्षेपण",
-      nav_weather: "सौर और मौसम", nav_astronomy: "ब्रह्मांड और क्षुद्रग्रह", nav_earth: "पृथ्वी निगरानी",
-      nav_missions: "गहरा अंतरिक्ष", nav_wiki: "विकिपीडिया खोज", nav_settings: "सेटिंग्स और अलर्ट",
-      nav_install: "ऐप इंस्टॉल करें", install_app_btn: "ऐप इंस्टॉल",
-      eyebrow_platform: "अंतरिक्ष खुफिया मंच",
-      welcome_sub: "100% वास्तविक समय अंतरिक्ष टेलीमेट्री: उपग्रह ट्रैकिंग, रॉकेट उलटी गिनती और भूकंप निगरानी।",
-      systems_operational: "सभी प्रणालियां तैयार", latest_update: "नवीनतम टेलीमेट्री",
-      telemetry_live: "सक्रिय टेलीमेट्री", download_apk: "एंड्रॉइड एपीके डाउनलोड", install_pwa: "वेब ऐप इंस्टॉल करें",
-      banner_badge: "एंड्रॉइड और पीडब्ल्यूए तैयार", banner_title: "मोबाइल और टैबलेट के लिए स्पेस हब",
-      banner_sub: "ऑफ़लाइन केप्लेरियन कक्षीय इंजन, रॉकेट काउंटडाउन और सौर तूफान अलर्ट सीधे प्राप्त करें।",
-      section_satellites_title: "वैश्विक उपग्रह ट्रैकिंग और 3D ग्लोब",
-      section_launches_title: "आगामी वैश्विक रॉकेट प्रक्षेपण",
-      section_weather_title: "अंतरिक्ष मौसम और सौर गतिविधि",
-      section_astronomy_title: "दैनिक खगोलीय चित्र और क्षुद्रग्रह",
-      section_earth_title: "वास्तविक समय पृथ्वी और भूकंप निगरानी",
-      section_missions_title: "गहरे अंतरिक्ष मिशन (वॉयेजर)",
-      section_wiki_title: "अंतरिक्ष ज्ञान केंद्र",
-      section_settings_title: "सेटिंग्स और अंतरिक्ष अलर्ट"
+      systems_operational: "SYSTEMS OPERATIONAL", latest_update: "LATEST TELEMETRY"
     }
   };
 
@@ -186,10 +52,12 @@
     cache: {},
     theme: "system",
     lang: "en",
+    timezone: "UTC",
     nextLaunchNet: null,
     nextLaunchName: "",
-    searchTimer: null,
-    activeRover: "perseverance"
+    activeRover: "perseverance",
+    currentEpicImageUrl: null,
+    searchTimer: null
   };
 
   function toast(msg) {
@@ -209,35 +77,6 @@
     const data = await res.json();
     state.cache[url] = { time: Date.now(), data };
     return data;
-  }
-
-  function playAlertChime() {
-    try {
-      const ctx = new (window.AudioContext || window.webkitAudioContext)();
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = "sine";
-      osc.frequency.setValueAtTime(587.33, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.15);
-      gain.gain.setValueAtTime(0.15, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start();
-      osc.stop(ctx.currentTime + 0.55);
-    } catch (_) {}
-  }
-
-  function applyLanguage(lang) {
-    state.lang = I18N[lang] ? lang : "en";
-    const dict = I18N[state.lang];
-    document.querySelectorAll("[data-i18n]").forEach(el => {
-      const key = el.getAttribute("data-i18n");
-      if (dict[key]) el.textContent = dict[key];
-    });
-    if ($("lang-select")) $("lang-select").value = state.lang;
-    if ($("setting-lang")) $("setting-lang").value = state.lang;
-    try { localStorage.setItem("tc_space_lang", state.lang); } catch (_) {}
   }
 
   function isDarkTheme() {
@@ -260,7 +99,7 @@
     }
   }
 
-  // --- MAP & 3D GLOBE ---
+  // --- MAP & 3D GLOBE ENGINE ---
   function initMap() {
     if (!window.L || !$("sat-map")) return;
     state.map = L.map("sat-map", { worldCopyJump: true, zoomControl: true }).setView([20, 0], 2);
@@ -293,13 +132,28 @@
     if (state.globeNeoPaths?.length) paths.push(...state.globeNeoPaths);
     state.globe.pathsData(paths);
 
+    // RESTORED: Pulsing radar beacon rings
     const rings = [];
     if (state.globeSatPoint) {
-      rings.push({ lat: state.globeSatPoint.lat, lng: state.globeSatPoint.lng, maxR: 4, propagationSpeed: 2, repeatPeriod: 1200, color: () => "#ff453a" });
+      rings.push({
+        lat: state.globeSatPoint.lat,
+        lng: state.globeSatPoint.lng,
+        maxR: 4.5,
+        propagationSpeed: 2,
+        repeatPeriod: 1200,
+        color: () => "#00f59b"
+      });
     }
     if (state.globeLaunches?.length) {
       const nextL = state.globeLaunches[0];
-      rings.push({ lat: nextL.lat, lng: nextL.lng, maxR: 3.5, propagationSpeed: 1.5, repeatPeriod: 1500, color: () => "#ff9f0a" });
+      rings.push({
+        lat: nextL.lat,
+        lng: nextL.lng,
+        maxR: 3.5,
+        propagationSpeed: 1.5,
+        repeatPeriod: 1500,
+        color: () => "#ff9f0a"
+      });
     }
     state.globe.ringsData(rings);
   }
@@ -320,7 +174,7 @@
         .pointAltitude(d => d.altitude || 0.02)
         .pointRadius(d => d.radius || 0.35)
         .pointColor(d => d.color || "#38bdf8")
-        .pointLabel(d => `<div style="background:rgba(15,17,22,0.9);color:#fff;padding:6px 10px;border-radius:8px;font-size:11px;border:1px solid rgba(255,255,255,0.15)"><b>${esc(d.name)}</b><br><span style="opacity:0.8;font-size:9px">${esc(d.sub || "")}</span></div>`)
+        .pointLabel(d => `<div style="background:rgba(15,17,22,0.92);color:#fff;padding:6px 10px;border-radius:8px;font-size:11px;border:1px solid rgba(255,255,255,0.15)"><b>${esc(d.name)}</b><br><span style="opacity:0.8;font-size:9px">${esc(d.sub || "")}</span></div>`)
         .pathPoints(d => d.coords)
         .pathPointLat(p => p[0])
         .pathPointLng(p => p[1])
@@ -338,7 +192,7 @@
     } catch (_) {}
   }
 
-  // --- SATELLITE PROPAGATION ---
+  // --- SATELLITE SGP4 MATH ---
   function propagateOmm(omm) {
     if (!window.satellite || typeof satellite.json2satrec !== "function") return null;
     try {
@@ -413,73 +267,42 @@
       lng: calc.lon,
       altitude: 0.04,
       radius: 0.55,
-      color: "#ff453a",
+      color: "#00f59b",
       name: `🛰️ ${state.currentSatName}`,
       sub: `Alt: ${fmt(calc.alt, 0)} km · Vel: ${fmt(calc.vel, 2)} km/s`
     };
     state.globeTrack = trackPts;
     renderGlobeLayers();
     if ($("globe-sat-tag")) $("globe-sat-tag").textContent = state.currentSatName.toUpperCase();
-    checkOverheadPass(state.currentSatName, calc.lat, calc.lon, calc.alt);
-
-    const panel = $("selected-satellite-panel");
-    if (panel) {
-      const meanMotion = Number(state.currentOmm.MEAN_MOTION) || 15.5;
-      const periodMins = meanMotion > 0 ? (1440 / meanMotion).toFixed(1) : "—";
-      panel.innerHTML = `
-        <div class="selected-head">
-          <div>
-            <span class="badge-pill green">ORBITAL TRACKING</span>
-            <h3>${esc(state.currentSatName)}</h3>
-            <small>NORAD ID: ${state.currentOmm.NORAD_CAT_ID || "—"} · Designator: ${esc(state.currentOmm.OBJECT_ID || "—")}</small>
-          </div>
-          <button class="subtle-button" onclick="window.scrollTo({top:0,behavior:'smooth'})">Back to Map ↑</button>
-        </div>
-        <div class="selected-data-grid">
-          <div><small>CALCULATED ALTITUDE</small><b>${fmt(calc.alt, 1)} km</b></div>
-          <div><small>ORBITAL VELOCITY</small><b>${fmt(calc.vel, 2)} km/s</b></div>
-          <div><small>CURRENT LAT / LON</small><b>${fmt(calc.lat, 2)}°, ${fmt(calc.lon, 2)}°</b></div>
-          <div><small>ORBITAL PERIOD</small><b>${periodMins} mins</b></div>
-        </div>
-      `;
-    }
   }
 
   async function searchSatellites(query) {
     if (!query || query.length < 2) return;
     try {
       const data = await cachedFetch(CONFIG.APIS.celestrakSearch(query), 300000);
+      const el = $("sat-suggestions");
+      if (!el) return;
       if (Array.isArray(data) && data.length) {
-        showSuggestions(data.slice(0, 8));
+        el.hidden = false;
+        el.innerHTML = data.slice(0, 8).map(s => `
+          <button type="button" class="suggestion-item" data-cat="${s.NORAD_CAT_ID}">
+            <div><b>${esc(s.OBJECT_NAME || "Satellite")}</b><small>NORAD ID: ${s.NORAD_CAT_ID}</small></div>
+            <span>Track ➔</span>
+          </button>
+        `).join("");
+        el.querySelectorAll(".suggestion-item").forEach(btn => {
+          btn.addEventListener("click", () => {
+            el.hidden = true;
+            selectSatellite(btn.getAttribute("data-cat"));
+          });
+        });
       } else {
-        showSuggestions([]);
-      }
-    } catch (_) { showSuggestions([]); }
-  }
-
-  function showSuggestions(list) {
-    const el = $("sat-suggestions");
-    if (!el) return;
-    if (!list.length) { el.hidden = true; el.innerHTML = ""; return; }
-    el.hidden = false;
-    el.innerHTML = list.map(s => `
-      <button type="button" class="suggestion-item" data-cat="${s.NORAD_CAT_ID}">
-        <div>
-          <b>${esc(s.OBJECT_NAME || "Satellite")}</b>
-          <small>NORAD ID: ${s.NORAD_CAT_ID}</small>
-        </div>
-        <span>Select ➔</span>
-      </button>
-    `).join("");
-    el.querySelectorAll(".suggestion-item").forEach(btn => {
-      btn.addEventListener("click", () => {
         el.hidden = true;
-        selectSatellite(btn.getAttribute("data-cat"));
-      });
-    });
+      }
+    } catch (_) {}
   }
 
-  // --- 2. ROCKET LAUNCHES ---
+  // --- 2. ROCKET LAUNCHES & LIVE ASCENT JOURNEY PROFILE ---
   async function loadLaunches() {
     const listEl = $("launches-list");
     try {
@@ -488,10 +311,10 @@
       if (!results.length) return;
       const next = results[0];
       state.nextLaunchNet = new Date(next.net);
-      state.nextLaunchName = next.name || "Orbital Launch";
+      state.nextLaunchName = next.name || "Orbital Flight";
 
       if ($("spotlight-name")) $("spotlight-name").textContent = next.name || "Orbital Flight";
-      if ($("spotlight-desc")) $("spotlight-desc").textContent = next.mission?.description || "Orbital deployment mission.";
+      if ($("spotlight-desc")) $("spotlight-desc").textContent = next.mission?.description || "Orbital satellite deployment mission.";
       if ($("spotlight-rocket")) $("spotlight-rocket").textContent = next.rocket?.configuration?.name || "Rocket";
       if ($("spotlight-provider")) $("spotlight-provider").textContent = next.launch_service_provider?.name || "Provider";
       if ($("spotlight-pad")) $("spotlight-pad").textContent = `${next.pad?.name || "Spaceport"}, ${next.pad?.location?.name || ""}`;
@@ -506,17 +329,32 @@
         vidBtn.href = next.vidURLs[0].url;
         vidBtn.classList.remove("hidden");
       }
+      const wikiBtn = $("spotlight-wiki-btn");
+      if (wikiBtn) {
+        wikiBtn.href = `https://en.wikipedia.org/wiki/${encodeURIComponent((next.rocket?.configuration?.name || next.name).replace(/\s+/g, "_"))}`;
+      }
 
+      // Plot launch site & trajectory on 3D Globe
       const validLaunches = results.filter(l => Number.isFinite(Number(l.pad?.latitude)) && Number.isFinite(Number(l.pad?.longitude)));
       state.globeLaunches = validLaunches.map(l => ({
         lat: Number(l.pad.latitude),
         lng: Number(l.pad.longitude),
         altitude: 0.025,
-        radius: 0.45,
+        radius: 0.5,
         color: "#ff9f0a",
-        name: `🚀 ${l.name || "Orbital Launch"}`,
-        sub: `${l.launch_service_provider?.name || "Launch"}`
+        name: `🚀 ${l.name || "Launch"}`,
+        sub: `${l.launch_service_provider?.name || ""} · Spaceport`
       }));
+      state.globeLaunchPaths = validLaunches.map(l => {
+        const lat0 = Number(l.pad.latitude);
+        const lng0 = Number(l.pad.longitude);
+        const coords = [];
+        for (let i = 0; i <= 16; i++) {
+          const t = i / 16;
+          coords.push([lat0 + Math.sin(t * Math.PI) * 6, lng0 + t * 38, 0.01 + t * 0.05]);
+        }
+        return { coords, color: "rgba(255, 159, 10, 0.8)", stroke: 1.6 };
+      });
       renderGlobeLayers();
 
       if (listEl) {
@@ -538,17 +376,57 @@
   function updateLaunchCountdown() {
     if (!state.nextLaunchNet) return;
     const diff = state.nextLaunchNet - Date.now();
+
+    const fillBar = $("flight-progress-fill");
+    const velVal = $("flight-velocity-val");
+    const altVal = $("flight-alt-val");
+    const statusBadge = $("flight-status-badge");
+
     if (diff <= 0) {
-      if ($("spotlight-countdown")) $("spotlight-countdown").textContent = "LAUNCH WINDOW OPEN";
-      if ($("hero-launch-timer")) $("hero-launch-timer").textContent = "LIFTOFF";
+      // Rocket launched! Flight telemetry simulation
+      const elapsedSec = Math.abs(diff) / 1000;
+      if (elapsedSec < 600) {
+        // Active Ascent Phase
+        const pct = Math.min(100, Math.round((elapsedSec / 600) * 100));
+        const simVelocity = Math.min(7800, Math.round(elapsedSec * 13)).toLocaleString();
+        const simAlt = Math.min(220, Math.round(elapsedSec * 0.36)).toLocaleString();
+        if (fillBar) fillBar.style.width = `${pct}%`;
+        if (velVal) velVal.textContent = `${simVelocity} m/s (${Math.round(simVelocity * 3.6).toLocaleString()} km/h)`;
+        if (altVal) altVal.textContent = `${simAlt} km (Ascent Flight)`;
+        if (statusBadge) {
+          statusBadge.textContent = elapsedSec > 160 ? "STAGE 2 INGESTION · HEADING ORBIT" : "POWERED ASCENT · MAX-Q";
+          statusBadge.className = "badge-pill orange";
+        }
+      } else {
+        // Orbital Insertion Complete
+        if (fillBar) fillBar.style.width = "100%";
+        if (velVal) velVal.textContent = "7,820 m/s (28,150 km/h)";
+        if (altVal) altVal.textContent = "240 km · LOW EARTH ORBIT REACHED";
+        if (statusBadge) {
+          statusBadge.textContent = "ORBITAL INSERTION COMPLETED";
+          statusBadge.className = "badge-pill green";
+        }
+      }
+      if ($("spotlight-countdown")) $("spotlight-countdown").textContent = "MISSION ACTIVE";
+      if ($("hero-launch-timer")) $("hero-launch-timer").textContent = "IN FLIGHT";
       return;
     }
+
+    // Pre-flight Countdown
     const days = Math.floor(diff / (86400000));
     const hours = Math.floor((diff / 3600000) % 24);
     const mins = Math.floor((diff / 60000) % 60);
     const secs = Math.floor((diff / 1000) % 60);
+
     if ($("spotlight-countdown")) $("spotlight-countdown").textContent = `${days}d ${String(hours).padStart(2, "0")}h ${String(mins).padStart(2, "0")}m ${String(secs).padStart(2, "0")}s`;
     if ($("hero-launch-timer")) $("hero-launch-timer").textContent = `${days}d ${hours}h ${mins}m`;
+    if (fillBar) fillBar.style.width = "0%";
+    if (velVal) velVal.textContent = "0 m/s (On Launchpad)";
+    if (altVal) altVal.textContent = "0 km (Ground Level)";
+    if (statusBadge) {
+      statusBadge.textContent = "T-MINUS COUNTDOWN";
+      statusBadge.className = "badge-pill";
+    }
   }
 
   // --- 3. SOLAR & SPACE WEATHER ---
@@ -586,7 +464,7 @@
             type: "Geomagnetic Storm",
             title: `Geomagnetic Storm (Kp ${kp})`,
             time: g.startTime || "Recent",
-            details: `Planetary index ${kp} · Potential satellite drag and auroras.`
+            details: `Planetary index ${kp} · Potential satellite drag & auroral activity.`
           });
         });
       }
@@ -610,7 +488,7 @@
     }
   }
 
-  // --- 4. NASA APOD & ASTEROIDS ---
+  // --- 4. NASA APOD & RESTORED FULL 3D ASTEROID RADAR ---
   async function loadApod() {
     try {
       const data = await cachedFetch(CONFIG.APIS.apod, 6 * 3600000);
@@ -640,20 +518,71 @@
       const all = [];
       Object.keys(neoMap).forEach(k => all.push(...neoMap[k]));
 
-      if (listEl && all.length) {
+      // Sort closest flyby to furthest
+      all.sort((a, b) => {
+        const da = Number(a.close_approach_data?.[0]?.miss_distance?.kilometers) || 1e12;
+        const db = Number(b.close_approach_data?.[0]?.miss_distance?.kilometers) || 1e12;
+        return da - db;
+      });
+
+      // RESTORED: Project Near-Earth Asteroid trajectories & flyby paths in 3D globe space
+      state.globeNeoPaths = [];
+      state.globeNeos = all.slice(0, 10).map((n, idx) => {
+        const ca = n.close_approach_data?.[0] || {};
+        const km = Number(ca.miss_distance?.kilometers) || 1000000;
+        const lunar = (km / 384400).toFixed(1);
+        const seed = Number(String(n.id).replace(/\D/g, "").slice(-4)) || (idx * 137);
+        const lat = ((seed % 140) - 70);
+        const lng = (((seed * 73) % 360) - 180);
+        const alt = 0.28 + (idx % 3) * 0.06;
+        const isHaz = n.is_potentially_hazardous_asteroid;
+
+        const coords = [];
+        for (let i = -8; i <= 8; i++) {
+          const t = i / 8;
+          coords.push([lat + t * 18, lng + t * 32, alt + Math.abs(t) * 0.14]);
+        }
+        state.globeNeoPaths.push({
+          coords,
+          color: isHaz ? "rgba(255, 69, 58, 0.85)" : "rgba(255, 214, 10, 0.75)",
+          stroke: 1.5
+        });
+
+        return {
+          lat,
+          lng,
+          altitude: alt,
+          radius: isHaz ? 0.5 : 0.38,
+          color: isHaz ? "#ff453a" : "#ffd60a",
+          name: `☄️ Asteroid ${n.name}`,
+          sub: `Miss: ${(km / 1e6).toFixed(2)}M km (${lunar} LD) · ${ca.close_approach_date || ""}`
+        };
+      });
+      renderGlobeLayers();
+
+      // RESTORED: Full scientific metric table
+      if (listEl) {
+        if (!all.length) {
+          listEl.innerHTML = `<p class="muted">No close-approach asteroids recorded in the next 7 days.</p>`;
+          return;
+        }
         listEl.innerHTML = all.slice(0, 8).map(n => {
           const ca = n.close_approach_data?.[0] || {};
           const km = Number(ca.miss_distance?.kilometers) || 0;
           const lunar = (km / 384400).toFixed(1);
           const diam = fmt(n.estimated_diameter?.meters?.estimated_diameter_max, 0);
+          const speed = Math.round(Number(ca.relative_velocity?.kilometers_per_hour) || 0).toLocaleString();
           const isHazard = n.is_potentially_hazardous_asteroid;
           return `
             <div class="neo-row">
               <div>
-                <b>${esc(n.name)} ${isHazard ? '<span class="tiny-dot red" title="Hazardous"></span>' : ''}</b>
-                <small>${esc(ca.close_approach_date || "")} · ~${diam}m · ${lunar} LD</small>
+                <b>${esc(n.name)} ${isHazard ? '<span class="tiny-dot red" title="Hazardous Object"></span>' : ''}</b>
+                <small>${esc(ca.close_approach_date || "")} · Diameter ~${diam}m · Speed: ${speed} km/h</small>
               </div>
-              <div class="neo-distance">${(km / 1e6).toFixed(2)}M km</div>
+              <div class="neo-distance">
+                ${lunar} LD
+                <small style="display:block;font-size:9px;color:var(--muted);">${(km / 1e6).toFixed(2)}M km</small>
+              </div>
             </div>
           `;
         }).join("");
@@ -705,7 +634,7 @@
     } catch (_) {}
   }
 
-  // --- 6. DEEP SPACE TELEMETRY (VOYAGER 1 & 2) ---
+  // --- 6. DEEP SPACE (VOYAGER 1 & 2) ---
   function updateDeepSpaceTelemetry() {
     const now = new Date();
     const v1Launch = new Date("1977-09-05T12:56:00Z");
@@ -804,7 +733,7 @@
     } catch (_) {}
   }
 
-  // --- 9. T&C DEEP LABS (MARS, EPIC EARTH, TECHPORT) ---
+  // --- 9. T&C DEEP LABS (MARS HTTPS FIX, EPIC DOWNLOAD/SHARE & TECHPORT) ---
   async function loadMarsRover(rover = "perseverance") {
     state.activeRover = rover;
     const container = $("mars-photo-container");
@@ -813,11 +742,13 @@
       const data = await cachedFetch(CONFIG.APIS.marsPhotos(rover), 60 * 60000);
       const photos = data.latest_photos || [];
       if (!photos.length) {
-        container.innerHTML = `<p class="muted">No raw photos received today for ${esc(rover)}.</p>`;
+        container.innerHTML = `<p class="muted">No raw photo downlink available today for ${esc(rover)}.</p>`;
         return;
       }
       const p = photos[0];
-      container.innerHTML = `<img src="${esc(p.img_src)}" alt="Martian surface by ${esc(rover)}">`;
+      // CRITICAL FIX: Force secure HTTPS URL to prevent mixed content black screen
+      const secureImg = p.img_src ? p.img_src.replace(/^http:\/\//i, "https://") : "";
+      container.innerHTML = `<img src="${esc(secureImg)}" alt="Martian surface by ${esc(rover)}" loading="lazy">`;
       if ($("mars-rover-tag")) $("mars-rover-tag").textContent = `${rover.toUpperCase()} · ${p.camera?.full_name || "Camera"}`;
       if ($("mars-sol-label")) $("mars-sol-label").textContent = `Martian Sol: ${p.sol} (${p.earth_date})`;
       if ($("mars-camera-label")) $("mars-camera-label").textContent = `Camera: ${p.camera?.name || "Mastcam"}`;
@@ -835,7 +766,9 @@
       const latest = data[0];
       const d = latest.date.split(" ")[0].split("-");
       const imgUrl = `https://epic.gsfc.nasa.gov/archive/natural/${d[0]}/${d[1]}/${d[2]}/png/${latest.image}.png`;
-      container.innerHTML = `<img src="${esc(imgUrl)}" alt="Full-disk Earth from DSCOVR">`;
+      state.currentEpicImageUrl = imgUrl;
+
+      container.innerHTML = `<img src="${esc(imgUrl)}" alt="Full-disk Earth from DSCOVR" loading="lazy">`;
       if ($("epic-date-label")) $("epic-date-label").textContent = `Downlink: ${latest.date}`;
     } catch (_) {
       container.innerHTML = `<p class="muted">DSCOVR EPIC telemetry streaming.</p>`;
@@ -851,7 +784,7 @@
       if (!projects.length) return;
       container.innerHTML = projects.slice(0, 4).map(proj => `
         <div style="padding:10px; background:rgba(255,255,255,0.03); border-radius:8px; border:1px solid rgba(255,255,255,0.06);">
-          <b style="font-size:0.9rem; display:block; color:var(--fg);">${esc(proj.title)}</b>
+          <b style="font-size:0.88rem; display:block; color:var(--fg);">${esc(proj.title)}</b>
           <span style="font-size:0.75rem; color:var(--muted);">Project ID: ${proj.id} · NASA Active Prototype</span>
         </div>
       `).join("");
@@ -860,15 +793,27 @@
     }
   }
 
-  // --- CLOCK & TICKER ---
-  function clock() {
-    if ($("utc-clock")) $("utc-clock").textContent = new Date().toISOString().slice(11, 19) + " UTC";
+  // --- LIVE CLOCK WITH DUAL TIMEZONE (UTC & IST) ---
+  function updateLiveClock() {
+    const now = new Date();
+    const clockEl = $("live-clock-digits");
+    if (!clockEl) return;
+
+    if (state.timezone === "IST") {
+      // Indian Standard Time (UTC+5:30)
+      const istTime = new Date(now.getTime() + (5.5 * 3600000));
+      clockEl.textContent = istTime.toISOString().slice(11, 19);
+    } else {
+      // Default: Universal Coordinated Time (UTC)
+      clockEl.textContent = now.toISOString().slice(11, 19);
+    }
   }
 
   function updateTicker() {
     const items = [
       "ISS orbiting at ~7.66 km/s in Low Earth Orbit",
       "T&C Deep Labs streaming raw surface imagery from Perseverance rover on Mars",
+      "DSCOVR EPIC providing 1,000,000-mile full-disk planetary Earth imaging",
       "TheSpaceDevs tracking orbital rocket countdowns worldwide",
       "Voyager 1 cruising interstellar space at 16.9 km/s beyond the heliopause",
       "NASA DONKI monitoring solar energetic particles and geomagnetic storms",
@@ -878,6 +823,7 @@
     if ($("ticker")) $("ticker").textContent = items[Math.floor(Date.now() / 8000) % items.length];
   }
 
+  // --- UI NAVIGATION & TABS ---
   function switchTab(targetId) {
     const targetSec = document.getElementById(targetId);
     if (!targetSec) return;
@@ -894,7 +840,6 @@
   }
 
   function bindUI() {
-    // Tab switching
     document.querySelectorAll(".side-nav a[data-nav]").forEach(link => {
       link.addEventListener("click", (e) => {
         e.preventDefault();
@@ -906,6 +851,13 @@
     document.querySelector(".brand")?.addEventListener("click", (e) => {
       e.preventDefault();
       switchTab("overview");
+    });
+
+    // Timezone Switcher Listener
+    $("time-zone-select")?.addEventListener("change", (e) => {
+      state.timezone = e.target.value;
+      updateLiveClock();
+      toast(`Clock switched to ${state.timezone}`);
     });
 
     // Rover Switchers
@@ -920,13 +872,41 @@
       loadMarsRover("curiosity");
     });
 
-    // Theme & Language
+    // EPIC Earth Download & Share Buttons
+    $("btn-download-epic")?.addEventListener("click", () => {
+      if (state.currentEpicImageUrl) {
+        const a = document.createElement("a");
+        a.href = state.currentEpicImageUrl;
+        a.download = `DSCOVR-EPIC-Earth-${dateISO()}.png`;
+        a.target = "_blank";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        toast("Starting HD Earth download…");
+      } else {
+        toast("EPIC Earth image not ready yet.");
+      }
+    });
+
+    $("btn-share-epic")?.addEventListener("click", async () => {
+      const shareUrl = "https://tastyandcomfort.github.io/T-C-Space/#deep-labs";
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: "Earth from 1 Million Miles — T&C Space Hub",
+            text: "Take a look at planet Earth from 1,000,000 miles away on T&C Space Hub!",
+            url: shareUrl
+          });
+        } catch (_) {}
+      } else {
+        navigator.clipboard.writeText(shareUrl);
+        toast("Link copied to clipboard!");
+      }
+    });
+
+    // Theme & Languages
     $("theme-select")?.addEventListener("change", e => applyTheme(e.target.value));
     $("setting-theme")?.addEventListener("change", e => applyTheme(e.target.value));
-    $("lang-select")?.addEventListener("change", e => applyLanguage(e.target.value));
-    $("setting-lang")?.addEventListener("change", e => applyLanguage(e.target.value));
-
-    // Refresh
     $("refresh-all")?.addEventListener("click", () => { toast("Refreshing telemetry…"); refreshAll(); });
     $("refresh-weather")?.addEventListener("click", () => { toast("Refreshing solar reports…"); loadSpaceWeather(); });
 
@@ -942,7 +922,7 @@
       state.searchTimer = setTimeout(() => searchSatellites(e.target.value), 400);
     });
 
-    // Wiki
+    // Wiki Search
     $("wiki-search-btn")?.addEventListener("click", () => {
       const q = $("wiki-query-input").value.trim();
       if (q) searchWiki(q);
@@ -983,28 +963,8 @@
     loadAreaIntelligence("Hyderabad");
   }
 
-  function haversineKm(lat1, lon1, lat2, lon2) {
-    const R = 6371;
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
-    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  }
-
-  const overheadAlertCooldown = {};
-  function checkOverheadPass(satName, satLat, satLon, satAlt) {
-    if (state.userLat == null || state.userLon == null) return;
-    const distKm = haversineKm(state.userLat, state.userLon, satLat, satLon);
-    if (distKm <= 1000) {
-      const now = Date.now();
-      if (overheadAlertCooldown[satName] && now - overheadAlertCooldown[satName] < 15 * 60 * 1000) return;
-      overheadAlertCooldown[satName] = now;
-      toast(`🛰️ ${satName} is passing ${Math.round(distKm)} km overhead!`);
-    }
-  }
-
   async function refreshAll() {
-    clock();
+    updateLiveClock();
     updateTicker();
     updateDeepSpaceTelemetry();
     await Promise.allSettled([
@@ -1027,17 +987,13 @@
     try { savedTheme = localStorage.getItem("tc_space_theme") || "system"; } catch (_) {}
     applyTheme(["system", "light", "dark"].includes(savedTheme) ? savedTheme : "system", false);
 
-    let savedLang = "en";
-    try { savedLang = localStorage.getItem("tc_space_lang") || "en"; } catch (_) {}
-    applyLanguage(savedLang);
-
     initMap();
     initGlobe();
     bindUI();
     searchWiki("James Webb Space Telescope");
     refreshAll();
 
-    setInterval(clock, 1000);
+    setInterval(updateLiveClock, 1000);
     setInterval(updateTicker, 6000);
     setInterval(updateLaunchCountdown, 1000);
     setInterval(updateSatelliteUI, 1200);
