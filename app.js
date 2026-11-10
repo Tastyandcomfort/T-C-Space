@@ -58,7 +58,6 @@
     activeRover: "perseverance",
     currentEpicImageUrl: null,
     searchTimer: null,
-    // Active Layers on 3D Globe
     activeLayers: {
       satellites: true,
       earthquakes: true,
@@ -107,7 +106,7 @@
     }
   }
 
-  // --- INTERACTIVE 3D GLOBE ENGINE (WORLDMONITOR STYLE) ---
+  // --- INTERACTIVE 3D GLOBE ENGINE ---
   function initMap() {
     if (!window.L || !$("sat-map")) return;
     state.map = L.map("sat-map", { worldCopyJump: true, zoomControl: true }).setView([20, 0], 2);
@@ -141,22 +140,22 @@
       if (state.globeStarlink?.length) pts.push(...state.globeStarlink);
     }
 
-    // Layer 2: Rocket Launches & Spaceports
+    // Layer 2: Rocket Spaceports
     if (state.activeLayers.launches && state.globeLaunches?.length) {
       pts.push(...state.globeLaunches);
     }
 
-    // Layer 3: Near-Earth Asteroid Flyby Radar
+    // Layer 3: Asteroids
     if (state.activeLayers.asteroids && state.globeNeos?.length) {
       pts.push(...state.globeNeos);
     }
 
-    // Layer 4: USGS Earthquakes
+    // Layer 4: Earthquakes
     if (state.activeLayers.earthquakes && state.globeEarthquakes?.length) {
       pts.push(...state.globeEarthquakes);
     }
 
-    // Layer 5: NASA EONET Active Fires & Volcanoes
+    // Layer 5: EONET Fires / Volcanoes
     if (state.activeLayers.fires && state.globeEonetEvents?.length) {
       pts.push(...state.globeEonetEvents);
     }
@@ -180,7 +179,7 @@
     }
     state.globe.pathsData(paths);
 
-    // Pulsing Radar Rings (Richter-scale seismic shockwaves & satellite beacons)
+    // Pulsing Radar Rings
     const rings = [];
     if (state.activeLayers.satellites && state.globeSatPoint) {
       rings.push({
@@ -225,7 +224,6 @@
         .pointAltitude(d => d.altitude || 0.02)
         .pointRadius(d => d.radius || 0.35)
         .pointColor(d => d.color || "#38bdf8")
-        // Interactive Click on any 3D Object
         .onPointClick((d) => {
           if (!d) return;
           state.globe.pointOfView({ lat: d.lat, lng: d.lng, altitude: Math.max(1.5, (d.altitude || 0) + 1.2) }, 1000);
@@ -247,7 +245,6 @@
       el.querySelector(".globe-loading")?.remove();
       renderGlobeLayers();
 
-      // Layer Filter Chips Listener
       document.querySelectorAll(".globe-layer-chip").forEach(chip => {
         chip.addEventListener("click", () => {
           const layer = chip.getAttribute("data-layer");
@@ -263,7 +260,7 @@
     } catch (_) {}
   }
 
-  // --- SATELLITE SGP4 MATH ---
+  // --- SATELLITE PROPAGATION ---
   function propagateOmm(omm) {
     if (!window.satellite || typeof satellite.json2satrec !== "function") return null;
     try {
@@ -373,7 +370,7 @@
     } catch (_) {}
   }
 
-  // --- 2. ROCKET LAUNCHES & ASCENT TELEMETRY PROFILE ---
+  // --- 2. ROCKET LAUNCHES ---
   async function loadLaunches() {
     const listEl = $("launches-list");
     try {
@@ -385,7 +382,7 @@
       state.nextLaunchName = next.name || "Orbital Flight";
 
       if ($("spotlight-name")) $("spotlight-name").textContent = next.name || "Orbital Flight";
-      if ($("spotlight-desc")) $("spotlight-desc").textContent = next.mission?.description || "Orbital satellite deployment mission.";
+      if ($("spotlight-desc")) $("spotlight-desc").textContent = next.mission?.description || "Orbital deployment mission.";
       if ($("spotlight-rocket")) $("spotlight-rocket").textContent = next.rocket?.configuration?.name || "Rocket";
       if ($("spotlight-provider")) $("spotlight-provider").textContent = next.launch_service_provider?.name || "Provider";
       if ($("spotlight-pad")) $("spotlight-pad").textContent = `${next.pad?.name || "Spaceport"}, ${next.pad?.location?.name || ""}`;
@@ -554,7 +551,7 @@
     }
   }
 
-  // --- 4. NASA APOD & 3D CELESTIAL ASTEROID RADAR ---
+  // --- 4. NASA APOD & ASTEROIDS ---
   async function loadApod() {
     try {
       const data = await cachedFetch(CONFIG.APIS.apod, 6 * 3600000);
@@ -590,7 +587,6 @@
         return da - db;
       });
 
-      // Project Near-Earth Asteroid trajectories & flybys on 3D Globe
       state.globeNeoPaths = [];
       state.globeNeos = all.slice(0, 10).map((n, idx) => {
         const ca = n.close_approach_data?.[0] || {};
@@ -654,7 +650,7 @@
     } catch (_) {}
   }
 
-  // --- 5. USGS EARTHQUAKES & NASA EONET PLOTTED ON 3D GLOBE ---
+  // --- 5. USGS EARTHQUAKES & NASA EONET ---
   async function loadEarthquakes() {
     const el = $("earthquake-list");
     try {
@@ -662,7 +658,6 @@
       const features = data.features || [];
       if ($("quake-count")) $("quake-count").textContent = `${features.length} IN 24H`;
 
-      // Plot Earthquakes on 3D Globe with Richter shockwaves
       state.globeEarthquakes = features.slice(0, 16).map(f => {
         const coords = f.geometry.coordinates;
         const mag = Number(f.properties.mag) || 0;
@@ -709,7 +704,6 @@
       const data = await cachedFetch(CONFIG.APIS.eonet, 30 * 60000);
       const events = data.events || [];
 
-      // Plot NASA EONET Wildfires & Volcanoes on 3D Globe
       state.globeEonetEvents = events.slice(0, 14).map(ev => {
         const geo = ev.geometry?.[0]?.coordinates;
         if (!geo) return null;
@@ -763,12 +757,16 @@
     if ($("v2-light-time")) $("v2-light-time").textContent = `~${v2LightHours} hrs round-trip`;
   }
 
-  // --- 7. SPACE WIKIPEDIA EXPLORER ---
+  // --- 7. SPACE WIKIPEDIA EXPLORER (FIXED) ---
   async function searchWiki(topic) {
     if (!topic) return;
     try {
       const data = await cachedFetch(CONFIG.APIS.wikipedia(topic), 24 * 3600000);
-      if ($("wiki-title")) if ($("wiki-title")) {   // Use plain clean title or strip HTML tags from displaytitle   $("wiki-title").textContent = data.title || (data.displaytitle ? data.displaytitle.replace(/<[^>]*>/g, '') : topic); }
+      const titleEl = $("wiki-title");
+      if (titleEl) {
+        const rawTitle = data.title || data.displaytitle || topic;
+        titleEl.textContent = String(rawTitle).replace(/<[^>]*>/g, "");
+      }
       if ($("wiki-extract")) $("wiki-extract").textContent = data.extract || "No summary available.";
       if ($("wiki-desc-tag")) $("wiki-desc-tag").textContent = (data.description || "ENCYCLOPEDIC BRIEF").toUpperCase();
       if ($("wiki-link")) $("wiki-link").href = data.content_urls?.desktop?.page || `https://en.wikipedia.org/wiki/${encodeURIComponent(topic)}`;
@@ -840,7 +838,7 @@
     } catch (_) {}
   }
 
-  // --- 9. T&C DEEP LABS (MARS HTTPS & MULTI-ROVER FAILOVER, EPIC DOWNLOAD/SHARE) ---
+  // --- 9. T&C DEEP LABS ---
   async function loadMarsRover(rover = "perseverance") {
     state.activeRover = rover;
     const container = $("mars-photo-container");
@@ -852,16 +850,13 @@
       let data = await res.json();
       let photos = data.latest_photos || [];
 
-      // Multi-rover fallback if Perseverance is in sol transition
       if (!photos.length && rover === "perseverance") {
-        console.log("Perseverance sol transition, checking Curiosity...");
         res = await fetch(CONFIG.APIS.marsPhotos("curiosity"));
         data = await res.json();
         photos = data.latest_photos || [];
         rover = "curiosity";
       }
 
-      // Curated NASA JPL Mars fallback frame if sol downlink is delayed
       if (!photos.length) {
         container.innerHTML = `<img src="https://images-assets.nasa.gov/image/PIA24424/PIA24424~orig.jpg" alt="Martian surface Jezero crater" loading="lazy">`;
         if ($("mars-rover-tag")) $("mars-rover-tag").textContent = "PERSEVERANCE · JEZERO CRATER";
@@ -960,6 +955,9 @@
     }
   }
 
+  // Expose globally so external scripts / notifications can switch tabs
+  window.switchTab = switchTab;
+
   function bindUI() {
     document.querySelectorAll(".side-nav a[data-nav]").forEach(link => {
       link.addEventListener("click", (e) => {
@@ -974,14 +972,12 @@
       switchTab("overview");
     });
 
-    // Timezone Switcher Listener
     $("time-zone-select")?.addEventListener("change", (e) => {
       state.timezone = e.target.value;
       updateLiveClock();
       toast(`Clock switched to ${state.timezone}`);
     });
 
-    // Rover Switchers
     $("btn-rover-perseverance")?.addEventListener("click", () => {
       $("btn-rover-curiosity")?.classList.remove("active");
       $("btn-rover-perseverance")?.classList.add("active");
@@ -993,7 +989,6 @@
       loadMarsRover("curiosity");
     });
 
-    // EPIC Earth Download & Share Buttons
     $("btn-download-epic")?.addEventListener("click", () => {
       if (state.currentEpicImageUrl) {
         const a = document.createElement("a");
@@ -1025,13 +1020,11 @@
       }
     });
 
-    // Theme & Languages
     $("theme-select")?.addEventListener("change", e => applyTheme(e.target.value));
     $("setting-theme")?.addEventListener("change", e => applyTheme(e.target.value));
     $("refresh-all")?.addEventListener("click", () => { toast("Refreshing telemetry…"); refreshAll(); });
     $("refresh-weather")?.addEventListener("click", () => { toast("Refreshing solar reports…"); loadSpaceWeather(); });
 
-    // Satellite select & search
     $("sat-select")?.addEventListener("change", e => selectSatellite(e.target.value));
     $("sat-search-form")?.addEventListener("submit", (e) => {
       e.preventDefault();
@@ -1043,7 +1036,6 @@
       state.searchTimer = setTimeout(() => searchSatellites(e.target.value), 400);
     });
 
-    // Wiki Search
     $("wiki-search-btn")?.addEventListener("click", () => {
       const q = $("wiki-query-input").value.trim();
       if (q) searchWiki(q);
@@ -1063,7 +1055,6 @@
       });
     });
 
-    // Intel Brief
     $("intel-search-btn")?.addEventListener("click", () => {
       const q = $("intel-area-input")?.value.trim();
       if (q) loadAreaIntelligence(q);
