@@ -15,14 +15,14 @@
 
   <style>
     /* ==============================================================
-       APPLE HIG DESIGN TOKENS & DYNAMIC GLASSMORPHISM
+       APPLE HIG DESIGN TOKENS & RESPONSIVE LAYOUT BASELINE
        ============================================================== */
     :root {
       --apple-bg: #fbfbfd;
-      --apple-surface: rgba(255, 255, 255, 0.75);
-      --apple-surface-card: rgba(255, 255, 255, 0.88);
+      --apple-surface: rgba(255, 255, 255, 0.78);
+      --apple-surface-card: rgba(255, 255, 255, 0.92);
       --apple-border: rgba(0, 0, 0, 0.08);
-      --apple-border-strong: rgba(0, 0, 0, 0.15);
+      --apple-border-strong: rgba(0, 0, 0, 0.16);
       --apple-fg: #1d1d1f;
       --apple-fg-sub: #86868b;
       --apple-blue: #0071e3;
@@ -37,66 +37,85 @@
 
     html[data-theme="dark"] {
       --apple-bg: #000000;
-      --apple-surface: rgba(26, 26, 30, 0.72);
-      --apple-surface-card: rgba(30, 30, 36, 0.82);
+      --apple-surface: rgba(26, 26, 30, 0.75);
+      --apple-surface-card: rgba(30, 30, 36, 0.88);
       --apple-border: rgba(255, 255, 255, 0.1);
-      --apple-border-strong: rgba(255, 255, 255, 0.2);
+      --apple-border-strong: rgba(255, 255, 255, 0.22);
       --apple-fg: #f5f5f7;
       --apple-fg-sub: #a1a1a6;
       --apple-blue: #2997ff;
-      --apple-blue-soft: rgba(41, 151, 255, 0.16);
+      --apple-blue-soft: rgba(41, 151, 255, 0.18);
       --apple-green: #30d158;
       --apple-orange: #ff9f0a;
       --apple-red: #ff453a;
       --apple-purple: #bf5af2;
-      --apple-shadow: 0 8px 32px rgba(0, 0, 0, 0.55);
+      --apple-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
     }
 
-    body {
+    /* GLOBAL FIX: Prevent any horizontal blowout */
+    html, body {
+      width: 100% !important;
+      max-width: 100vw !important;
+      overflow-x: hidden !important;
+      margin: 0 !important;
+      padding: 0 !important;
       background: var(--apple-bg) !important;
       color: var(--apple-fg) !important;
       font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Helvetica, Arial, sans-serif !important;
-      transition: background-color 0.3s ease, color 0.3s ease;
-      min-height: 100vh;
-      display: flex;
     }
 
-    /* PURE CSS: Hide install prompts when inside installed standalone PWA */
+    img {
+      max-width: 100% !important;
+      height: auto;
+    }
+
+    /* Hide install prompts inside installed standalone PWA */
     @media (display-mode: standalone), (display-mode: fullscreen), (display-mode: minimal-ui) {
       #open-install-modal, #side-install-nav, .app-banner-card, #install-modal {
         display: none !important;
       }
     }
 
-    /* App Shell & Smart Sidebar */
+    /* App Shell Container */
     .app-shell {
       width: 100%;
       min-height: 100vh;
       display: flex;
+      overflow-x: hidden;
     }
 
+    /* ==============================================================
+       SMART SIDEBAR: SMOOTH HOVER EXPAND & DOCKED PIN
+       ============================================================== */
     .sidebar {
       width: 68px;
       background: var(--apple-surface) !important;
       backdrop-filter: var(--apple-glass-blur) !important;
       -webkit-backdrop-filter: var(--apple-glass-blur) !important;
       border-right: 1px solid var(--apple-border) !important;
-      transition: width 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: width 0.28s cubic-bezier(0.16, 1, 0.3, 1);
       overflow-x: hidden;
+      overflow-y: auto;
       white-space: nowrap;
       z-index: 100;
       display: flex;
       flex-direction: column;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      padding-top: 18px;
+      flex-shrink: 0;
     }
+    .sidebar::-webkit-scrollbar { display: none; }
+
     .sidebar:hover, .sidebar.pinned {
       width: 240px;
     }
-    .sidebar .nav-text, .sidebar .side-label, .sidebar .brand-copy, .sidebar .sidebar-bottom p, .sidebar .sidebar-bottom small {
+    .sidebar .nav-text, .sidebar .side-label, .sidebar .brand-copy, .sidebar .badge-pill {
       opacity: 0;
       transition: opacity 0.2s ease;
     }
-    .sidebar:hover .nav-text, .sidebar:hover .side-label, .sidebar:hover .brand-copy, .sidebar:hover .sidebar-bottom p, .sidebar:hover .sidebar-bottom small,
-    .sidebar.pinned .nav-text, .sidebar.pinned .side-label, .sidebar.pinned .brand-copy, .sidebar.pinned .sidebar-bottom p, .sidebar.pinned .sidebar-bottom small {
+    .sidebar:hover .nav-text, .sidebar:hover .side-label, .sidebar:hover .brand-copy, .sidebar:hover .badge-pill,
+    .sidebar.pinned .nav-text, .sidebar.pinned .side-label, .sidebar.pinned .brand-copy, .sidebar.pinned .badge-pill {
       opacity: 1;
     }
 
@@ -106,14 +125,15 @@
       flex-direction: column;
       min-width: 0;
       background: var(--apple-bg);
+      min-height: 100vh;
     }
     .content-wrap {
       flex: 1;
-      display: block;
       width: 100%;
       max-width: 1400px;
       margin: 0 auto;
-      padding: 0 20px 40px 20px;
+      padding: 20px 24px 30px 24px;
+      box-sizing: border-box;
     }
 
     /* Topbar Navigation */
@@ -122,7 +142,7 @@
       backdrop-filter: var(--apple-glass-blur) !important;
       -webkit-backdrop-filter: var(--apple-glass-blur) !important;
       border-bottom: 1px solid var(--apple-border) !important;
-      padding: 10px 22px;
+      padding: 10px 24px;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -131,7 +151,7 @@
       z-index: 40;
     }
 
-    /* Hotel-Style Compact World Clock Pill */
+    /* Compact World Clock Pill */
     .clock-pill-wrap {
       display: inline-flex;
       align-items: center;
@@ -152,8 +172,8 @@
     /* Glassmorphic 6-City World Clock Dropdown */
     .world-clock-dropdown-menu {
       position: absolute;
-      top: 58px;
-      right: 210px;
+      top: 56px;
+      right: 220px;
       background: var(--apple-surface-card);
       backdrop-filter: var(--apple-glass-blur);
       -webkit-backdrop-filter: var(--apple-glass-blur);
@@ -192,7 +212,7 @@
       color: var(--apple-fg-sub);
     }
 
-    /* Theme-Safe High-Contrast 3D HUD Button */
+    /* High-Contrast 3D HUD Button */
     .btn-cinema-hud-launch {
       padding: 7px 16px;
       border-radius: 20px;
@@ -202,11 +222,11 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      transition: all 0.2s;
       border: 1px solid var(--apple-blue);
       background: var(--apple-blue);
       color: #ffffff !important;
       box-shadow: 0 2px 8px rgba(0, 113, 227, 0.25);
+      transition: all 0.2s;
     }
     html[data-theme="dark"] .btn-cinema-hud-launch {
       background: var(--apple-blue-soft);
@@ -218,7 +238,7 @@
       box-shadow: 0 4px 14px rgba(0, 113, 227, 0.35);
     }
 
-    /* Apple-Styled Verified Source Badges */
+    /* Apple Verified Agency Source Badges */
     .apple-source-badge {
       display: inline-flex;
       align-items: center;
@@ -244,7 +264,7 @@
     .apple-source-badge.teal span { background: var(--apple-green); }
     .apple-source-badge.purple span { background: var(--apple-purple); }
 
-    /* Interactive Clickable Metric Tiles in Overview */
+    /* Overview Clickable Interactive Metric Cards */
     .metric-card.interactive-tile {
       background: var(--apple-surface-card) !important;
       border: 1px solid var(--apple-border) !important;
@@ -261,13 +281,42 @@
       box-shadow: 0 12px 30px rgba(0, 113, 227, 0.16);
     }
 
-    /* Embedded Cockpit HUD Badge on 2D Leaflet Map */
+    /* ==============================================================
+       MARS ROVER IMAGE FRAME (BOUNDED & CLAMPED)
+       ============================================================== */
+    .photo-frame-wrap {
+      width: 100% !important;
+      max-width: 100% !important;
+      height: 320px !important;
+      max-height: 320px !important;
+      background: #08090d;
+      border-radius: 14px;
+      overflow: hidden !important;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 12px 0;
+      border: 1px solid var(--apple-border);
+      position: relative;
+    }
+    .photo-frame-wrap img {
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: cover !important;
+      display: block;
+    }
+
+    /* ==============================================================
+       LEAFLET MAP COCKPIT & TOP-RIGHT IN-MAP HUD
+       ============================================================== */
     .map-embedded-hud {
-      position: absolute;
-      bottom: 24px;
-      left: 20px;
+      position: absolute !important;
+      top: 16px !important;
+      right: 16px !important;
+      bottom: auto !important;
+      left: auto !important;
       z-index: 1000;
-      max-width: 320px;
+      max-width: 300px;
       background: var(--apple-surface-card);
       backdrop-filter: var(--apple-glass-blur);
       -webkit-backdrop-filter: var(--apple-glass-blur);
@@ -277,7 +326,30 @@
       box-shadow: var(--apple-shadow);
     }
 
-    /* Scientific Evaluation Gauges for Intel Brief */
+    .map-preset-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+    .map-preset-btn {
+      padding: 4px 10px;
+      background: var(--apple-surface);
+      border: 1px solid var(--apple-border);
+      border-radius: 14px;
+      font-size: 0.74rem;
+      font-weight: 600;
+      color: var(--apple-fg);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .map-preset-btn:hover {
+      background: var(--apple-blue-soft);
+      border-color: var(--apple-blue);
+      color: var(--apple-blue);
+    }
+
+    /* Scientific Evaluation Gauges */
     .intel-gauge-box {
       margin-top: 8px;
       padding-top: 8px;
@@ -300,9 +372,10 @@
     }
 
     /* ==============================================================
-       PERMANENT DOCKED FOOTER (THEME-ADAPTIVE & CLEAN)
+       PERMANENT DOCKED FOOTER (THEME-ADAPTIVE & SEAMLESS CORNER)
        ============================================================== */
     .docked-sticky-footer {
+      margin-top: auto;
       position: sticky;
       bottom: 0;
       left: 0;
@@ -311,9 +384,9 @@
       backdrop-filter: var(--apple-glass-blur) !important;
       -webkit-backdrop-filter: var(--apple-glass-blur) !important;
       border-top: 1px solid var(--apple-border) !important;
-      z-index: 50;
-      padding: 10px 24px;
-      box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05);
+      z-index: 40;
+      padding: 12px 24px;
+      box-sizing: border-box;
     }
     .docked-footer-inner {
       max-width: 1400px;
@@ -413,9 +486,9 @@
   <div class="app-shell">
     <!-- Smart Hover-Expandable Apple Sidebar -->
     <aside class="sidebar" id="sidebar">
-      <div style="display:flex; justify-content:space-between; align-items:center; padding: 14px 18px 8px 18px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; padding: 0 16px 14px 16px;">
         <a class="brand" href="#overview" style="display:flex; align-items:center; gap:10px; text-decoration:none; color:inherit;">
-          <img class="brand-icon" src="assets/space-hub-icon-192.png?v=1" alt="T&C Space Hub logo" style="width:32px; height:32px; border-radius:8px;">
+          <img class="brand-icon" src="assets/space-hub-icon-192.png?v=1" alt="T&C Space Hub logo" style="width:34px; height:34px; border-radius:8px;">
           <span class="brand-copy">
             <b style="font-size:0.95rem; display:block;">SPACE HUB</b>
             <small style="font-size:0.65rem; color:var(--apple-fg-sub); letter-spacing:0.8px;">MISSION CONTROL</small>
@@ -432,11 +505,10 @@
           <span class="nav-text">Overview</span>
         </a>
 
-        <!-- T&C Deep Labs -->
         <a href="#deep-labs" data-nav="deep-labs" style="border-left: 3px solid var(--apple-blue); background: var(--apple-blue-soft);">
           <span class="nav-icon">🪐</span>
           <span class="nav-text"><b>T&C Deep Labs</b></span>
-          <small class="badge-pill green" style="font-size: 8px;">TOP PICK</small>
+          <small class="badge-pill green" style="font-size: 8px;">FLAGSHIP</small>
         </a>
 
         <a href="#satellites" data-nav="satellites">
@@ -507,6 +579,7 @@
 
     <!-- Main Content Area -->
     <main class="main-area">
+      <!-- Topbar Header -->
       <header class="topbar">
         <div class="mobile-brand">
           <img class="brand-icon" src="assets/space-hub-icon-192.png?v=1" alt="Space Hub">
@@ -531,7 +604,7 @@
           <div class="clock-pill-wrap" id="btn-toggle-world-clock" title="Click to view all World Clocks">
             <span>🌍</span>
             <span id="active-clock-time">--:--:--</span>
-            <small id="active-clock-city" style="color:var(--apple-fg-sub); font-size:0.75rem;">IST ▼</small>
+            <small id="active-clock-city">IST ▼</small>
           </div>
 
           <!-- Glassmorphic 6-City World Clock Dropdown Menu -->
@@ -635,7 +708,7 @@
             <div class="ticker-time">100% REAL-TIME DATA</div>
           </section>
 
-          <!-- AUTOMATED ROTATING TELEMETRY TILES -->
+          <!-- INTERACTIVE CLICKABLE OVERVIEW METRICS GRID -->
           <section class="metrics-grid" aria-label="Space overview metrics">
             <!-- Dynamic Tile 1 -->
             <article class="metric-card interactive-tile" id="tile-dynamic-1" onclick="window.navigateCurrentTile(1)">
@@ -781,6 +854,7 @@
 
         <!-- SECTION 1: SATELLITES & 2D MAP WITH EMBEDDED HUD -->
         <section class="section-block" id="satellites">
+          <!-- SINGLE CLEAN AUTHORITATIVE SECTION HEADER (NO DUPLICATE) -->
           <div class="section-title">
             <div>
               <div class="eyebrow">ORBITAL INTELLIGENCE &amp; GROUND TRACK</div>
@@ -795,19 +869,10 @@
             </div>
           </div>
 
-          <!-- UNIFIED 2D MAP COCKPIT WITH IN-MAP HUD -->
+          <!-- UNIFIED 2D MAP COCKPIT WITH IN-MAP HUD (TOP-RIGHT) -->
           <article class="surface map-card" style="margin-top:16px; position:relative;">
-            <div class="card-heading">
-              <div>
-                <div class="eyebrow">INTEGRATED ORBITAL COCKPIT</div>
-                <h3>Worldwide Satellite Ground Track</h3>
-                <p>Search 14,000+ CelesTrak NORAD catalogued objects or select an instant telemetry preset:</p>
-              </div>
-              <span class="live-tag"><span class="pulse-ring"></span> TRACKING</span>
-            </div>
-
             <!-- Integrated Search & Presets Toolbar -->
-            <div style="padding: 0 16px 12px 16px;">
+            <div style="padding: 16px 16px 12px 16px;">
               <form id="sat-search-form" class="search-form" autocomplete="off" style="margin-bottom:8px;">
                 <input id="sat-search" type="search" placeholder="Type satellite name or NORAD ID (e.g. Starlink, Hubble, NOAA, GPS, ISS)…" aria-label="Search 14000+ satellites" required>
                 <button class="primary-button" type="submit">Track Object <span>↗</span></button>
@@ -824,10 +889,10 @@
               </div>
             </div>
 
-            <!-- 2D Leaflet Map -->
+            <!-- 2D Leaflet Map Container -->
             <div id="sat-map" class="map" style="min-height:500px; position:relative;"></div>
 
-            <!-- EMBEDDED IN-MAP TELEMETRY HUD -->
+            <!-- EMBEDDED IN-MAP TELEMETRY HUD (POSITIONED IN TOP-RIGHT) -->
             <div class="map-embedded-hud" id="selected-satellite-panel">
               <div class="selected-empty">
                 ◎ <b>Tracking ISS (Default)</b>
@@ -1433,7 +1498,7 @@
     <div class="hud-header-bar">
       <div style="display:flex; align-items:center; gap:8px;">
         <span class="pulse-ring"></span>
-        <b style="color:#00d2ff; letter-spacing:0.5px; font-size:0.92rem;">T&amp;C 3D MISSION COMMAND THEATER</b>
+        <b style="color:#00d2ff; letter-spacing:0.5px; font-size:0.92rem;">T&C 3D MISSION COMMAND THEATER</b>
       </div>
       <div class="hud-layer-toolbar">
         <button class="hud-layer-chip active" data-layer="satellites" type="button">🛰️ Satellites</button>
