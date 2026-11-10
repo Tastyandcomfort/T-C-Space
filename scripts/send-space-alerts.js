@@ -1,13 +1,12 @@
+
 const admin = require('firebase-admin');
 
-// 1. Initialize Firebase Admin SDK
 if (!process.env.FIREBASE_SERVICE_ACCOUNT) {
   console.error("Missing FIREBASE_SERVICE_ACCOUNT secret!");
   process.exit(1);
 }
 
 const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
-
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
 });
@@ -17,7 +16,7 @@ const NASA_KEY = process.env.NASA_API_KEY || 'fLRTKjpmtJGRWqzFKG8NrtmwbbkwBnPnWK
 
 // --- TELEMETRY & ALERT FETCHERS ---
 
-// 1. NASA APOD (With High-Res Picture)
+// 1. NASA APOD (With Picture)
 async function getAPOD() {
   try {
     const res = await fetch(`https://api.nasa.gov/planetary/apod?api_key=${NASA_KEY}`);
@@ -35,7 +34,7 @@ async function getAPOD() {
   return null;
 }
 
-// 2. Mars Rover Surface Cam (Perseverance / Curiosity)
+// 2. Mars Rover Surface Cam (Perseverance)
 async function getMarsRoverAlert() {
   try {
     const res = await fetch(`https://api.nasa.gov/mars-photos/api/v1/rovers/perseverance/latest_photos?api_key=${NASA_KEY}`);
@@ -43,11 +42,12 @@ async function getMarsRoverAlert() {
     const photos = data.latest_photos || [];
     if (photos.length > 0) {
       const p = photos[0];
+      const secureImg = p.img_src.replace(/^http:\/\//i, 'https://');
       return {
         topic: 'mars',
-        title: `🔴 T&C Deep Labs: Mars Surface Live Cam`,
-        body: `Perseverance rover beamed raw surface telemetry from Jezero Crater on Sol ${p.sol}. Tap to inspect Red Planet landscape.`,
-        image: p.img_src, // Displays actual photo of Mars on user's lock screen!
+        title: `🔴 T&C Deep Labs: Mars Surface Cam`,
+        body: `Perseverance rover beamed raw surface telemetry from Jezero Crater on Sol ${p.sol}. Tap to inspect.`,
+        image: secureImg,
         url: 'https://tastyandcomfort.github.io/T-C-Space/#deep-labs'
       };
     }
@@ -55,7 +55,7 @@ async function getMarsRoverAlert() {
   return null;
 }
 
-// 3. EPIC: Earth from 1 Million Miles (DSCOVR Satellite)
+// 3. EPIC: Earth from 1 Million Miles (DSCOVR)
 async function getEpicEarthAlert() {
   try {
     const res = await fetch(`https://api.nasa.gov/EPIC/api/natural?api_key=${NASA_KEY}`);
@@ -67,8 +67,8 @@ async function getEpicEarthAlert() {
       return {
         topic: 'epic',
         title: `🌍 Earth from 1 Million Miles (DSCOVR Probe)`,
-        body: `Fresh full-disk natural color planetary view taken from deep space Lagrange Point L1. Tap to inspect telemetry.`,
-        image: imgUrl, // Displays full-disk Earth photo from deep space!
+        body: `Fresh full-disk natural color planetary view taken from deep space Lagrange Point L1.`,
+        image: imgUrl,
         url: 'https://tastyandcomfort.github.io/T-C-Space/#deep-labs'
       };
     }
@@ -76,7 +76,7 @@ async function getEpicEarthAlert() {
   return null;
 }
 
-// 4. Satellite Passes (ISS, Tiangong CSS, Hubble)
+// 4. Satellite Passes (ISS)
 async function getSatelliteIntel() {
   try {
     const res = await fetch('https://api.wheretheiss.at/v1/satellites/25544');
@@ -86,8 +86,8 @@ async function getSatelliteIntel() {
 
     return {
       topic: 'satellite',
-      title: '🛰️ Orbital Track: ISS & Low-Earth Satellites',
-      body: `ISS cruising at ${speed} km/h (${alt} km altitude). Tiangong CSS & Hubble orbital passes active. Tap to track live coordinates.`,
+      title: '🛰️ Orbital Track: ISS Live Telemetry',
+      body: `ISS cruising at ${speed} km/h (${alt} km altitude). Tiangong CSS & Hubble orbital passes active.`,
       image: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1000&auto=format&fit=crop',
       url: 'https://tastyandcomfort.github.io/T-C-Space/#satellites'
     };
@@ -105,16 +105,17 @@ async function getAsteroidAlert() {
     const candidate = objects.find(o => o.is_potentially_hazardous_asteroid) || objects[0];
 
     if (candidate) {
-      const close = candidate.close_approach_data[0];
-      const speed = Math.round(close?.relative_velocity?.kilometers_per_hour || 0).toLocaleString();
-      const missDist = Math.round(close?.miss_distance?.kilometers || 0).toLocaleString();
+      const closeData = candidate.close_approach_data[0];
+      const speed = Math.round(closeData?.relative_velocity?.kilometers_per_hour || 0).toLocaleString();
+      const missDist = Math.round(closeData?.miss_distance?.kilometers || 0);
+      const lunar = (missDist / 384400).toFixed(1);
       const diam = Math.round(candidate.estimated_diameter?.meters?.estimated_diameter_max || 0);
       const isHaz = candidate.is_potentially_hazardous_asteroid;
 
       return {
         topic: 'asteroid',
         title: `${isHaz ? '⚠️ HAZARDOUS' : '☄️'} Asteroid Flyby: ${candidate.name}`,
-        body: `Size: ~${diam}m | Speed: ${speed} km/h\nMiss Distance: ${missDist} km. Status: ${isHaz ? 'Close Watch' : 'Safe Flyby'}.`,
+        body: `Distance: ${lunar} LD (${(missDist/1e6).toFixed(2)}M km) | Speed: ${speed} km/h | Size: ~${diam}m`,
         image: 'https://images.unsplash.com/photo-1614728894747-a83421e2b9c9?q=80&w=1000&auto=format&fit=crop',
         url: 'https://tastyandcomfort.github.io/T-C-Space/#astronomy'
       };
@@ -128,8 +129,8 @@ async function getTechPortAlert() {
   try {
     return {
       topic: 'techport',
-      title: '🔬 T&C Deep Labs: NASA Future Inventions',
-      body: 'NASA logged new experimental propulsion and lunar oxygen extraction prototypes. Tap to inspect TechPort radar.',
+      title: '🔬 T&C Deep Labs: NASA Inventions Radar',
+      body: 'NASA logged new experimental propulsion and lunar oxygen extraction prototypes. Tap to inspect.',
       image: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=1000&auto=format&fit=crop',
       url: 'https://tastyandcomfort.github.io/T-C-Space/#deep-labs'
     };
@@ -137,28 +138,7 @@ async function getTechPortAlert() {
   return null;
 }
 
-// 7. Interstellar Telemetry (Voyager 1 & 2)
-async function getVoyagerTelemetry() {
-  try {
-    const now = new Date();
-    const start2024 = new Date('2024-01-01T00:00:00Z').getTime();
-    const daysSince = (now.getTime() - start2024) / (86400000);
-    const v1AU = (162.0 + (daysSince * 0.0097)).toFixed(2);
-    const v1Km = (v1AU * 149597870.7 / 1000000000).toFixed(2);
-    const v1LightHours = ((v1AU * 149597870.7) / (299792 * 3600) * 2).toFixed(1);
-
-    return {
-      topic: 'voyager',
-      title: '✦ Interstellar Telemetry: Voyager 1 & 2',
-      body: `Voyager 1: ${v1AU} AU (~${v1Km}B km) from Sun | Speed: 16.9 km/s. Round-trip light time: ~${v1LightHours} hrs.`,
-      image: 'https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?q=80&w=1000&auto=format&fit=crop',
-      url: 'https://tastyandcomfort.github.io/T-C-Space/#missions'
-    };
-  } catch (e) { console.error('Voyager Error:', e.message); }
-  return null;
-}
-
-// 8. Upcoming Rocket Launches
+// 7. Rocket Launches
 async function getRocketLaunch() {
   try {
     const res = await fetch('https://lldev.thespacedevs.com/2.2.0/launch/upcoming/?limit=1');
@@ -180,7 +160,7 @@ async function getRocketLaunch() {
   return null;
 }
 
-// 9. Solar Storms (DONKI)
+// 8. Solar Storms (DONKI)
 async function getSolarStormAlert() {
   try {
     const res = await fetch(`https://api.nasa.gov/DONKI/GST?api_key=${NASA_KEY}`);
@@ -192,7 +172,7 @@ async function getSolarStormAlert() {
         return {
           topic: 'solar',
           title: `☀️ Severe Solar Storm Alert (Kp ${maxKp})`,
-          body: `Active geomagnetic storm reported by NASA DONKI. Auroras possible at lower latitudes; satellite navigation fluctuations likely.`,
+          body: `Active geomagnetic storm reported by NASA DONKI. Auroras possible at lower latitudes.`,
           image: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?q=80&w=1000&auto=format&fit=crop',
           url: 'https://tastyandcomfort.github.io/T-C-Space/#space-weather',
           isEmergency: true
@@ -211,7 +191,6 @@ async function selectNextAlert() {
   const launch = await getRocketLaunch();
   if (launch && launch.isEmergency) return launch;
 
-  // Complete rotation cycling through all subjects
   const rotationOrder = [
     'mars',        // Mars Rover surface photo!
     'epic',        // Earth from 1 million miles photo!
@@ -219,7 +198,6 @@ async function selectNextAlert() {
     'satellite',   // ISS & satellite pass tracking
     'asteroid',    // Near-Earth Asteroid Radar
     'techport',    // NASA Future Inventions Radar
-    'voyager',     // Interstellar Voyager 1 & 2 telemetry
     'launch'       // Upcoming global rocket flights
   ];
 
@@ -238,7 +216,6 @@ async function selectNextAlert() {
   else if (targetTopic === 'satellite') chosen = await getSatelliteIntel();
   else if (targetTopic === 'asteroid') chosen = await getAsteroidAlert();
   else if (targetTopic === 'techport') chosen = await getTechPortAlert();
-  else if (targetTopic === 'voyager') chosen = await getVoyagerTelemetry();
   else if (targetTopic === 'launch') chosen = launch || await getRocketLaunch();
 
   chosen = chosen || await getMarsRoverAlert() || await getAPOD();
@@ -254,7 +231,6 @@ async function selectNextAlert() {
   return chosen;
 }
 
-// --- DISPATCHER ---
 async function run() {
   console.log('Running Master Space Alert Dispatcher with Mars & T&C Deep Labs...');
 
