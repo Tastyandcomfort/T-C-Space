@@ -1,3 +1,4 @@
+
 const admin = require('firebase-admin');
 
 if (!process.env.FIREBASE_SERVICE_ACCOUNT) {
