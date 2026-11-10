@@ -1023,6 +1023,48 @@
       });
     });
 
+
+// --- SMART MOBILE ACCORDION & DESKTOP SPLIT-SCREEN RESIZER ---
+    const mobileToggleBtn = $("btn-toggle-globe-mobile");
+    const globeDeck = $("common-globe-command-deck");
+    const toggleLabel = $("globe-toggle-icon");
+
+    if (mobileToggleBtn && globeDeck) {
+      mobileToggleBtn.addEventListener("click", () => {
+        const isCollapsed = globeDeck.classList.toggle("collapsed");
+        if (toggleLabel) {
+          toggleLabel.textContent = isCollapsed ? "▼ Open 3D Globe" : "▲ Minimize";
+        }
+        // Force WebGL canvas to match new dimensions smoothly
+        setTimeout(() => {
+          if (state.globe) {
+            const el = $("globe-view");
+            if (el && el.clientWidth > 0 && el.clientHeight > 0) {
+              state.globe.width(el.clientWidth).height(el.clientHeight);
+            }
+          }
+        }, 120);
+      });
+    }
+
+    // Auto-minimize globe on purely text-based tabs on small screens
+    const originalSwitchTab = window.switchTab;
+    window.switchTab = function(targetId) {
+      if (typeof originalSwitchTab === "function") originalSwitchTab(targetId);
+      
+      // If mobile user switches to Wiki, Settings, or About: auto-collapse globe to save screen space
+      if (window.innerWidth < 1024 && globeDeck) {
+        const textTabs = ["wiki", "settings", "about", "sources"];
+        if (textTabs.includes(targetId)) {
+          globeDeck.classList.add("collapsed");
+          if (toggleLabel) toggleLabel.textContent = "▼ Open 3D Globe";
+        }
+      }
+    };
+
+
+
+     
     document.querySelector(".brand")?.addEventListener("click", (e) => {
       e.preventDefault();
       switchTab("overview");
