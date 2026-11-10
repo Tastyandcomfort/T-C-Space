@@ -456,7 +456,7 @@
             <article class="surface card">
               <div class="card-heading">
                 <div>
-                  <span class="badge-pill red">LIVE MARTIAN DOWNLINK</span>
+                  <span class="badge-pill red">MARTIAN SURFACE DOWNLINK</span>
                   <h3>Mars Rover Surface Cam</h3>
                   <small id="mars-rover-tag">Perseverance · Jezero Crater</small>
                 </div>
@@ -470,7 +470,10 @@
               </div>
               <div style="display:flex; justify-content:space-between; font-size:0.8rem; color:var(--muted); margin-top:8px;">
                 <span id="mars-sol-label">Martian Sol: --</span>
-                <span id="mars-camera-label">Camera: Mastcam-Z</span>
+                <span id="mars-camera-label">Instrument: Mastcam-Z</span>
+              </div>
+              <div style="margin-top:4px; font-size:0.75rem; color:#00d2ff;" id="mars-next-pass">
+                Expected Relay: Next DSN pass ~12 hrs
               </div>
             </article>
 
@@ -501,7 +504,7 @@
               </p>
             </article>
 
-            <!-- 3. EPIC: Earth from 1 Million Miles -->
+            <!-- 3. EPIC: Earth from 1 Million Miles (Download & Share) -->
             <article class="surface card">
               <div class="card-heading">
                 <div>
@@ -515,8 +518,11 @@
                 <p class="muted">Retrieving DSCOVR Earth polychromatic frame…</p>
               </div>
               <div style="display:flex; justify-content:space-between; font-size:0.8rem; color:var(--muted); margin-top:6px;">
-                <span id="epic-date-label">Downlink: DSCOVR L1 Orbit</span>
+                <span id="epic-date-label">Downlink UTC: DSCOVR L1 Orbit</span>
                 <span>Natural Color Full-Disk</span>
+              </div>
+              <div style="margin-top:4px; font-size:0.75rem; color:#00d2ff;" id="epic-next-pass">
+                Next Image Downlink: ~2 hrs (Lagrange L1 batch)
               </div>
               <div class="photo-actions-strip">
                 <button class="action-btn-sm" id="btn-download-epic" type="button">⬇ Download HD Image</button>
@@ -646,8 +652,8 @@
           <div class="section-title">
             <div>
               <div class="eyebrow">ORBITAL MISSIONS &amp; FLIGHT TELEMETRY</div>
-              <h2>Upcoming Launches &amp; Real-Time Ascent Profile</h2>
-              <p>Live schedule from Launch Library 2 with real-time launch journey telemetry: velocity, altitude, staging, and mission encyclopedia links.</p>
+              <h2>Upcoming Launches &amp; Real-Time Flight Profile</h2>
+              <p>Live schedule from Launch Library 2 with verified mission status badges, launchpad coordinates, and mission encyclopedia links.</p>
             </div>
             <span class="section-count">02 / FLIGHTS</span>
           </div>
@@ -667,7 +673,7 @@
                 <div><small>TARGET ORBIT</small><b id="spotlight-orbit">Low Earth Orbit</b></div>
               </div>
 
-              <!-- Live Ascent Flight Profile -->
+              <!-- Flight Ascent Profile Bar -->
               <div class="flight-journey-box">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                   <b style="font-size:0.85rem;"><span class="pulse-ring"></span> FLIGHT ASCENT TELEMETRY PROFILE</b>
@@ -684,8 +690,8 @@
                   <span>Orbit Insertion</span>
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-top:10px; font-size:0.85rem;">
-                  <div><small style="color:var(--muted)">TELEMETRY VELOCITY: </small><b id="flight-velocity-val">0 m/s (0 km/h)</b></div>
-                  <div><small style="color:var(--muted)">ALTITUDE: </small><b id="flight-alt-val">0 km (Ground Level)</b></div>
+                  <div><small style="color:var(--muted)">FLIGHT STATUS: </small><b id="flight-velocity-val">Vehicle standing at pad · Countdown proceeding</b></div>
+                  <div><small style="color:var(--muted)">TRAJECTORY: </small><b id="flight-alt-val">0 km (Ground Stage)</b></div>
                 </div>
               </div>
 
@@ -720,9 +726,9 @@
           </div>
           <div class="weather-grid">
             <article class="metric-card">
-              <div class="metric-top"><span>SOLAR FLARES (7D)</span><span class="metric-symbol orange">☼</span></div>
+              <div class="metric-top"><span>SOLAR FLARES (48H)</span><span class="metric-symbol orange">☼</span></div>
               <strong id="solar-count">—</strong>
-              <small>flares recorded in past 7 days</small>
+              <small>flares recorded in past 48 hours</small>
             </article>
             <article class="metric-card">
               <div class="metric-top"><span>GEOMAGNETIC STORMS</span><span class="metric-symbol purple">◈</span></div>
@@ -756,7 +762,7 @@
             <div>
               <div class="eyebrow">CELESTIAL RADAR &amp; DISCOVERY</div>
               <h2>Astronomy Picture &amp; Near-Earth Asteroid Radar</h2>
-              <p>Near-Earth Asteroid close approaches with real-time velocity, lunar distance (LD), diameter, and NASA APOD.</p>
+              <p>Near-Earth Asteroid close approaches with relative velocity, lunar distance (LD), diameter, and NASA APOD.</p>
             </div>
             <span class="section-count">04 / RADAR</span>
           </div>
@@ -777,6 +783,7 @@
             </div>
           </article>
 
+          <!-- Full Scientific Asteroid Radar -->
           <article class="surface neo-panel">
             <div class="card-heading">
               <div>
@@ -916,8 +923,8 @@
           <div class="section-title">
             <div>
               <div class="eyebrow">INTERSTELLAR EXPLORATION</div>
-              <h2>Deep Space Telemetry</h2>
-              <p>Follow humanity's most distant robotic emissaries beyond the heliosphere.</p>
+              <h2>Deep Space Telemetry (NASA JPL DSN)</h2>
+              <p>Verified heliocentric distance and light-time communication vectors for humanity's most distant spacecraft.</p>
             </div>
             <span class="section-count">06 / DEEP SPACE</span>
           </div>
@@ -1009,7 +1016,7 @@
           </article>
         </section>
 
-        <!-- SECTION 8: SETTINGS & PREFERENCES -->
+        <!-- SECTION 8: SETTINGS & NOTIFICATION ENGINE -->
         <section class="section-block" id="settings">
           <div class="section-title">
             <div>
