@@ -292,6 +292,67 @@
       letter-spacing: 0.5px;
       margin-bottom: 12px;
     }
+
+
+    /* ==============================================================
+       ADAPTIVE SPLIT-SCREEN & COLLAPSIBLE GLOBE ENGINE
+       ============================================================== */
+    
+    /* Desktop & Large Screens (Idea 1: Side-by-Side Split Screen) */
+    @media (min-width: 1024px) {
+      .content-wrap {
+        display: grid;
+        grid-template-columns: 460px 1fr;
+        gap: 20px;
+        align-items: start;
+      }
+      .common-globe-theater {
+        position: sticky;
+        top: 80px; /* Sticks neatly below the topbar */
+        height: calc(100vh - 110px);
+        margin-bottom: 0;
+        display: flex;
+        flex-direction: column;
+      }
+      #globe-view {
+        flex: 1;
+        min-height: 0 !important; /* Lets WebGL fill available height cleanly */
+      }
+      .globe-collapse-toggle {
+        display: none !important; /* No toggle needed on desktop split-screen */
+      }
+    }
+
+    /* Mobile & Small Screens (Idea 3: Collapsible Drawer) */
+    @media (max-width: 1023px) {
+      .common-globe-theater {
+        margin-bottom: 16px;
+        transition: max-height 0.35s ease, opacity 0.3s ease;
+      }
+      .common-globe-theater.collapsed #globe-view,
+      .common-globe-theater.collapsed .globe-theater-head,
+      .common-globe-theater.collapsed .globe-hud-overlay {
+        display: none !important;
+      }
+      .globe-collapse-toggle {
+        display: flex;
+        width: 100%;
+        padding: 10px 16px;
+        background: rgba(41, 151, 255, 0.12);
+        border: 1px solid rgba(41, 151, 255, 0.3);
+        border-radius: 10px;
+        color: #fff;
+        font-size: 0.82rem;
+        font-weight: 700;
+        align-items: center;
+        justify-content: space-between;
+        cursor: pointer;
+        margin-bottom: 10px;
+      }
+    }
+    
+  
+  
   </style>
 </head>
 <body>
@@ -434,19 +495,26 @@
         <!-- PERSISTENT COMMON 3D COMMAND GLOBE (WORLDMONITOR-STYLE)       -->
         <!-- Stays visible as common ground across all operational views   -->
         <!-- ============================================================== -->
+        <!-- Mobile 1-Tap Drawer Button (Visible on Small Screens) -->
+        <button type="button" class="globe-collapse-toggle" id="btn-toggle-globe-mobile">
+          <span>🌍 <b id="globe-toggle-label">3D Orbital Radar Viewport</b></span>
+          <span id="globe-toggle-icon">▲ Minimize</span>
+        </button>
+
+        <!-- Common 3D Command Deck -->
         <section class="common-globe-theater" id="common-globe-command-deck">
           <div class="globe-theater-head">
             <div class="globe-layer-toolbar">
-              <span style="font-size:0.75rem; font-weight:bold; color:var(--muted); margin-right:4px;">ACTIVE HUD LAYERS:</span>
+              <span style="font-size:0.75rem; font-weight:bold; color:var(--muted); margin-right:4px;">LAYERS:</span>
               <button class="globe-layer-chip active" data-layer="satellites" type="button">🛰️ Satellites</button>
-              <button class="globe-layer-chip active" data-layer="earthquakes" type="button">⚡ Earthquakes (USGS)</button>
-              <button class="globe-layer-chip active" data-layer="fires" type="button">🔥 Fires (EONET)</button>
-              <button class="globe-layer-chip active" data-layer="launches" type="button">🚀 Spaceports</button>
+              <button class="globe-layer-chip active" data-layer="earthquakes" type="button">⚡ Quakes</button>
+              <button class="globe-layer-chip active" data-layer="fires" type="button">🔥 Fires</button>
+              <button class="globe-layer-chip active" data-layer="launches" type="button">🚀 Flights</button>
               <button class="globe-layer-chip active" data-layer="asteroids" type="button">☄️ Asteroids</button>
             </div>
             <div class="globe-quick-controls">
-              <button class="globe-ctrl-btn" id="btn-globe-reset" type="button" title="Reset View">⌂ Reset</button>
-              <button class="globe-ctrl-btn" id="btn-globe-iss" type="button" title="Center ISS">🛰️ Track ISS</button>
+              <button class="globe-ctrl-btn" id="btn-globe-reset" type="button" title="Reset View">⌂</button>
+              <button class="globe-ctrl-btn" id="btn-globe-iss" type="button" title="Center ISS">🛰️ ISS</button>
             </div>
           </div>
 
@@ -460,11 +528,11 @@
           </div>
 
           <!-- 3D WebGL Globe Viewport -->
-          <div id="globe-view" style="width: 100%; min-height: 480px; position: relative;">
+          <div id="globe-view">
             <div class="globe-loading">Loading 3D Planetary Radar &amp; Telemetry layers…</div>
           </div>
         </section>
-
+        
         <!-- SECTION 0: OVERVIEW -->
         <section class="section-block active-view" id="overview">
           <section class="welcome-row">
