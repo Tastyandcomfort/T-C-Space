@@ -41,12 +41,15 @@ self.addEventListener('notificationclick', (event) => {
 
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
+      // If the app is already open, navigate and focus
       for (const client of windowClients) {
         if (client.url.includes('/T-C-Space/')) {
           client.navigate(targetUrl);
+          client.postMessage({ action: 'NAVIGATE_TAB', url: targetUrl });
           return client.focus();
         }
       }
+      // If closed, open fresh window
       if (clients.openWindow) return clients.openWindow(targetUrl);
     })
   );
