@@ -4,7 +4,7 @@
   "use strict";
 
   const CONFIG = {
-    NASA_KEY: "DEMO_KEY",
+    NASA_KEY: "fLRTKjpmtJGRWqzFKG8NrtmwbbkwBnPnWKNzn8Gd",
     CATALOG_CACHE_MS: 2 * 60 * 60 * 1000,
     REFRESH_MS: 5 * 60 * 1000,
     APIS: {
@@ -12,11 +12,11 @@
       celestrakSearch: (q) => `https://celestrak.org/NORAD/elements/gp.php?NAME=${encodeURIComponent(q)}&FORMAT=JSON`,
       celestrakStarlink: `https://celestrak.org/NORAD/elements/gp.php?GROUP=starlink&FORMAT=JSON`,
       launches: `https://lldev.thespacedevs.com/2.2.0/launch/upcoming/?limit=9`,
-      donkiFlr: (s, e) => `https://api.nasa.gov/DONKI/FLR?startDate=${s}&endDate=${e}&api_key=DEMO_KEY`,
-      donkiGst: (s, e) => `https://api.nasa.gov/DONKI/GST?startDate=${s}&endDate=${e}&api_key=DEMO_KEY`,
-      donkiCme: (s, e) => `https://api.nasa.gov/DONKI/CME?startDate=${s}&endDate=${e}&api_key=DEMO_KEY`,
-      apod: `https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY`,
-      neows: (s, e) => `https://api.nasa.gov/neo/rest/v1/feed?start_date=${s}&end_date=${e}&api_key=DEMO_KEY`,
+      donkiFlr: (s, e) => `https://api.nasa.gov/DONKI/FLR?startDate=${s}&endDate=${e}&api_key=fLRTKjpmtJGRWqzFKG8NrtmwbbkwBnPnWKNzn8Gd`,
+      donkiGst: (s, e) => `https://api.nasa.gov/DONKI/GST?startDate=${s}&endDate=${e}&api_key=fLRTKjpmtJGRWqzFKG8NrtmwbbkwBnPnWKNzn8Gd`,
+      donkiCme: (s, e) => `https://api.nasa.gov/DONKI/CME?startDate=${s}&endDate=${e}&api_key=fLRTKjpmtJGRWqzFKG8NrtmwbbkwBnPnWKNzn8Gd`,
+      apod: `https://api.nasa.gov/planetary/apod?api_key=fLRTKjpmtJGRWqzFKG8NrtmwbbkwBnPnWKNzn8Gd`,
+      neows: (s, e) => `https://api.nasa.gov/neo/rest/v1/feed?start_date=${s}&end_date=${e}&api_key=fLRTKjpmtJGRWqzFKG8NrtmwbbkwBnPnWKNzn8Gd`,
       earthquakes: `https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_day.geojson`,
       eonet: `https://eonet.gsfc.nasa.gov/api/v3/events?status=open&limit=16`,
       wikipedia: (q) => `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(q.trim().replace(/\s+/g, "_"))}`
