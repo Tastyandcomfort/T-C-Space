@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#0d0e12" id="theme-color-meta">
+  <meta name="theme-color" content="#fbfbfd" id="theme-color-meta">
   <meta name="description" content="T&C Space Hub — Complete real-time space intelligence: orbital satellite tracking, rocket launches, solar weather, asteroids, earthquakes and deep space telemetry.">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -14,6 +14,53 @@
   <link rel="stylesheet" href="styles.css">
 
   <style>
+    /* ==============================================================
+       APPLE HIG DESIGN TOKENS & DYNAMIC GLASSMORPHISM
+       ============================================================== */
+    :root {
+      --apple-bg: #fbfbfd;
+      --apple-surface: rgba(255, 255, 255, 0.75);
+      --apple-surface-card: rgba(255, 255, 255, 0.88);
+      --apple-border: rgba(0, 0, 0, 0.08);
+      --apple-border-strong: rgba(0, 0, 0, 0.15);
+      --apple-fg: #1d1d1f;
+      --apple-fg-sub: #86868b;
+      --apple-blue: #0071e3;
+      --apple-blue-soft: rgba(0, 113, 227, 0.12);
+      --apple-green: #34c759;
+      --apple-orange: #ff9500;
+      --apple-red: #ff3b30;
+      --apple-purple: #af52de;
+      --apple-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+      --apple-glass-blur: saturate(180%) blur(24px);
+    }
+
+    html[data-theme="dark"] {
+      --apple-bg: #000000;
+      --apple-surface: rgba(26, 26, 30, 0.72);
+      --apple-surface-card: rgba(30, 30, 36, 0.82);
+      --apple-border: rgba(255, 255, 255, 0.1);
+      --apple-border-strong: rgba(255, 255, 255, 0.2);
+      --apple-fg: #f5f5f7;
+      --apple-fg-sub: #a1a1a6;
+      --apple-blue: #2997ff;
+      --apple-blue-soft: rgba(41, 151, 255, 0.16);
+      --apple-green: #30d158;
+      --apple-orange: #ff9f0a;
+      --apple-red: #ff453a;
+      --apple-purple: #bf5af2;
+      --apple-shadow: 0 8px 32px rgba(0, 0, 0, 0.55);
+    }
+
+    body {
+      background: var(--apple-bg) !important;
+      color: var(--apple-fg) !important;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Helvetica, Arial, sans-serif !important;
+      transition: background-color 0.3s ease, color 0.3s ease;
+      min-height: 100vh;
+      display: flex;
+    }
+
     /* PURE CSS: Hide install prompts when inside installed standalone PWA */
     @media (display-mode: standalone), (display-mode: fullscreen), (display-mode: minimal-ui) {
       #open-install-modal, #side-install-nav, .app-banner-card, #install-modal {
@@ -21,169 +68,220 @@
       }
     }
 
-    /* Layout Baseline */
+    /* App Shell & Smart Sidebar */
     .app-shell {
+      width: 100%;
       min-height: 100vh;
       display: flex;
     }
+
+    .sidebar {
+      width: 68px;
+      background: var(--apple-surface) !important;
+      backdrop-filter: var(--apple-glass-blur) !important;
+      -webkit-backdrop-filter: var(--apple-glass-blur) !important;
+      border-right: 1px solid var(--apple-border) !important;
+      transition: width 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+      overflow-x: hidden;
+      white-space: nowrap;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+    }
+    .sidebar:hover, .sidebar.pinned {
+      width: 240px;
+    }
+    .sidebar .nav-text, .sidebar .side-label, .sidebar .brand-copy, .sidebar .sidebar-bottom p, .sidebar .sidebar-bottom small {
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+    .sidebar:hover .nav-text, .sidebar:hover .side-label, .sidebar:hover .brand-copy, .sidebar:hover .sidebar-bottom p, .sidebar:hover .sidebar-bottom small,
+    .sidebar.pinned .nav-text, .sidebar.pinned .side-label, .sidebar.pinned .brand-copy, .sidebar.pinned .sidebar-bottom p, .sidebar.pinned .sidebar-bottom small {
+      opacity: 1;
+    }
+
     .main-area {
       flex: 1;
       display: flex;
       flex-direction: column;
       min-width: 0;
+      background: var(--apple-bg);
     }
     .content-wrap {
       flex: 1;
       display: block;
       width: 100%;
-      max-width: 1380px;
+      max-width: 1400px;
       margin: 0 auto;
-      padding: 0 18px 40px 18px;
+      padding: 0 20px 40px 20px;
     }
 
-    /* Live Pulsing Beacon Animation */
-    .pulse-ring {
-      display: inline-block;
-      width: 9px;
-      height: 9px;
-      border-radius: 50%;
-      background: #00f59b;
-      box-shadow: 0 0 0 0 rgba(0, 245, 155, 0.7);
-      animation: tcPulse 1.8s infinite;
-      margin-right: 6px;
-      vertical-align: middle;
-    }
-    @keyframes tcPulse {
-      0% { box-shadow: 0 0 0 0 rgba(0, 245, 155, 0.7); }
-      70% { box-shadow: 0 0 0 9px rgba(0, 245, 155, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(0, 245, 155, 0); }
-    }
-
-    /* ==============================================================
-       EXECUTIVE HOTEL-STYLE WORLD WALL CLOCKS (STICKY TOP TICKER)
-       ============================================================== */
-    .world-clocks-bar {
+    /* Topbar Navigation */
+    .topbar {
+      background: var(--apple-surface) !important;
+      backdrop-filter: var(--apple-glass-blur) !important;
+      -webkit-backdrop-filter: var(--apple-glass-blur) !important;
+      border-bottom: 1px solid var(--apple-border) !important;
+      padding: 10px 22px;
       display: flex;
+      justify-content: space-between;
       align-items: center;
-      background: rgba(14, 18, 25, 0.95);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      padding: 8px 18px;
-      overflow-x: auto;
+      position: sticky;
+      top: 0;
+      z-index: 40;
+    }
+
+    /* Hotel-Style Compact World Clock Pill */
+    .clock-pill-wrap {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--apple-surface-card);
+      border: 1px solid var(--apple-border-strong);
+      border-radius: 20px;
+      padding: 5px 12px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      transition: all 0.2s;
+    }
+    .clock-pill-wrap:hover {
+      border-color: var(--apple-blue);
+    }
+
+    /* Glassmorphic 6-City World Clock Dropdown */
+    .world-clock-dropdown-menu {
+      position: absolute;
+      top: 58px;
+      right: 210px;
+      background: var(--apple-surface-card);
+      backdrop-filter: var(--apple-glass-blur);
+      -webkit-backdrop-filter: var(--apple-glass-blur);
+      border: 1px solid var(--apple-border-strong);
+      border-radius: 16px;
+      box-shadow: var(--apple-shadow);
+      padding: 16px 20px;
+      display: none;
+      z-index: 1000;
+      grid-template-columns: repeat(3, 140px);
       gap: 16px;
-      white-space: nowrap;
-      scrollbar-width: thin;
+    }
+    .world-clock-dropdown-menu.active {
+      display: grid;
     }
     .world-clock-item {
       display: flex;
       flex-direction: column;
-      border-right: 1px solid rgba(255, 255, 255, 0.08);
-      padding-right: 16px;
-      min-width: 120px;
-    }
-    .world-clock-item:last-child {
-      border-right: none;
+      gap: 2px;
     }
     .world-clock-city {
-      font-size: 0.68rem;
+      font-size: 0.65rem;
       letter-spacing: 0.8px;
-      color: var(--muted);
+      color: var(--apple-fg-sub);
       font-weight: 700;
       text-transform: uppercase;
-      display: flex;
-      align-items: center;
-      gap: 4px;
     }
     .world-clock-time {
       font-family: monospace;
-      font-size: 0.92rem;
+      font-size: 0.96rem;
       font-weight: bold;
-      color: var(--fg);
+      color: var(--apple-fg);
     }
     .world-clock-date {
       font-size: 0.65rem;
-      color: var(--muted);
-      opacity: 0.85;
+      color: var(--apple-fg-sub);
     }
 
-    /* Light Mode Contrast for 3D HUD Button */
+    /* Theme-Safe High-Contrast 3D HUD Button */
     .btn-cinema-hud-launch {
-      padding: 7px 15px;
-      border-radius: 8px;
-      font-size: 0.82rem;
+      padding: 7px 16px;
+      border-radius: 20px;
+      font-size: 0.8rem;
       font-weight: 700;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       gap: 6px;
       transition: all 0.2s;
-      border: 1px solid #0071e3;
-      background: #0071e3;
+      border: 1px solid var(--apple-blue);
+      background: var(--apple-blue);
       color: #ffffff !important;
+      box-shadow: 0 2px 8px rgba(0, 113, 227, 0.25);
     }
     html[data-theme="dark"] .btn-cinema-hud-launch {
-      background: rgba(41, 151, 255, 0.18);
-      border-color: #2997ff;
-      color: #2997ff !important;
+      background: var(--apple-blue-soft);
+      border-color: var(--apple-blue);
+      color: var(--apple-blue) !important;
     }
     .btn-cinema-hud-launch:hover {
       transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(41, 151, 255, 0.35);
+      box-shadow: 0 4px 14px rgba(0, 113, 227, 0.35);
     }
+
+    /* Apple-Styled Verified Source Badges */
+    .apple-source-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      background: var(--apple-surface);
+      border: 1px solid var(--apple-border);
+      color: var(--apple-fg);
+    }
+    .apple-source-badge span {
+      background: var(--apple-blue);
+      color: #fff;
+      padding: 1px 7px;
+      border-radius: 10px;
+      font-size: 0.62rem;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+    }
+    .apple-source-badge.orange span { background: var(--apple-orange); }
+    .apple-source-badge.teal span { background: var(--apple-green); }
+    .apple-source-badge.purple span { background: var(--apple-purple); }
 
     /* Interactive Clickable Metric Tiles in Overview */
     .metric-card.interactive-tile {
+      background: var(--apple-surface-card) !important;
+      border: 1px solid var(--apple-border) !important;
+      box-shadow: var(--apple-shadow);
+      border-radius: 16px !important;
       cursor: pointer;
-      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+      transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s ease, border-color 0.22s ease;
       text-decoration: none;
       color: inherit;
-      display: flex;
-      flex-direction: column;
     }
     .metric-card.interactive-tile:hover {
       transform: translateY(-3px);
-      border-color: #2997ff;
-      box-shadow: 0 8px 24px rgba(41, 151, 255, 0.18);
-    }
-    .metric-hero-sub {
-      font-size: 1.15rem !important;
-      font-weight: 800;
-      color: var(--fg);
-      display: block;
-      margin: 4px 0;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      border-color: var(--apple-blue) !important;
+      box-shadow: 0 12px 30px rgba(0, 113, 227, 0.16);
     }
 
-    /* Integrated 2D Map Quick-Select Presets */
-    .map-preset-pills {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin-top: 8px;
-    }
-    .map-preset-btn {
-      padding: 4px 10px;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.15);
+    /* Embedded Cockpit HUD Badge on 2D Leaflet Map */
+    .map-embedded-hud {
+      position: absolute;
+      bottom: 24px;
+      left: 20px;
+      z-index: 1000;
+      max-width: 320px;
+      background: var(--apple-surface-card);
+      backdrop-filter: var(--apple-glass-blur);
+      -webkit-backdrop-filter: var(--apple-glass-blur);
+      border: 1px solid var(--apple-border-strong);
       border-radius: 14px;
-      font-size: 0.74rem;
-      font-weight: 600;
-      color: var(--fg);
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .map-preset-btn:hover {
-      background: rgba(41, 151, 255, 0.2);
-      border-color: #2997ff;
-      color: #2997ff;
+      padding: 12px 14px;
+      box-shadow: var(--apple-shadow);
     }
 
     /* Scientific Evaluation Gauges for Intel Brief */
     .intel-gauge-box {
       margin-top: 8px;
       padding-top: 8px;
-      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      border-top: 1px solid var(--apple-border);
       font-size: 0.7rem;
       display: flex;
       flex-direction: column;
@@ -191,7 +289,7 @@
     }
     .intel-gauge-bar {
       height: 4px;
-      background: rgba(255, 255, 255, 0.1);
+      background: var(--apple-border);
       border-radius: 2px;
       overflow: hidden;
     }
@@ -202,23 +300,23 @@
     }
 
     /* ==============================================================
-       PERMANENT STICKY FOOTER & T&C ECOSYSTEM DOCK
+       PERMANENT DOCKED FOOTER (THEME-ADAPTIVE & CLEAN)
        ============================================================== */
     .docked-sticky-footer {
       position: sticky;
       bottom: 0;
       left: 0;
       width: 100%;
-      background: rgba(12, 14, 20, 0.94);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      background: var(--apple-surface) !important;
+      backdrop-filter: var(--apple-glass-blur) !important;
+      -webkit-backdrop-filter: var(--apple-glass-blur) !important;
+      border-top: 1px solid var(--apple-border) !important;
       z-index: 50;
-      padding: 10px 20px;
-      box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.5);
+      padding: 10px 24px;
+      box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05);
     }
     .docked-footer-inner {
-      max-width: 1380px;
+      max-width: 1400px;
       margin: 0 auto;
       display: flex;
       justify-content: space-between;
@@ -234,26 +332,26 @@
     }
     .docked-eco-btn {
       padding: 5px 12px;
-      border-radius: 6px;
+      border-radius: 14px;
       font-size: 0.74rem;
       font-weight: 700;
       text-decoration: none;
       display: inline-flex;
       align-items: center;
       gap: 5px;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      color: var(--fg);
+      background: var(--apple-surface-card);
+      border: 1px solid var(--apple-border);
+      color: var(--apple-fg);
       transition: all 0.2s;
     }
     .docked-eco-btn:hover {
-      background: rgba(41, 151, 255, 0.15);
-      border-color: #2997ff;
-      color: #2997ff;
+      background: var(--apple-blue-soft);
+      border-color: var(--apple-blue);
+      color: var(--apple-blue);
     }
     .docked-meta-credits {
-      font-size: 0.72rem;
-      color: var(--muted);
+      font-size: 0.74rem;
+      color: var(--apple-fg-sub);
       display: flex;
       align-items: center;
       gap: 8px;
@@ -265,56 +363,27 @@
       top: 0; left: 0;
       width: 100vw; height: 100vh;
       background: rgba(8, 10, 14, 0.96);
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       z-index: 999999;
       display: none;
       flex-direction: column;
-      animation: fadeInCinema 0.25s ease-out;
     }
     .globe-modal-hud.active { display: flex; }
-    @keyframes fadeInCinema {
-      from { opacity: 0; transform: scale(0.98); }
-      to { opacity: 1; transform: scale(1); }
-    }
     .hud-header-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 10px 20px;
+      padding: 10px 22px;
       background: rgba(14, 18, 25, 0.95);
       border-bottom: 1px solid rgba(41, 151, 255, 0.25);
-      z-index: 10;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-    .hud-layer-toolbar {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-    }
-    .hud-layer-chip {
-      padding: 4px 10px;
-      border-radius: 14px;
-      font-size: 0.74rem;
-      font-weight: 600;
-      cursor: pointer;
-      border: 1px solid rgba(255,255,255,0.15);
-      background: rgba(255,255,255,0.04);
-      color: var(--muted);
-      transition: all 0.2s;
-    }
-    .hud-layer-chip.active {
-      background: rgba(41, 151, 255, 0.22);
-      border-color: #2997ff;
-      color: #fff;
     }
     .hud-close-btn {
       padding: 6px 14px;
       background: rgba(255, 69, 58, 0.15);
       border: 1px solid rgba(255, 69, 58, 0.4);
       color: #ff453a;
-      border-radius: 6px;
+      border-radius: 16px;
       font-weight: bold;
       font-size: 0.8rem;
       cursor: pointer;
@@ -331,151 +400,113 @@
       max-width: 330px;
       background: rgba(11, 14, 20, 0.94);
       backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
       border: 1px solid rgba(41, 151, 255, 0.5);
-      border-radius: 10px;
-      padding: 14px;
+      border-radius: 14px;
+      padding: 16px;
       color: #fff;
       z-index: 20;
       display: none;
-    }
-    .hud-telemetry-dock h4 { margin: 0 0 6px 0; font-size: 0.95rem; color: #00d2ff; }
-    .hud-telemetry-dock p { margin: 0; font-size: 0.8rem; color: #ccc; line-height: 1.5; }
-
-    /* Deep Labs Grid & Photo Actions */
-    .deep-labs-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 16px;
-      margin-top: 16px;
-    }
-    .photo-frame-wrap {
-      width: 100%;
-      height: 290px;
-      background: #08090d;
-      border-radius: 12px;
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 10px 0;
-      border: 1px solid rgba(255,255,255,0.08);
-      position: relative;
-    }
-    .photo-frame-wrap img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      transition: transform 0.3s ease;
-    }
-    .photo-frame-wrap img:hover { transform: scale(1.02); }
-    .photo-actions-strip {
-      display: flex;
-      gap: 8px;
-      margin-top: 10px;
-    }
-    .action-btn-sm {
-      padding: 6px 14px;
-      border-radius: 6px;
-      font-size: 0.78rem;
-      font-weight: 600;
-      cursor: pointer;
-      border: 1px solid rgba(255,255,255,0.15);
-      background: rgba(255,255,255,0.06);
-      color: var(--fg);
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
     }
   </style>
 </head>
 <body>
   <div class="app-shell">
-    <!-- Sidebar Navigation -->
+    <!-- Smart Hover-Expandable Apple Sidebar -->
     <aside class="sidebar" id="sidebar">
-      <a class="brand" href="#overview">
-        <img class="brand-icon" src="assets/space-hub-icon-192.png?v=1" alt="T&C Space Hub logo">
-        <span class="brand-copy">
-          <b>SPACE HUB</b>
-          <small id="brand-tag">MISSION CONTROL</small>
-        </span>
-      </a>
-      <div class="side-label">WORKSPACE</div>
+      <div style="display:flex; justify-content:space-between; align-items:center; padding: 14px 18px 8px 18px;">
+        <a class="brand" href="#overview" style="display:flex; align-items:center; gap:10px; text-decoration:none; color:inherit;">
+          <img class="brand-icon" src="assets/space-hub-icon-192.png?v=1" alt="T&C Space Hub logo" style="width:32px; height:32px; border-radius:8px;">
+          <span class="brand-copy">
+            <b style="font-size:0.95rem; display:block;">SPACE HUB</b>
+            <small style="font-size:0.65rem; color:var(--apple-fg-sub); letter-spacing:0.8px;">MISSION CONTROL</small>
+          </span>
+        </a>
+        <button id="btn-pin-sidebar" type="button" class="subtle-button" style="padding:2px 6px; font-size:0.75rem;" title="Pin or Unpin Sidebar">📌</button>
+      </div>
+
+      <div class="side-label" style="font-size:0.68rem; font-weight:700; color:var(--apple-fg-sub); padding:10px 18px 4px 18px; letter-spacing:0.8px;">TELEMETRY WORKSPACE</div>
+      
       <nav class="side-nav" aria-label="Main navigation">
         <a class="active" href="#overview" data-nav="overview">
           <span class="nav-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg></span>
           <span class="nav-text">Overview</span>
         </a>
 
-        <!-- T&C Deep Labs Tab -->
-        <a href="#deep-labs" data-nav="deep-labs" style="border-left: 3px solid #2997ff; background: rgba(41, 151, 255, 0.08);">
+        <!-- T&C Deep Labs -->
+        <a href="#deep-labs" data-nav="deep-labs" style="border-left: 3px solid var(--apple-blue); background: var(--apple-blue-soft);">
           <span class="nav-icon">🪐</span>
           <span class="nav-text"><b>T&C Deep Labs</b></span>
-          <small class="badge-pill green" style="font-size: 8px;">FLAGSHIP</small>
+          <small class="badge-pill green" style="font-size: 8px;">TOP PICK</small>
         </a>
 
         <a href="#satellites" data-nav="satellites">
           <span class="nav-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
           <span class="nav-text">Satellites</span>
         </a>
+
         <a href="#launches" data-nav="launches">
           <span class="nav-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg></span>
           <span class="nav-text">Rocket Flights</span>
         </a>
+
         <a href="#space-weather" data-nav="space-weather">
           <span class="nav-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg></span>
           <span class="nav-text">Solar Storms</span>
         </a>
+
         <a href="#astronomy" data-nav="astronomy">
           <span class="nav-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg></span>
           <span class="nav-text">Asteroids &amp; APOD</span>
         </a>
+
         <a href="#earth-monitor" data-nav="earth-monitor">
           <span class="nav-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg></span>
           <span class="nav-text">Earth Monitor</span>
         </a>
+
         <a href="#intel-brief" data-nav="intel-brief">
           <span class="nav-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg></span>
           <span class="nav-text">Intel Brief</span>
         </a>
+
         <a href="#missions" data-nav="missions">
           <span class="nav-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="6"/><path d="M3.6 15h16.8"/><path d="M12 3a15 15 0 0 1 0 18"/></svg></span>
           <span class="nav-text">Deep Space</span>
         </a>
+
         <a href="#wiki" data-nav="wiki">
           <span class="nav-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></span>
           <span class="nav-text">Wiki Hub</span>
         </a>
+
         <a href="#settings" data-nav="settings">
           <span class="nav-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg></span>
           <span class="nav-text">Settings</span>
         </a>
+
         <a href="#about" data-nav="about">
           <span class="nav-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></span>
           <span class="nav-text">About</span>
         </a>
 
-        <!-- Install Link -->
         <a href="javascript:void(0)" onclick="triggerPWAInstall()" id="side-install-nav" class="side-install-highlight">
           <span class="nav-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></span>
           <b class="nav-text" id="side-install-text">Install</b>
           <small class="badge-pill green" id="side-install-badge">APP</small>
         </a>
       </nav>
-      <div class="sidebar-bottom">
+
+      <div class="sidebar-bottom" style="margin-top:auto; padding:16px 18px;">
         <div class="connection-indicator">
           <span class="pulse-ring"></span>
-          <span>Telemetry Stream</span>
+          <span>Telemetry</span>
           <b>LIVE</b>
         </div>
-        <p>Curiosity has no borders.</p>
-        <small>Independent T&C Platform</small>
       </div>
     </aside>
 
     <!-- Main Content Area -->
     <main class="main-area">
-      <!-- Topbar Header -->
       <header class="topbar">
         <div class="mobile-brand">
           <img class="brand-icon" src="assets/space-hub-icon-192.png?v=1" alt="Space Hub">
@@ -484,8 +515,9 @@
         <div class="breadcrumb">
           <span>Space Hub</span><i>/</i><b id="current-section-label">Overview</b>
         </div>
+
         <div class="top-actions">
-          <!-- Model B 3D Cinema HUD Launcher (High-Contrast Theme-Safe) -->
+          <!-- Model B 3D Cinema HUD Launcher -->
           <button type="button" class="btn-cinema-hud-launch" onclick="openCinemaHud()">
             🌐 <span>Launch 3D Command HUD</span>
           </button>
@@ -494,6 +526,47 @@
             <span class="install-pill-icon">⬇</span>
             <span class="install-pill-text" id="install-btn-text">Install App</span>
           </button>
+
+          <!-- Compact World Clock Pill with Dropdown Trigger -->
+          <div class="clock-pill-wrap" id="btn-toggle-world-clock" title="Click to view all World Clocks">
+            <span>🌍</span>
+            <span id="active-clock-time">--:--:--</span>
+            <small id="active-clock-city" style="color:var(--apple-fg-sub); font-size:0.75rem;">IST ▼</small>
+          </div>
+
+          <!-- Glassmorphic 6-City World Clock Dropdown Menu -->
+          <div class="world-clock-dropdown-menu" id="world-clock-dropdown">
+            <div class="world-clock-item">
+              <span class="world-clock-city">🇮🇳 NEW DELHI / MUMBAI</span>
+              <span class="world-clock-time" id="clock-delhi">--:--:--</span>
+              <span class="world-clock-date" id="date-delhi">-- --- ----</span>
+            </div>
+            <div class="world-clock-item">
+              <span class="world-clock-city">🇬🇧 LONDON</span>
+              <span class="world-clock-time" id="clock-london">--:--:--</span>
+              <span class="world-clock-date" id="date-london">-- --- ----</span>
+            </div>
+            <div class="world-clock-item">
+              <span class="world-clock-city">🇺🇸 NEW YORK</span>
+              <span class="world-clock-time" id="clock-ny">--:--:--</span>
+              <span class="world-clock-date" id="date-ny">-- --- ----</span>
+            </div>
+            <div class="world-clock-item">
+              <span class="world-clock-city">🇯🇵 TOKYO</span>
+              <span class="world-clock-time" id="clock-tokyo">--:--:--</span>
+              <span class="world-clock-date" id="date-tokyo">-- --- ----</span>
+            </div>
+            <div class="world-clock-item">
+              <span class="world-clock-city">🇦🇺 SYDNEY</span>
+              <span class="world-clock-time" id="clock-sydney">--:--:--</span>
+              <span class="world-clock-date" id="date-sydney">-- --- ----</span>
+            </div>
+            <div class="world-clock-item">
+              <span class="world-clock-city">🌌 UTC ZULU</span>
+              <span class="world-clock-time" id="clock-utc">--:--:--</span>
+              <span class="world-clock-date" id="date-utc">-- --- ----</span>
+            </div>
+          </div>
 
           <label class="lang-picker" title="Change Language">
             <span>🌐</span>
@@ -507,6 +580,7 @@
               <option value="hi">हिन्दी</option>
             </select>
           </label>
+
           <label class="theme-picker" title="Change Appearance">
             <span>🌓</span>
             <select id="theme-select" aria-label="Choose appearance">
@@ -518,43 +592,6 @@
           <button id="refresh-all" class="icon-btn" title="Refresh data" aria-label="Refresh all data">↻</button>
         </div>
       </header>
-
-      <!-- EXECUTIVE HOTEL-STYLE WORLD WALL CLOCKS -->
-      <section class="world-clocks-bar" aria-label="Global Time Protocol">
-        <div style="font-size:0.68rem; font-weight:800; color:var(--muted); letter-spacing:0.8px; margin-right:4px;">
-          <span class="pulse-ring"></span> GLOBAL TIME
-        </div>
-        <div class="world-clock-item">
-          <span class="world-clock-city">🇮🇳 NEW DELHI / MUMBAI</span>
-          <span class="world-clock-time" id="clock-delhi">--:--:--</span>
-          <span class="world-clock-date" id="date-delhi">-- --- ----</span>
-        </div>
-        <div class="world-clock-item">
-          <span class="world-clock-city">🇬🇧 LONDON</span>
-          <span class="world-clock-time" id="clock-london">--:--:--</span>
-          <span class="world-clock-date" id="date-london">-- --- ----</span>
-        </div>
-        <div class="world-clock-item">
-          <span class="world-clock-city">🇺🇸 NEW YORK</span>
-          <span class="world-clock-time" id="clock-ny">--:--:--</span>
-          <span class="world-clock-date" id="date-ny">-- --- ----</span>
-        </div>
-        <div class="world-clock-item">
-          <span class="world-clock-city">🇯🇵 TOKYO</span>
-          <span class="world-clock-time" id="clock-tokyo">--:--:--</span>
-          <span class="world-clock-date" id="date-tokyo">-- --- ----</span>
-        </div>
-        <div class="world-clock-item">
-          <span class="world-clock-city">🇦🇺 SYDNEY</span>
-          <span class="world-clock-time" id="clock-sydney">--:--:--</span>
-          <span class="world-clock-date" id="date-sydney">-- --- ----</span>
-        </div>
-        <div class="world-clock-item">
-          <span class="world-clock-city">🌌 UTC (ZULU)</span>
-          <span class="world-clock-time" id="clock-utc">--:--:--</span>
-          <span class="world-clock-date" id="date-utc">-- --- ----</span>
-        </div>
-      </section>
 
       <div class="content-wrap">
         <!-- SECTION 0: OVERVIEW -->
@@ -598,37 +635,37 @@
             <div class="ticker-time">100% REAL-TIME DATA</div>
           </section>
 
-          <!-- INTERACTIVE CLICKABLE OVERVIEW METRICS GRID -->
+          <!-- AUTOMATED ROTATING TELEMETRY TILES -->
           <section class="metrics-grid" aria-label="Space overview metrics">
-            <!-- Card 1: ISS Altitude (Jumps to #satellites) -->
-            <article class="metric-card interactive-tile" onclick="window.switchTab('satellites')" title="Click to view ISS in Satellites tab">
-              <div class="metric-top"><span>ISS ORBITAL ALTITUDE</span><span class="metric-symbol blue">◎</span></div>
-              <strong id="iss-alt">Loading…</strong>
-              <small>kilometres above Earth</small>
-              <div class="metric-bottom"><span class="tiny-dot green"></span> Keplerian / SGP4 ➔</div>
+            <!-- Dynamic Tile 1 -->
+            <article class="metric-card interactive-tile" id="tile-dynamic-1" onclick="window.navigateCurrentTile(1)">
+              <div class="metric-top"><span id="tile-1-label">ISS ORBITAL ALTITUDE</span><span class="metric-symbol blue">◎</span></div>
+              <strong id="iss-alt">423.7 km</strong>
+              <small id="tile-1-sub">kilometres above Earth</small>
+              <div class="metric-bottom" id="tile-1-foot"><span class="tiny-dot green"></span> Keplerian / SGP4 ➔</div>
             </article>
 
-            <!-- Card 2: ISS Velocity (Jumps to #satellites) -->
-            <article class="metric-card interactive-tile" onclick="window.switchTab('satellites')" title="Click to view ISS in Satellites tab">
-              <div class="metric-top"><span>ISS ORBITAL VELOCITY</span><span class="metric-symbol purple">⌁</span></div>
-              <strong id="iss-velocity">Loading…</strong>
-              <small>kilometres per second</small>
-              <div class="metric-bottom" id="iss-name-metric">International Space Station ➔</div>
+            <!-- Dynamic Tile 2 -->
+            <article class="metric-card interactive-tile" id="tile-dynamic-2" onclick="window.navigateCurrentTile(2)">
+              <div class="metric-top"><span id="tile-2-label">ISS ORBITAL VELOCITY</span><span class="metric-symbol purple">⌁</span></div>
+              <strong id="iss-velocity">7.66 km/s</strong>
+              <small id="tile-2-sub">kilometres per second</small>
+              <div class="metric-bottom" id="tile-2-foot">Low Earth Orbit ➔</div>
             </article>
 
-            <!-- Card 3: Next Launch (Jumps to #launches) -->
-            <article class="metric-card interactive-tile" onclick="window.switchTab('launches')" title="Click to view Countdown in Launches tab">
+            <!-- Tile 3: Next Launch (Jumps to #launches) -->
+            <article class="metric-card interactive-tile" onclick="window.switchTab('launches')">
               <div class="metric-top"><span>NEXT ROCKET LAUNCH</span><span class="metric-symbol orange">🚀</span></div>
               <strong id="hero-launch-timer">--:--:--</strong>
               <span class="metric-hero-sub" id="hero-launch-name">Upcoming Flight</span>
               <div class="metric-bottom" id="hero-launch-provider">TheSpaceDevs LL2 Feed ➔</div>
             </article>
 
-            <!-- Card 4: Space Weather (Jumps to #space-weather) -->
-            <article class="metric-card interactive-tile" onclick="window.switchTab('space-weather')" title="Click to inspect Heliophysics tab">
+            <!-- Tile 4: Space Weather (Jumps to #space-weather) -->
+            <article class="metric-card interactive-tile" onclick="window.switchTab('space-weather')">
               <div class="metric-top"><span>SOLAR WIND &amp; DONKI</span><span class="metric-symbol teal">☼</span></div>
               <strong id="hero-solar-status">Nominal</strong>
-              <small id="hero-solar-count">Reports verified live</small>
+              <small id="hero-solar-count">Verified live telemetry</small>
               <div class="metric-bottom"><span class="tiny-dot green"></span> Space Weather Watch ➔</div>
             </article>
           </section>
@@ -662,11 +699,11 @@
               <div class="photo-frame-wrap" id="mars-photo-container">
                 <p class="muted">Contacting Deep Space Network for Mars camera downlink…</p>
               </div>
-              <div style="display:flex; justify-content:space-between; font-size:0.8rem; color:var(--muted); margin-top:8px;">
+              <div style="display:flex; justify-content:space-between; font-size:0.8rem; color:var(--apple-fg-sub); margin-top:8px;">
                 <span id="mars-sol-label">Martian Sol: --</span>
                 <span id="mars-camera-label">Instrument: Mastcam-Z</span>
               </div>
-              <div style="margin-top:4px; font-size:0.75rem; color:#00d2ff;" id="mars-next-pass">
+              <div style="margin-top:4px; font-size:0.75rem; color:var(--apple-blue);" id="mars-next-pass">
                 Expected Relay: Next DSN pass ~12 hrs
               </div>
             </article>
@@ -693,7 +730,7 @@
                   <small>Carbon Dioxide Density</small>
                 </article>
               </div>
-              <p style="font-size:0.82rem; line-height:1.6; color:var(--muted); margin-top:14px;">
+              <p style="font-size:0.82rem; line-height:1.6; color:var(--apple-fg-sub); margin-top:14px;">
                 Mars atmospheric pressure is less than 1% of Earth's sea-level pressure. Telemetry is updated through NASA Mars Science Laboratory environmental monitoring.
               </p>
             </article>
@@ -711,11 +748,11 @@
               <div class="photo-frame-wrap" id="epic-earth-container">
                 <p class="muted">Retrieving DSCOVR Earth polychromatic frame…</p>
               </div>
-              <div style="display:flex; justify-content:space-between; font-size:0.8rem; color:var(--muted); margin-top:6px;">
+              <div style="display:flex; justify-content:space-between; font-size:0.8rem; color:var(--apple-fg-sub); margin-top:6px;">
                 <span id="epic-date-label">Downlink UTC: DSCOVR L1 Orbit</span>
                 <span>Natural Color Full-Disk</span>
               </div>
-              <div style="margin-top:4px; font-size:0.75rem; color:#00d2ff;" id="epic-next-pass">
+              <div style="margin-top:4px; font-size:0.75rem; color:var(--apple-blue);" id="epic-next-pass">
                 Next Image Downlink: ~2 hrs (Lagrange L1 batch)
               </div>
               <div class="photo-actions-strip">
@@ -742,7 +779,7 @@
           </div>
         </section>
 
-        <!-- SECTION 1: SATELLITES & UNIFIED 2D MAP COCKPIT -->
+        <!-- SECTION 1: SATELLITES & 2D MAP WITH EMBEDDED HUD -->
         <section class="section-block" id="satellites">
           <div class="section-title">
             <div>
@@ -758,8 +795,8 @@
             </div>
           </div>
 
-          <!-- UNIFIED 2D MAP COCKPIT (SEARCH + PRESETS EMBEDDED DIRECTLY) -->
-          <article class="surface map-card" style="margin-top:16px;">
+          <!-- UNIFIED 2D MAP COCKPIT WITH IN-MAP HUD -->
+          <article class="surface map-card" style="margin-top:16px; position:relative;">
             <div class="card-heading">
               <div>
                 <div class="eyebrow">INTEGRATED ORBITAL COCKPIT</div>
@@ -769,7 +806,7 @@
               <span class="live-tag"><span class="pulse-ring"></span> TRACKING</span>
             </div>
 
-            <!-- Integrated Search & Preset Bar Over Map -->
+            <!-- Integrated Search & Presets Toolbar -->
             <div style="padding: 0 16px 12px 16px;">
               <form id="sat-search-form" class="search-form" autocomplete="off" style="margin-bottom:8px;">
                 <input id="sat-search" type="search" placeholder="Type satellite name or NORAD ID (e.g. Starlink, Hubble, NOAA, GPS, ISS)…" aria-label="Search 14000+ satellites" required>
@@ -777,9 +814,8 @@
               </form>
               <div id="sat-suggestions" class="suggestion-list" role="listbox" hidden></div>
 
-              <!-- Quick Presets Directly on Map -->
               <div class="map-preset-pills">
-                <span style="font-size:0.75rem; font-weight:700; color:var(--muted); align-self:center;">PRESETS:</span>
+                <span style="font-size:0.75rem; font-weight:700; color:var(--apple-fg-sub); align-self:center;">PRESETS:</span>
                 <button type="button" class="map-preset-btn" onclick="window.selectSatelliteDirect('25544')">🛰️ ISS</button>
                 <button type="button" class="map-preset-btn" onclick="window.selectSatelliteDirect('48274')">🇨🇳 Tiangong (CSS)</button>
                 <button type="button" class="map-preset-btn" onclick="window.selectSatelliteDirect('20580')">🔭 Hubble (HST)</button>
@@ -788,21 +824,23 @@
               </div>
             </div>
 
-            <div id="sat-map" class="map" style="min-height:460px;"></div>
+            <!-- 2D Leaflet Map -->
+            <div id="sat-map" class="map" style="min-height:500px; position:relative;"></div>
+
+            <!-- EMBEDDED IN-MAP TELEMETRY HUD -->
+            <div class="map-embedded-hud" id="selected-satellite-panel">
+              <div class="selected-empty">
+                ◎ <b>Tracking ISS (Default)</b>
+                <span>Click any preset or search above to focus ground track.</span>
+              </div>
+            </div>
+
             <div class="map-foot">
               <span><i class="legend-dot"></i> Current Position</span>
               <span><i class="legend-dot legend-blue"></i> Projected Ground Track</span>
               <span id="map-stamp" class="mono">Orbital Elements: CelesTrak</span>
             </div>
           </article>
-
-          <!-- Selected Satellite Telemetry Panel -->
-          <div id="selected-satellite-panel" class="selected-satellite-panel" style="margin-top:16px;">
-            <div class="selected-empty">
-              ◎ <b>No custom satellite selected</b>
-              <span>Search and choose any satellite to display its individual telemetry parameters.</span>
-            </div>
-          </div>
         </section>
 
         <!-- SECTION 2: ROCKET LAUNCHES -->
@@ -853,8 +891,8 @@
                   <span>Orbit Insertion</span>
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-top:10px; font-size:0.85rem;">
-                  <div><small style="color:var(--muted)">FLIGHT STATUS: </small><b id="flight-velocity-val">Vehicle standing at pad · Countdown proceeding</b></div>
-                  <div><small style="color:var(--muted)">TRAJECTORY: </small><b id="flight-alt-val">0 km (Ground Stage)</b></div>
+                  <div><small style="color:var(--apple-fg-sub)">FLIGHT STATUS: </small><b id="flight-velocity-val">Vehicle standing at pad · Countdown proceeding</b></div>
+                  <div><small style="color:var(--apple-fg-sub)">TRAJECTORY: </small><b id="flight-alt-val">0 km (Ground Stage)</b></div>
                 </div>
               </div>
 
@@ -914,8 +952,9 @@
           <article class="surface weather-panel">
             <div class="card-heading">
               <div>
-                <h3>Recent Solar &amp; Geomagnetic Events</h3>
-                <p>NASA Space Weather Database Of Notifications, Knowledge, Information (DONKI).</p>
+                <div class="apple-source-badge orange"><span>NASA</span> <i>DONKI Heliophysics</i></div>
+                <h3>Solar Flares &amp; Geomagnetic Events</h3>
+                <p>Real-time observed space weather phenomena.</p>
               </div>
               <button id="refresh-weather" class="subtle-button">Refresh Events ↻</button>
             </div>
@@ -925,7 +964,7 @@
           </article>
         </section>
 
-        <!-- SECTION 4: NEAR-EARTH ASTEROIDS (RADAR SWAPPED TO TOP) & APOD -->
+        <!-- SECTION 4: NEAR-EARTH ASTEROIDS (SWAPPED TO TOP) & APOD -->
         <section class="section-block" id="astronomy">
           <div class="section-title">
             <div>
@@ -945,7 +984,7 @@
           <article class="surface neo-panel" style="margin-bottom: 24px;">
             <div class="card-heading">
               <div>
-                <span class="badge-pill orange">PRIMARY CELESTIAL RADAR</span>
+                <div class="apple-source-badge teal"><span>NASA JPL</span> <i>NeoWs Radar System</i></div>
                 <h3>Near-Earth Object Radar (Close Approaches)</h3>
                 <p>Active close approach flybys: distance in Lunar Distance (LD), relative speed, and hazard level.</p>
               </div>
@@ -994,7 +1033,7 @@
             <article class="surface earth-card">
               <div class="card-heading">
                 <div>
-                  <div class="eyebrow">USGS SEISMIC NETWORK</div>
+                  <div class="apple-source-badge"><span>USGS</span> <i>NEIC Global Seismic Network</i></div>
                   <h3>Recent Earthquakes (M 2.5+)</h3>
                   <p>Worldwide seismic activity recorded in the past 24 hours.</p>
                 </div>
@@ -1008,8 +1047,8 @@
             <article class="surface earth-card">
               <div class="card-heading">
                 <div>
-                  <div class="eyebrow">NASA EONET OBSERVATORY</div>
-                  <h3>Global Natural Events</h3>
+                  <div class="apple-source-badge blue"><span>NASA</span> <i>EONET Observatory</i></div>
+                  <h3>Global Natural Events &amp; Wildfires</h3>
                   <p>Wildfires, active volcanoes, severe storms and sea ice monitored by NASA satellites.</p>
                 </div>
                 <span class="small-chip blue">NASA EONET</span>
@@ -1058,7 +1097,7 @@
               <p id="intel-area-summary" class="intel-summary-text">Loading regional intelligence brief and environmental telemetry…</p>
             </div>
 
-            <!-- Enhanced Environmental Metric Grid with Evaluation Gauges -->
+            <!-- Environmental Metrics with Evaluation Gauges -->
             <div class="intel-metrics-grid">
               <article class="metric-card">
                 <div class="metric-top"><span>AIR QUALITY (US AQI)</span><span class="metric-symbol green">🌬️</span></div>
@@ -1066,7 +1105,7 @@
                 <small id="intel-aqi-status">Calculating AQI…</small>
                 <div class="intel-gauge-box">
                   <div class="intel-gauge-bar"><div class="intel-gauge-fill" id="gauge-aqi" style="width:0%; background:#30d158;"></div></div>
-                  <span style="color:var(--muted)">0–50 Good | 51–100 Mod | 151+ Haz</span>
+                  <span>0–50 Good | 51–100 Mod | 151+ Haz</span>
                 </div>
               </article>
 
@@ -1075,7 +1114,7 @@
                 <strong id="intel-pollution">—</strong>
                 <small id="intel-pollution-sub">NO₂ &amp; Ozone levels</small>
                 <div class="intel-gauge-box">
-                  <span style="color:var(--muted)">WHO Guidance Baseline: &lt;15 µg/m³</span>
+                  <span>WHO Guidance Baseline: &lt;15 µg/m³</span>
                 </div>
               </article>
 
@@ -1085,7 +1124,7 @@
                 <small id="intel-groundwater-sub">Subsurface moisture index</small>
                 <div class="intel-gauge-box">
                   <div class="intel-gauge-bar"><div class="intel-gauge-fill" id="gauge-gw" style="width:0%; background:#2997ff;"></div></div>
-                  <span style="color:var(--muted)">&lt;25% Dry | 25–45% Normal | &gt;45% High</span>
+                  <span>&lt;25% Dry | 25–45% Normal | &gt;45% High</span>
                 </div>
               </article>
 
@@ -1094,7 +1133,7 @@
                 <strong id="intel-greenery">—</strong>
                 <small id="intel-greenery-sub">Vegetation &amp; biome index</small>
                 <div class="intel-gauge-box">
-                  <span style="color:var(--muted)">NDVI Vegetation Cover Index</span>
+                  <span>NDVI Vegetation Cover Index</span>
                 </div>
               </article>
 
@@ -1103,7 +1142,7 @@
                 <strong id="intel-radiation">—</strong>
                 <small id="intel-radiation-sub">Shortwave W/m² &amp; UV</small>
                 <div class="intel-gauge-box">
-                  <span style="color:var(--muted)">0–2 Low | 3–5 Mod | 6–7 Very High | 8+ Ext</span>
+                  <span>0–2 Low | 3–5 Mod | 6–7 Very High | 8+ Ext</span>
                 </div>
               </article>
 
@@ -1112,7 +1151,7 @@
                 <strong id="intel-resources">—</strong>
                 <small id="intel-resources-sub">Regional reserves &amp; renewables</small>
                 <div class="intel-gauge-box">
-                  <span style="color:var(--muted)">Regional Resource Profile</span>
+                  <span>Regional Resource Profile</span>
                 </div>
               </article>
             </div>
@@ -1132,39 +1171,31 @@
 
           <div class="voyager-grid">
             <article class="surface voyager-card voyager-one">
-              <div class="voyager-top">
-                <span class="mission-badge">INTERSTELLAR MISSION</span>
-                <span class="mission-status"><i></i> ACTIVE IN INTERSTELLAR SPACE</span>
+              <div class="card-heading" style="margin-bottom:12px;">
+                <div>
+                  <div class="apple-source-badge purple"><span>NASA JPL</span> <i>Deep Space Network (DSN)</i></div>
+                  <h3>Voyager 1</h3>
+                </div>
+                <span class="mission-status"><i></i> INTERSTELLAR SPACE</span>
               </div>
-              <div class="voyager-art">
-                <div class="voyager-sun"></div>
-                <div class="voyager-path"></div>
-                <div class="voyager-probe">✦</div>
-                <span>THE SPACE BETWEEN THE STARS</span>
-              </div>
-              <h3>Voyager 1</h3>
               <p>Launched 5 Sept 1977 · The most distant human-made object in history.</p>
               <div class="voyager-numbers">
                 <div><small>DISTANCE FROM SUN</small><b id="v1-dist-sun">~163.5 AU (24.46B km)</b></div>
                 <div><small>ROUND-TRIP LIGHT TIME</small><b id="v1-light-time">~45h 18m</b></div>
                 <div><small>HYPERBOLIC SPEED</small><b>16.9 km/s (38,000 mph)</b></div>
-                <div><small>COMMUNICATION</small><b>NASA Deep Space Network (DSN)</b></div>
+                <div><small>COMMUNICATION</small><b>NASA Deep Space Network</b></div>
               </div>
               <a class="text-link" href="https://science.nasa.gov/mission/voyager/where-are-voyager-1-and-voyager-2-now/" target="_blank" rel="noopener">NASA Official Voyager Position Tracker ↗</a>
             </article>
 
             <article class="surface voyager-card voyager-two">
-              <div class="voyager-top">
-                <span class="mission-badge">INTERSTELLAR MISSION</span>
-                <span class="mission-status"><i></i> ACTIVE IN INTERSTELLAR SPACE</span>
+              <div class="card-heading" style="margin-bottom:12px;">
+                <div>
+                  <div class="apple-source-badge purple"><span>NASA JPL</span> <i>Deep Space Network (DSN)</i></div>
+                  <h3>Voyager 2</h3>
+                </div>
+                <span class="mission-status"><i></i> INTERSTELLAR SPACE</span>
               </div>
-              <div class="voyager-art">
-                <div class="voyager-sun"></div>
-                <div class="voyager-path"></div>
-                <div class="voyager-probe">✦</div>
-                <span>INTERSTELLAR MEDIUM · SOUTH</span>
-              </div>
-              <h3>Voyager 2</h3>
               <p>Launched 20 Aug 1977 · The only spacecraft to visit Uranus and Neptune.</p>
               <div class="voyager-numbers">
                 <div><small>DISTANCE FROM SUN</small><b id="v2-dist-sun">~136.8 AU (20.46B km)</b></div>
@@ -1217,21 +1248,24 @@
           </article>
         </section>
 
-        <!-- SECTION 8: SETTINGS & PREFERENCES -->
+        <!-- SECTION 8: COMBINED SETTINGS & ALERT PREFERENCES -->
         <section class="section-block" id="settings">
           <div class="section-title">
             <div>
               <div class="eyebrow">PREFERENCES &amp; NOTIFICATION THRESHOLDS</div>
-              <h2>Settings &amp; Space Alerts</h2>
-              <p>Customize telemetry preferences, localization, and critical alert notification thresholds.</p>
+              <h2>Mission Control Preferences</h2>
+              <p>Configure interface localization, appearance styling, and individual real-time alert thresholds.</p>
             </div>
             <span class="section-count">08 / PREFERENCES</span>
           </div>
 
-          <div class="settings-grid">
+          <div class="settings-grid" style="grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));">
+            <!-- Left: Display & Localization -->
             <article class="surface settings-card">
               <h3>Display &amp; Localization</h3>
-              <div class="setting-item">
+              <p class="muted">Interface language and dynamic appearance settings:</p>
+              
+              <div class="setting-item" style="margin-top:16px;">
                 <div><b>Interface Language</b><small>Select from 7 international languages</small></div>
                 <select id="setting-lang" class="setting-select">
                   <option value="en">English</option><option value="es">Español</option>
@@ -1239,7 +1273,8 @@
                   <option value="zh">中文</option><option value="ja">日本語</option><option value="hi">हिन्दी</option>
                 </select>
               </div>
-              <div class="setting-item">
+
+              <div class="setting-item" style="margin-top:16px;">
                 <div><b>Appearance Mode</b><small>Light, dark or match your device system setting</small></div>
                 <select id="setting-theme" class="setting-select">
                   <option value="system">Match System</option>
@@ -1247,16 +1282,24 @@
                   <option value="dark">Dark Appearance</option>
                 </select>
               </div>
+
+              <div style="margin-top:24px; padding-top:16px; border-top:1px solid var(--apple-border);">
+                <b>About Telemetry Data</b>
+                <p class="muted" style="font-size:0.8rem; line-height:1.6; margin-top:6px;">
+                  All data streams are ingested live from official public endpoints. No simulated or artificial curves are rendered.
+                </p>
+              </div>
             </article>
 
+            <!-- Right: Real-Time Alerts Engine -->
             <article class="surface settings-card">
               <div style="display:flex; justify-content:space-between; align-items:center;">
-                <h3>Real-Time Alerts &amp; Notification Engine</h3>
+                <h3>Real-Time Alerts Engine</h3>
                 <button type="button" class="subtle-button" id="toggle-all-alerts-btn" style="font-size:0.75rem;">Deselect All</button>
               </div>
               <p class="muted">Select the specific subjects you want to receive real-time push alerts for:</p>
               
-              <div class="toggle-list" id="alerts-toggle-list">
+              <div class="toggle-list" id="alerts-toggle-list" style="margin-top:14px;">
                 <label class="toggle-row">
                   <div><b>🛰️ Satellite Passes (ISS / Satellites)</b><small>Notify on visible regional passes</small></div>
                   <input type="checkbox" checked class="apple-toggle" data-category="satellite">
@@ -1287,8 +1330,8 @@
                 </label>
               </div>
 
-              <div class="setting-actions" style="margin-top:14px; display:flex; gap:10px;">
-                <button id="save-alert-prefs-btn" class="primary-button" type="button">💾 Save Alert Preferences</button>
+              <div class="setting-actions" style="margin-top:16px; display:flex; gap:10px;">
+                <button id="save-alert-prefs-btn" class="primary-button" type="button">💾 Save Preferences</button>
                 <button id="test-alert-btn" class="subtle-button" type="button">🔔 Test Notification</button>
               </div>
             </article>
@@ -1311,33 +1354,42 @@
           </div>
         </section>
 
-        <!-- SECTION 10: ABOUT -->
+        <!-- SECTION 10: ABOUT (EXECUTIVE AEROSPACE PROFILE) -->
         <section class="section-block" id="about">
           <div class="section-title">
             <div><div class="eyebrow">CREATOR &amp; ECOSYSTEM</div><h2>About T&amp;C Space Hub</h2></div>
             <span class="section-count">10 / ABOUT</span>
           </div>
 
-          <div class="dashboard-grid">
-            <article class="card">
+          <div class="dashboard-grid" style="grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));">
+            <article class="card" style="background:var(--apple-surface-card); border-radius:18px;">
               <div class="card-head">
-                <div><div class="eyebrow">FOUNDER &amp; DEVELOPER</div><h3>Murali Manohar</h3><p>Creator of T&amp;C Space Hub</p></div>
-                <span class="pill blue">SUMMARY</span>
+                <div>
+                  <span class="badge-pill blue">FOUNDER &amp; DEVELOPER</span>
+                  <h3 style="margin-top:6px;">Murali Manohar</h3>
+                  <small style="color:var(--apple-fg-sub)">Creator of T&amp;C Space Hub</small>
+                </div>
               </div>
-              <p style="line-height: 1.65; color: var(--muted); margin-top: 8px;">
-                T&amp;C Space Hub is an initiative created by <strong>Murali Manohar</strong> under the <strong>T&amp;C (Tasty &amp; Comfort)</strong> ecosystem. Designed with a focus on clarity, speed, and zero-clutter telemetry for students, researchers, and space enthusiasts worldwide.
+              <p style="line-height: 1.7; color: var(--apple-fg-sub); margin-top: 10px; font-size:0.9rem;">
+                T&amp;C Space Hub is an initiative architected by <strong>Murali Manohar</strong> under the <strong>T&amp;C (Tasty &amp; Comfort)</strong> ecosystem. Built with a focus on un-simulated scientific integrity, speed, and zero-clutter telemetry for students, researchers, and space enthusiasts worldwide.
               </p>
+              <div style="margin-top:16px; padding-top:14px; border-top:1px solid var(--apple-border); display:flex; gap:16px; font-size:0.8rem;">
+                <div><small style="color:var(--apple-fg-sub)">ARCHITECTURE</small><b style="display:block;">100% Live Science Endpoints</b></div>
+                <div><small style="color:var(--apple-fg-sub)">ENGINE</small><b style="display:block;">WebGL / SGP4 / HIG</b></div>
+              </div>
             </article>
 
-            <article class="card">
+            <article class="card" style="background:var(--apple-surface-card); border-radius:18px;">
               <div class="card-head">
-                <div><div class="eyebrow">OPEN SCIENCE CREDITS</div><h3>Public Data &amp; Telemetry Sources</h3></div>
-                <span class="pill green">VERIFIED</span>
+                <div>
+                  <span class="badge-pill green">OPEN SCIENCE CREDITS</span>
+                  <h3 style="margin-top:6px;">Scientific Infrastructure</h3>
+                </div>
               </div>
-              <ul class="clean-list" style="margin-top: 10px; line-height: 1.7; color: var(--muted);">
+              <ul class="clean-list" style="margin-top: 10px; line-height: 1.7; color: var(--apple-fg-sub); font-size:0.85rem;">
                 <li><strong>NASA Open APIs</strong> — APOD, DONKI, NeoWs, EPIC Earth, Mars Rovers &amp; TechPort</li>
                 <li><strong>CelesTrak &amp; satellite.js</strong> — Orbital propagation &amp; SGP4 mathematics</li>
-                <li><strong>TheSpaceDevs</strong> — Global rocket flight schedules &amp; countdowns</li>
+                <li><strong>TheSpaceDevs</strong> — Global rocket flight schedules &amp; verified status</li>
                 <li><strong>USGS &amp; Open-Meteo</strong> — Environmental &amp; seismic hazard monitoring</li>
               </ul>
             </article>
@@ -1346,12 +1398,12 @@
       </div>
 
       <!-- ============================================================== -->
-      <!-- PERMANENT STICKY DOCKED FOOTER & INTEGRATED T&C ECOSYSTEM     -->
+      <!-- PERMANENT STICKY DOCKED FOOTER (APPLE GLASSMORPHIC HIG)       -->
       <!-- ============================================================== -->
       <footer class="docked-sticky-footer">
         <div class="docked-footer-inner">
           <div class="docked-ecosystem-strip">
-            <span style="font-size:0.75rem; font-weight:800; color:var(--muted); letter-spacing:0.8px;">T&amp;C ECOSYSTEM:</span>
+            <span style="font-size:0.75rem; font-weight:800; color:var(--apple-fg-sub); letter-spacing:0.8px;">T&amp;C ECOSYSTEM:</span>
             <a class="docked-eco-btn" href="https://tastyandcomfort.github.io/T-C/" target="_blank" rel="noopener">
               <span>🏪</span> <span>T&amp;C Stall</span>
             </a>
@@ -1379,7 +1431,7 @@
   <!-- MODEL B: CINEMA 3D HUD OVERLAY MODAL -->
   <div class="globe-modal-hud" id="globe-modal-hud">
     <div class="hud-header-bar">
-      <div class="hud-title-wrap">
+      <div style="display:flex; align-items:center; gap:8px;">
         <span class="pulse-ring"></span>
         <b style="color:#00d2ff; letter-spacing:0.5px; font-size:0.92rem;">T&amp;C 3D MISSION COMMAND THEATER</b>
       </div>
@@ -1633,7 +1685,7 @@
               userAgent: navigator.userAgent
             });
 
-            console.log('Thank you for enabling notifications-T&C! Token:', token);
+            console.log('✅ Device saved to Firestore! Token:', token);
 
             swReg.showNotification('T&C Space Hub Alert 🚀', {
               body: 'Connected! Device registered in space_fcm_tokens. You will now receive verified telemetry alerts!',
@@ -1689,7 +1741,7 @@
             preferences: prefs,
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
           }, { merge: true });
-          alert("Thank you preferences are saved! You will only receive notifications for your chosen categories.");
+          alert("✅ Preferences Saved! You will only receive alerts for your chosen categories.");
         }
       } catch (e) {
         alert("Please enable notification permissions first by clicking 'Test Notification'.");
