@@ -96,7 +96,7 @@
     }
   }
 
-  // --- INTERACTIVE 3D GLOBE ENGINE (WITH PULSING RADAR WAVES) ---
+  // --- INTERACTIVE 3D GLOBE ENGINE (WITH HTML MARKERS & PULSING RADAR WAVES) ---
   function initMap() {
     if (!window.L || !$("sat-map")) return;
     state.map = L.map("sat-map", { worldCopyJump: true, zoomControl: true }).setView([20, 0], 2);
@@ -122,35 +122,35 @@
 
   function renderGlobeLayers() {
     if (!state.globe) return;
-    const pts = [];
+    const markers = [];
 
     // Layer 1: Satellites
-    if (state.activeLayers.satellites) {
-      if (state.globeSatPoint) pts.push(state.globeSatPoint);
-      if (state.globeStarlink?.length) pts.push(...state.globeStarlink);
+    if (state.activeLayers.satellites && state.globeSatMarker) {
+      markers.push(state.globeSatMarker);
     }
 
     // Layer 2: Rocket Launches & Spaceports
-    if (state.activeLayers.launches && state.globeLaunches?.length) {
-      pts.push(...state.globeLaunches);
+    if (state.activeLayers.launches && state.globeLaunchMarkers?.length) {
+      markers.push(...state.globeLaunchMarkers);
     }
 
     // Layer 3: Asteroids
-    if (state.activeLayers.asteroids && state.globeNeos?.length) {
-      pts.push(...state.globeNeos);
+    if (state.activeLayers.asteroids && state.globeNeoMarkers?.length) {
+      markers.push(...state.globeNeoMarkers);
     }
 
     // Layer 4: Earthquakes
-    if (state.activeLayers.earthquakes && state.globeEarthquakes?.length) {
-      pts.push(...state.globeEarthquakes);
+    if (state.activeLayers.earthquakes && state.globeQuakeMarkers?.length) {
+      markers.push(...state.globeQuakeMarkers);
     }
 
     // Layer 5: EONET Fires / Volcanoes
-    if (state.activeLayers.fires && state.globeEonetEvents?.length) {
-      pts.push(...state.globeEonetEvents);
+    if (state.activeLayers.fires && state.globeEonetMarkers?.length) {
+      markers.push(...state.globeEonetMarkers);
     }
 
-    state.globe.pointsData(pts);
+    // Render as interactive HTML DOM Badges
+    state.globe.htmlElementsData(markers);
 
     // 3D Orbital Trajectory Arcs
     const paths = [];
@@ -205,21 +205,22 @@
       const dark = isDarkTheme();
       state.globe = Globe()(el)
         .width(el.clientWidth || 320)
-        .height(el.clientHeight || 420)
+        .height(el.clientHeight || 480)
         .globeImageUrl(dark ? "https://unpkg.com/three-globe/example/img/earth-night.jpg" : "https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg")
         .backgroundColor("rgba(0,0,0,0)")
         .showAtmosphere(true)
         .atmosphereColor("#3b82f6")
         .atmosphereAltitude(0.18)
-        .pointAltitude(d => d.altitude || 0.02)
-        .pointRadius(d => d.radius || 0.35)
-        .pointColor(d => d.color || "#38bdf8")
-        .onPointClick((d) => {
-          if (!d) return;
-          state.globe.pointOfView({ lat: d.lat, lng: d.lng, altitude: Math.max(1.5, (d.altitude || 0) + 1.2) }, 1000);
-          showGlobeHud(d.name, `${d.sub || ""}<br><small style="color:#00d2ff">Lat: ${fmt(d.lat, 2)}° | Lon: ${fmt(d.lng, 2)}°</small>`);
+        .htmlElement(d => {
+          const badge = document.createElement("div");
+          badge.className = `hud-marker-badge ${d.badgeClass || ""}`;
+          badge.innerHTML = `<span>${d.icon}</span> <span>${d.label}</span>`;
+          badge.addEventListener("click", () => {
+            state.globe.pointOfView({ lat: d.lat, lng: d.lng, altitude: Math.max(1.3, (d.altitude || 0) + 1.2) }, 1000);
+            showGlobeHud(d.name, `${d.sub || ""}<br><small style="color:#00d2ff">Lat: ${fmt(d.lat, 2)}° | Lon: ${fmt(d.lng, 2)}°</small>`);
+          });
+          return badge;
         })
-        .pointLabel(d => `<div style="background:rgba(15,17,22,0.92);color:#fff;padding:6px 10px;border-radius:8px;font-size:11px;border:1px solid rgba(255,255,255,0.15)"><b>${esc(d.name)}</b><br><span style="opacity:0.8;font-size:9px">${esc(d.sub || "")}</span></div>`)
         .pathPoints(d => d.coords)
         .pathPointLat(p => p[0])
         .pathPointLng(p => p[1])
@@ -235,6 +236,7 @@
       el.querySelector(".globe-loading")?.remove();
       renderGlobeLayers();
 
+      // Layer Filter Chips Listener
       document.querySelectorAll(".globe-layer-chip").forEach(chip => {
         chip.addEventListener("click", () => {
           const layer = chip.getAttribute("data-layer");
@@ -247,6 +249,18 @@
       });
 
       $("btn-close-globe-hud")?.addEventListener("click", hideGlobeHud);
+
+      $("btn-globe-reset")?.addEventListener("click", () => {
+        state.globe.pointOfView({ lat: 20, lng: 0, altitude: 2.3 }, 800);
+        hideGlobeHud();
+      });
+
+      $("btn-globe-iss")?.addEventListener("click", () => {
+        if (state.globeSatPoint) {
+          state.globe.pointOfView({ lat: state.globeSatPoint.lat, lng: state.globeSatPoint.lng, altitude: 1.5 }, 1000);
+          showGlobeHud("🛰️ " + state.currentSatName, `Altitude: ${fmt(state.globeSatPoint.alt, 0)} km | Speed: ${fmt(state.globeSatPoint.vel, 2)} km/s`);
+        }
+      });
     } catch (_) {}
   }
 
@@ -323,15 +337,20 @@
     state.globeSatPoint = {
       lat: calc.lat,
       lng: calc.lon,
-      altitude: 0.04,
-      radius: 0.55,
-      color: "#00f59b",
-      name: `🛰️ ${state.currentSatName}`,
-      sub: `Alt: ${fmt(calc.alt, 0)} km · Vel: ${fmt(calc.vel, 2)} km/s`
+      alt: calc.alt,
+      vel: calc.vel
+    };
+    state.globeSatMarker = {
+      lat: calc.lat,
+      lng: calc.lon,
+      icon: "🛰️",
+      label: "ISS",
+      badgeClass: "badge-sat",
+      name: "🛰️ " + state.currentSatName,
+      sub: `Altitude: ${fmt(calc.alt, 0)} km · Speed: ${fmt(calc.vel, 2)} km/s`
     };
     state.globeTrack = trackPts;
     renderGlobeLayers();
-    if ($("globe-sat-tag")) $("globe-sat-tag").textContent = state.currentSatName.toUpperCase();
   }
 
   async function searchSatellites(query) {
@@ -378,7 +397,6 @@
       const results = data.results || [];
       if (!results.length) return;
 
-      // Filter to find the next active or future flight
       const now = Date.now();
       const futureOrActive = results.filter(l => new Date(l.net).getTime() > (now - 6 * 3600000));
       const next = futureOrActive[0] || results[0];
@@ -408,17 +426,22 @@
         wikiBtn.href = `https://en.wikipedia.org/wiki/${encodeURIComponent((next.rocket?.configuration?.name || next.name).replace(/\s+/g, "_"))}`;
       }
 
-      // Plot launch site on 3D Globe
+      // Plot launch site on 3D Globe with interactive HUD badges
       const validLaunches = results.filter(l => Number.isFinite(Number(l.pad?.latitude)) && Number.isFinite(Number(l.pad?.longitude)));
       state.globeLaunches = validLaunches.map(l => ({
         lat: Number(l.pad.latitude),
+        lng: Number(l.pad.longitude)
+      }));
+      state.globeLaunchMarkers = validLaunches.map(l => ({
+        lat: Number(l.pad.latitude),
         lng: Number(l.pad.longitude),
-        altitude: 0.025,
-        radius: 0.5,
-        color: "#ff9f0a",
+        icon: "🚀",
+        label: l.name?.split("|")[0]?.slice(0, 10) || "Launch",
+        badgeClass: "badge-launch",
         name: `🚀 Spaceport: ${l.name || "Launch"}`,
         sub: `${l.launch_service_provider?.name || ""} · ${l.pad?.name || ""}`
       }));
+
       state.globeLaunchPaths = validLaunches.map(l => {
         const lat0 = Number(l.pad.latitude);
         const lng0 = Number(l.pad.longitude);
@@ -431,7 +454,7 @@
       });
       renderGlobeLayers();
 
-      // Display remaining launch flights with real status badges
+      // Display remaining launches with verified agency status badges
       if (listEl) {
         listEl.innerHTML = results.slice(1).map(l => {
           const d = new Date(l.net);
@@ -464,7 +487,6 @@
     if (diff <= 0) {
       const elapsedSec = Math.abs(diff) / 1000;
       if (elapsedSec < 3600) {
-        // Rocket in active window / recently launched
         if (statusBadge) statusBadge.innerHTML = '🚀 LAUNCH WINDOW ACTIVE';
         if (fillBar) fillBar.style.width = '100%';
         if (velVal) velVal.textContent = 'Mission underway · Check live webcast stream ↗';
@@ -588,8 +610,9 @@
         return da - db;
       });
 
+      // Project Near-Earth Asteroid trajectories & flybys on 3D Globe
       state.globeNeoPaths = [];
-      state.globeNeos = all.slice(0, 10).map((n, idx) => {
+      state.globeNeoMarkers = all.slice(0, 10).map((n, idx) => {
         const ca = n.close_approach_data?.[0] || {};
         const km = Number(ca.miss_distance?.kilometers) || 1000000;
         const lunar = (km / 384400).toFixed(1);
@@ -614,8 +637,9 @@
           lat,
           lng,
           altitude: alt,
-          radius: isHaz ? 0.5 : 0.38,
-          color: isHaz ? "#ff453a" : "#ffd60a",
+          icon: isHaz ? "⚠️" : "☄️",
+          label: n.name?.slice(0, 10) || "Asteroid",
+          badgeClass: isHaz ? "badge-quake" : "badge-sat",
           name: `☄️ Asteroid ${n.name}`,
           sub: `Miss: ${(km / 1e6).toFixed(2)}M km (${lunar} LD) · ${ca.close_approach_date || ""}`
         };
@@ -659,15 +683,16 @@
       const features = data.features || [];
       if ($("quake-count")) $("quake-count").textContent = `${features.length} IN 24H`;
 
-      state.globeEarthquakes = features.slice(0, 16).map(f => {
+      // Plot Earthquakes on 3D Globe with Richter shockwaves and badges
+      state.globeQuakeMarkers = features.slice(0, 16).map(f => {
         const coords = f.geometry.coordinates;
         const mag = Number(f.properties.mag) || 0;
         return {
           lat: coords[1],
           lng: coords[0],
-          altitude: 0.015,
-          radius: Math.max(0.3, mag * 0.09),
-          color: mag >= 6.0 ? "#ff453a" : (mag >= 4.5 ? "#ff9f0a" : "#30d158"),
+          icon: "⚡",
+          label: `M ${mag.toFixed(1)}`,
+          badgeClass: "badge-quake",
           name: `⚡ M ${mag.toFixed(1)} Earthquake`,
           sub: `${f.properties.place} · Depth: ${coords[2]} km`
         };
@@ -705,16 +730,17 @@
       const data = await cachedFetch(CONFIG.APIS.eonet, 30 * 60000);
       const events = data.events || [];
 
-      state.globeEonetEvents = events.slice(0, 14).map(ev => {
+      // Plot NASA EONET Wildfires & Volcanoes on 3D Globe
+      state.globeEonetMarkers = events.slice(0, 14).map(ev => {
         const geo = ev.geometry?.[0]?.coordinates;
         if (!geo) return null;
         const isFire = ev.categories?.[0]?.title?.includes("Wildfire");
         return {
           lat: geo[1],
           lng: geo[0],
-          altitude: 0.018,
-          radius: 0.4,
-          color: isFire ? "#ff375f" : "#bf5af2",
+          icon: isFire ? "🔥" : "🌋",
+          label: isFire ? "Fire" : "Volcano",
+          badgeClass: isFire ? "badge-fire" : "badge-volcano",
           name: `${isFire ? "🔥 Wildfire" : "🌋 Volcano"}: ${ev.title}`,
           sub: `NASA EONET · ${ev.categories?.[0]?.title || "Natural Hazard"}`
         };
@@ -903,7 +929,6 @@
     const container = $("techport-list");
     if (!container) return;
     try {
-      // Use NASA Open Data Portal endpoint (CORS-safe & real-time)
       const res = await fetch("https://data.nasa.gov/resource/28iq-w3z3.json?$limit=5");
       if (!res.ok) throw new Error("CORS/Offline");
       const projects = await res.json();
@@ -917,7 +942,6 @@
         return;
       }
     } catch (_) {
-      // Verified active NASA TechPort research projects
       container.innerHTML = `
         <div style="padding:10px; background:rgba(255,255,255,0.03); border-radius:8px; border:1px solid rgba(255,255,255,0.06);">
           <b style="font-size:0.88rem; display:block; color:var(--fg);">DRACO: Demonstration Rocket for Agile Cislunar Operations</b>
@@ -959,6 +983,7 @@
     if ($("ticker")) $("ticker").textContent = items[Math.floor(Date.now() / 8000) % items.length];
   }
 
+  // --- CONTEXTUAL TAB SWITCHING (SMOOTH GLOBE GLIDE) ---
   function switchTab(targetId) {
     const targetSec = document.getElementById(targetId);
     if (!targetSec) return;
@@ -969,6 +994,20 @@
     if (activeLink) activeLink.classList.add("active");
     if ($("current-section-label")) $("current-section-label").textContent = activeLink ? activeLink.querySelector(".nav-text")?.textContent || targetId : targetId;
     window.scrollTo({ top: 0, behavior: "smooth" });
+
+    // Smooth camera glides to contextual target on the persistent globe
+    if (state.globe) {
+      if (targetId === "satellites" && state.globeSatPoint) {
+        state.globe.pointOfView({ lat: state.globeSatPoint.lat, lng: state.globeSatPoint.lng, altitude: 1.6 }, 1000);
+      } else if (targetId === "launches" && state.globeLaunches?.length) {
+        const l = state.globeLaunches[0];
+        state.globe.pointOfView({ lat: l.lat, lng: l.lng, altitude: 1.6 }, 1000);
+      } else if (targetId === "earth-monitor" && state.globeQuakeMarkers?.length) {
+        const q = state.globeQuakeMarkers[0];
+        state.globe.pointOfView({ lat: q.lat, lng: q.lng, altitude: 1.6 }, 1000);
+      }
+    }
+
     if (targetId === "satellites") {
       setTimeout(() => state.map?.invalidateSize(), 60);
     }
