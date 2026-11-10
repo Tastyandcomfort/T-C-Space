@@ -1,4 +1,4 @@
-/* --- T&C Space Hub Apple Human Interface Guidelines (HIG) CSS --- */
+/* --- T&C Space Hub: Apple Human Interface Guidelines (HIG) --- */
 :root {
   color-scheme: dark;
   --bg-base: #000000;
@@ -54,7 +54,7 @@ body {
 /* Shell */
 .apple-shell { display: flex; min-height: 100vh; width: 100vw; }
 
-/* Sidebar */
+/* Desktop Sidebar */
 .apple-sidebar {
   width: 250px;
   background: var(--bg-sidebar);
@@ -122,7 +122,7 @@ body {
 }
 .apple-settings-trigger:hover { color: var(--text-main); }
 
-/* Main Section */
+/* Main Workspace */
 .apple-main { margin-left: 250px; flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
 .apple-header {
   height: 68px;
@@ -138,9 +138,27 @@ body {
   -webkit-backdrop-filter: var(--blur-ultra);
   border-bottom: 0.5px solid var(--border-subtle);
 }
+
+.header-left { display: flex; align-items: center; gap: 12px; }
+
+/* Mobile Logo Badge in Header */
+.mobile-logo-badge {
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  overflow: hidden;
+  background: var(--apple-blue);
+  box-shadow: 0 3px 10px rgba(10, 132, 255, 0.25);
+  display: none; /* Shown on mobile via media query */
+  flex-shrink: 0;
+}
+.mobile-logo-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.mobile-logo-fallback { width: 100%; height: 100%; display: none; place-items: center; color: white; }
+
+.header-title-group { display: flex; flex-direction: column; }
 .header-eyebrow { font-size: 9px; font-weight: 700; color: var(--apple-blue); letter-spacing: 0.8px; }
 .header-title { font-size: 18px; font-weight: 700; letter-spacing: -0.4px; }
-.header-right { display: flex; align-items: center; gap: 12px; }
+.header-right { display: flex; align-items: center; gap: 10px; }
 
 /* Dual Clock Pill */
 .apple-clock-pill {
@@ -151,22 +169,16 @@ body {
   border: 0.5px solid var(--border-subtle);
   border-radius: 99px;
   padding: 6px 14px;
-  cursor: pointer;
 }
 .clock-split { display: flex; gap: 8px; font: 11px var(--font-mono); }
 .clock-primary { font-weight: 700; color: var(--text-main); }
 .clock-secondary { color: var(--text-muted); }
-.pulsing-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  display: inline-block;
-}
+.pulsing-dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
 .pulsing-dot.green { background: var(--apple-green); box-shadow: 0 0 0 3px rgba(48, 209, 88, 0.25); }
 
 .apple-round-btn {
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
   border: 0.5px solid var(--border-subtle);
   background: var(--bg-elevated);
@@ -220,12 +232,7 @@ body {
 .hero-desc { font-size: 13px; color: var(--text-muted); line-height: 1.5; max-width: 700px; }
 
 /* Metrics */
-.metrics-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 14px;
-  margin-bottom: 20px;
-}
+.metrics-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px; }
 .metric-card {
   background: var(--bg-surface);
   border: 0.5px solid var(--border-subtle);
@@ -259,7 +266,7 @@ body {
   color: var(--text-muted);
 }
 
-/* Map */
+/* Map & Watermark Clean Overrides */
 .card-header-split { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; }
 .apple-segmented {
   display: inline-flex;
@@ -286,6 +293,7 @@ body {
   font-weight: 600;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
+
 .apple-map-container {
   height: 420px;
   border-radius: 14px;
@@ -293,6 +301,20 @@ body {
   background: #111;
   border: 0.5px solid var(--border-subtle);
 }
+
+/* Complete removal of the Leaflet white watermark box */
+.leaflet-control-attribution {
+  background: transparent !important;
+  color: rgba(255, 255, 255, 0.25) !important;
+  font-size: 8px !important;
+  padding: 4px 8px !important;
+  box-shadow: none !important;
+}
+.leaflet-control-attribution a {
+  color: rgba(255, 255, 255, 0.3) !important;
+  text-decoration: none !important;
+}
+
 .map-stats-strip {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -302,6 +324,35 @@ body {
   color: var(--text-muted);
 }
 .map-stats-strip b { font-family: var(--font-mono); color: var(--apple-blue); }
+
+/* Asteroids (NeoWs) Grid */
+.asteroid-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+.asteroid-card {
+  padding: 16px 18px;
+  border-radius: 14px;
+  background: var(--bg-elevated);
+  border: 0.5px solid var(--border-subtle);
+}
+.asteroid-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.asteroid-title { font-size: 15px; font-weight: 700; }
+.hazard-badge {
+  font: 700 9px var(--font-mono);
+  padding: 3px 8px;
+  border-radius: 99px;
+}
+.hazard-badge.red { background: rgba(255, 69, 58, 0.2); color: var(--apple-red); }
+.hazard-badge.green { background: rgba(48, 209, 88, 0.2); color: var(--apple-green); }
+
+.asteroid-numbers {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 0.5px solid var(--border-subtle);
+}
+.asteroid-numbers small { font-size: 8px; color: var(--text-dim); display: block; margin-bottom: 2px; }
+.asteroid-numbers b { font: 600 12px var(--font-mono); color: var(--apple-blue); }
 
 /* Area Intel Grid */
 .area-chip-strip { display: flex; gap: 8px; overflow-x: auto; margin-bottom: 18px; padding-bottom: 4px; }
@@ -530,9 +581,13 @@ body {
   .apple-main { margin-left: 0; padding-bottom: 74px; }
   .metrics-grid { grid-template-columns: repeat(2, 1fr); }
   .two-col-grid { grid-template-columns: 1fr; }
+  .asteroid-grid { grid-template-columns: 1fr; }
   .intel-metrics-grid { grid-template-columns: repeat(2, 1fr); }
   .apple-viewport { padding: 18px 16px 40px; }
   .apple-header { padding: 0 16px; }
+
+  /* Activate mobile logo in top header */
+  .mobile-logo-badge { display: block; }
 
   .mobile-dock {
     display: flex;
