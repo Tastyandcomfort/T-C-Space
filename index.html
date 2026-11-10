@@ -1,9 +1,8 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#f5f5f7" id="theme-color-meta">
+  <meta name="theme-color" content="#0d0e12" id="theme-color-meta">
   <meta name="description" content="T&C Space Hub — Complete real-time space intelligence: orbital satellite tracking, rocket launches, solar weather, asteroids, earthquakes and deep space telemetry.">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -40,22 +39,42 @@
       100% { box-shadow: 0 0 0 0 rgba(0, 245, 155, 0); }
     }
 
-    /* Interactive 3D Globe Layer Toolbar */
+    /* Persistent Common 3D Command Deck (WorldMonitor Style) */
+    .common-globe-theater {
+      background: #08090d;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 14px;
+      overflow: hidden;
+      margin-bottom: 24px;
+      position: relative;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+    }
+    .globe-theater-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 18px;
+      background: rgba(15, 18, 24, 0.85);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      flex-wrap: wrap;
+      gap: 10px;
+    }
     .globe-layer-toolbar {
       display: flex;
       flex-wrap: wrap;
       gap: 8px;
-      margin-bottom: 12px;
       align-items: center;
     }
     .globe-layer-chip {
-      padding: 6px 12px;
-      border-radius: 20px;
-      font-size: 0.78rem;
+      padding: 5px 12px;
+      border-radius: 18px;
+      font-size: 0.76rem;
       font-weight: 600;
       cursor: pointer;
       border: 1px solid rgba(255,255,255,0.15);
-      background: rgba(255,255,255,0.05);
+      background: rgba(255,255,255,0.04);
       color: var(--muted);
       transition: all 0.2s ease;
       display: inline-flex;
@@ -66,24 +85,68 @@
       background: rgba(41, 151, 255, 0.2);
       border-color: #2997ff;
       color: #fff;
-      box-shadow: 0 0 10px rgba(41, 151, 255, 0.3);
+      box-shadow: 0 0 10px rgba(41, 151, 255, 0.35);
     }
+    .globe-quick-controls {
+      display: flex;
+      gap: 6px;
+    }
+    .globe-ctrl-btn {
+      padding: 5px 10px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 6px;
+      color: #fff;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .globe-ctrl-btn:hover { background: rgba(255,255,255,0.18); }
+
+    /* Interactive 3D WorldMonitor HUD Badges */
+    .hud-marker-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 10px;
+      font-weight: bold;
+      color: #fff;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.7);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      white-space: nowrap;
+      pointer-events: auto;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      border: 1px solid rgba(255,255,255,0.25);
+    }
+    .hud-marker-badge:hover {
+      transform: scale(1.15);
+      z-index: 1000 !important;
+    }
+    .badge-sat { background: rgba(0, 245, 155, 0.25); border-color: #00f59b; color: #00f59b; }
+    .badge-quake { background: rgba(255, 69, 58, 0.3); border-color: #ff453a; color: #ff9f0a; }
+    .badge-fire { background: rgba(255, 55, 95, 0.3); border-color: #ff375f; color: #ff375f; }
+    .badge-volcano { background: rgba(191, 90, 242, 0.3); border-color: #bf5af2; color: #bf5af2; }
+    .badge-launch { background: rgba(255, 159, 10, 0.3); border-color: #ff9f0a; color: #ffd60a; }
 
     /* Interactive Globe HUD Telemetry Card */
     .globe-hud-overlay {
       position: absolute;
-      top: 16px;
+      top: 65px;
       right: 16px;
-      max-width: 310px;
-      background: rgba(11, 13, 18, 0.92);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(41, 151, 255, 0.4);
+      max-width: 320px;
+      background: rgba(11, 13, 18, 0.94);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(41, 151, 255, 0.45);
       border-radius: 10px;
-      padding: 12px 14px;
+      padding: 14px 16px;
       color: #fff;
-      z-index: 20;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+      z-index: 50;
+      box-shadow: 0 10px 36px rgba(0, 0, 0, 0.7);
       display: none;
       animation: fadeInHud 0.25s ease-out;
     }
@@ -92,8 +155,8 @@
       to { opacity: 1; transform: translateY(0); }
     }
     .globe-hud-overlay h4 {
-      margin: 0 0 4px 0;
-      font-size: 0.92rem;
+      margin: 0 0 6px 0;
+      font-size: 0.95rem;
       color: #00d2ff;
       display: flex;
       justify-content: space-between;
@@ -101,16 +164,16 @@
     }
     .globe-hud-overlay p {
       margin: 0;
-      font-size: 0.78rem;
-      color: #bbb;
-      line-height: 1.45;
+      font-size: 0.8rem;
+      color: #ccc;
+      line-height: 1.5;
     }
     .globe-hud-close {
       cursor: pointer;
       background: none;
       border: none;
       color: #888;
-      font-size: 1rem;
+      font-size: 1.1rem;
       padding: 0 4px;
     }
     .globe-hud-close:hover { color: #fff; }
@@ -172,9 +235,7 @@
       object-fit: cover;
       transition: transform 0.3s ease;
     }
-    .photo-frame-wrap img:hover {
-      transform: scale(1.02);
-    }
+    .photo-frame-wrap img:hover { transform: scale(1.02); }
     .photo-actions-strip {
       display: flex;
       gap: 8px;
@@ -194,11 +255,9 @@
       gap: 6px;
       transition: background 0.2s;
     }
-    .action-btn-sm:hover {
-      background: rgba(255,255,255,0.15);
-    }
+    .action-btn-sm:hover { background: rgba(255,255,255,0.15); }
 
-    /* Real-Time Clock Pill with Timezone Select */
+    /* Real-Time Dual Clock (UTC & IST) */
     .clock-pill-wrap {
       display: flex;
       align-items: center;
@@ -262,7 +321,7 @@
 
         <a href="#satellites" data-nav="satellites">
           <span class="nav-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
-          <span class="nav-text">Satellites &amp; 3D</span>
+          <span class="nav-text">Satellites</span>
         </a>
         <a href="#launches" data-nav="launches">
           <span class="nav-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg></span>
@@ -335,7 +394,7 @@
             <span class="install-pill-text" id="install-btn-text">Install App</span>
           </button>
 
-          <!-- Dual Timezone Selector Clock -->
+          <!-- Dual Timezone Selector Clock (UTC & IST) -->
           <div class="clock-pill-wrap" title="Toggle UTC / IST Time">
             <span class="pulse-ring"></span>
             <span id="live-clock-digits">--:--:--</span>
@@ -370,6 +429,42 @@
       </header>
 
       <div class="content-wrap">
+
+        <!-- ============================================================== -->
+        <!-- PERSISTENT COMMON 3D COMMAND GLOBE (WORLDMONITOR-STYLE)       -->
+        <!-- Stays visible as common ground across all operational views   -->
+        <!-- ============================================================== -->
+        <section class="common-globe-theater" id="common-globe-command-deck">
+          <div class="globe-theater-head">
+            <div class="globe-layer-toolbar">
+              <span style="font-size:0.75rem; font-weight:bold; color:var(--muted); margin-right:4px;">ACTIVE HUD LAYERS:</span>
+              <button class="globe-layer-chip active" data-layer="satellites" type="button">🛰️ Satellites</button>
+              <button class="globe-layer-chip active" data-layer="earthquakes" type="button">⚡ Earthquakes (USGS)</button>
+              <button class="globe-layer-chip active" data-layer="fires" type="button">🔥 Fires (EONET)</button>
+              <button class="globe-layer-chip active" data-layer="launches" type="button">🚀 Spaceports</button>
+              <button class="globe-layer-chip active" data-layer="asteroids" type="button">☄️ Asteroids</button>
+            </div>
+            <div class="globe-quick-controls">
+              <button class="globe-ctrl-btn" id="btn-globe-reset" type="button" title="Reset View">⌂ Reset</button>
+              <button class="globe-ctrl-btn" id="btn-globe-iss" type="button" title="Center ISS">🛰️ Track ISS</button>
+            </div>
+          </div>
+
+          <!-- Interactive Clickable HUD Card on 3D Globe -->
+          <div class="globe-hud-overlay" id="globe-hud-overlay">
+            <h4>
+              <span id="globe-hud-title">Telemetry Target</span>
+              <button class="globe-hud-close" id="btn-close-globe-hud" type="button">✕</button>
+            </h4>
+            <p id="globe-hud-desc">Tap any object on the globe to inspect real-time coordinates, velocity, or seismic magnitude.</p>
+          </div>
+
+          <!-- 3D WebGL Globe Viewport -->
+          <div id="globe-view" style="width: 100%; min-height: 480px; position: relative;">
+            <div class="globe-loading">Loading 3D Planetary Radar &amp; Telemetry layers…</div>
+          </div>
+        </section>
+
         <!-- SECTION 0: OVERVIEW -->
         <section class="section-block active-view" id="overview">
           <section class="welcome-row">
@@ -504,7 +599,7 @@
               </p>
             </article>
 
-            <!-- 3. EPIC: Earth from 1 Million Miles (Download & Share) -->
+            <!-- 3. EPIC: Earth from 1 Million Miles -->
             <article class="surface card">
               <div class="card-heading">
                 <div>
@@ -547,25 +642,15 @@
           </div>
         </section>
 
-        <!-- SECTION 1: SATELLITES & INTERACTIVE 3D GLOBE THEATER -->
+        <!-- SECTION 1: SATELLITES & 2D ORBITAL MAP -->
         <section class="section-block" id="satellites">
           <div class="section-title">
             <div>
-              <div class="eyebrow">ORBITAL INTELLIGENCE &amp; MULTI-LAYER THEATER</div>
-              <h2>Interactive 3D Planetary Command Theater</h2>
-              <p>Explore real-time satellites, USGS earthquake shockwaves, NASA EONET wildfires, and near-Earth asteroids mapped simultaneously in 3D WebGL.</p>
+              <div class="eyebrow">ORBITAL INTELLIGENCE &amp; GROUND TRACK</div>
+              <h2>Global Satellite Tracking</h2>
+              <p>Real-time SGP4 Keplerian orbital calculations with 2D ground track projections.</p>
             </div>
             <span class="section-count">01 / ORBIT</span>
-          </div>
-
-          <!-- Interactive Layer Filters -->
-          <div class="globe-layer-toolbar">
-            <span style="font-size:0.8rem; font-weight:bold; color:var(--muted); margin-right:4px;">ACTIVE LAYERS:</span>
-            <button class="globe-layer-chip active" data-layer="satellites" type="button">🛰️ Satellites</button>
-            <button class="globe-layer-chip active" data-layer="earthquakes" type="button">⚡ Earthquakes (USGS)</button>
-            <button class="globe-layer-chip active" data-layer="fires" type="button">🔥 Fires &amp; Volcanoes (EONET)</button>
-            <button class="globe-layer-chip active" data-layer="launches" type="button">🚀 Spaceports</button>
-            <button class="globe-layer-chip active" data-layer="asteroids" type="button">☄️ Asteroids</button>
           </div>
 
           <div class="dashboard-grid">
@@ -596,55 +681,29 @@
               </div>
             </article>
 
-            <article class="surface globe-card" style="position:relative;">
-              <div class="globe-hud-overlay" id="globe-hud-overlay">
-                <h4>
-                  <span id="globe-hud-title">Telemetry Target</span>
-                  <button class="globe-hud-close" id="btn-close-globe-hud" type="button">✕</button>
-                </h4>
-                <p id="globe-hud-desc">Tap any object on the globe to inspect real-time coordinates, velocity, or seismic magnitude.</p>
-              </div>
-
+            <!-- Satellite Search Panel -->
+            <article class="surface search-card">
               <div class="card-heading">
                 <div>
-                  <div class="eyebrow">INTERACTIVE 3D WEBGL</div>
-                  <h3>Planetary &amp; Celestial Globe</h3>
-                  <p>Rotate, drag, zoom, and tap any event to inspect full telemetry.</p>
+                  <div class="eyebrow">CELESTRAK LIVE CATALOGUE</div>
+                  <h3>Search 14,000+ Satellites</h3>
+                  <p>Type any satellite name or NORAD ID to query real-time orbital elements (TLE / OMM).</p>
                 </div>
-                <span class="small-chip">WEBGL 3D</span>
+                <span class="small-chip">100% LIVE DATA</span>
               </div>
-              <div id="globe-view" class="globe-view" style="min-height: 420px;">
-                <div class="globe-loading">Loading 3D Earth &amp; Telemetry layers…</div>
-              </div>
-              <div class="globe-caption">
-                <span>EARTH · ORBITAL PERSPECTIVE</span>
-                <span id="globe-sat-tag">TRACKING ISS</span>
+              <form id="sat-search-form" class="search-form" autocomplete="off">
+                <input id="sat-search" type="search" placeholder="Type satellite name (e.g. Starlink, NOAA, GPS, Landsat, Envisat)…" aria-label="Search satellites" required>
+                <button class="primary-button" type="submit">Track Satellite <span>↗</span></button>
+              </form>
+              <div id="sat-suggestions" class="suggestion-list" role="listbox" aria-label="Satellite suggestions" hidden></div>
+              <div id="selected-satellite-panel" class="selected-satellite-panel">
+                <div class="selected-empty">
+                  ◎ <b>No custom satellite selected</b>
+                  <span>Search and choose any satellite to display its individual telemetry parameters.</span>
+                </div>
               </div>
             </article>
           </div>
-
-          <!-- Satellite Catalogue Search -->
-          <article class="surface search-card">
-            <div class="card-heading">
-              <div>
-                <div class="eyebrow">CELESTRAK LIVE CATALOGUE</div>
-                <h3>Search 14,000+ Satellites</h3>
-                <p>Type any satellite name or NORAD ID to query real-time orbital elements (TLE / OMM).</p>
-              </div>
-              <span class="small-chip">100% LIVE DATA</span>
-            </div>
-            <form id="sat-search-form" class="search-form" autocomplete="off">
-              <input id="sat-search" type="search" placeholder="Type satellite name (e.g. Starlink, NOAA, GPS, Landsat, Envisat)…" aria-label="Search satellites" required>
-              <button class="primary-button" type="submit">Track Satellite <span>↗</span></button>
-            </form>
-            <div id="sat-suggestions" class="suggestion-list" role="listbox" aria-label="Satellite suggestions" hidden></div>
-            <div id="selected-satellite-panel" class="selected-satellite-panel">
-              <div class="selected-empty">
-                ◎ <b>No custom satellite selected</b>
-                <span>Search and choose any satellite to display its individual telemetry parameters.</span>
-              </div>
-            </div>
-          </article>
         </section>
 
         <!-- SECTION 2: ROCKET LAUNCHES & ASCENT PROFILE -->
