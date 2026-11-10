@@ -34,6 +34,7 @@ function navigateToSpace(spaceId) {
     'overview': 'Mission Control',
     'satellites': 'Orbital Tracking',
     'launches': 'Rockets & Flights',
+    'asteroids': 'Asteroid Radar (NeoWs)',
     'planetary': 'Space Weather',
     'earth-intel': 'Area Intel Brief',
     'cosmos': 'Cosmos & Wiki'
@@ -56,7 +57,7 @@ function navigateToSpace(spaceId) {
   }
 }
 
-// 3. Real-Time Leaflet Satellite Map
+// 3. Real-Time Leaflet Satellite Map (Watermark-free dark styling)
 let satMap = null;
 let issMarker = null;
 
@@ -69,7 +70,7 @@ function initMap() {
 
   L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
     maxZoom: 18,
-    attribution: '© OpenStreetMap & CARTO'
+    attribution: '© OpenStreetMap'
   }).addTo(satMap);
 
   const satIcon = L.divIcon({
@@ -112,7 +113,51 @@ async function fetchLiveIss() {
   } catch (_) {}
 }
 
-// 5. Area-Wise Intelligence Brief (Open-Meteo Real-time ground sensors)
+// 5. NASA JPL NeoWs Asteroid Radar (Real-time live feed)
+async function fetchAsteroids() {
+  const container = document.getElementById('asteroids-container');
+  try {
+    const today = new Date().toISOString().slice(0, 10);
+    const res = await fetch(`https://api.nasa.gov/neo/rest/v1/feed?start_date=${today}&end_date=${today}&api_key=DEMO_KEY`);
+    if (!res.ok) throw new Error();
+    const data = await res.json();
+    const neos = data.near_earth_objects[today] || [];
+
+    if (container) {
+      if (neos.length === 0) {
+        container.innerHTML = '<p class="card-text">No immediate asteroid approaches recorded for today.</p>';
+        return;
+      }
+      container.innerHTML = neos.slice(0, 8).map(ast => {
+        const isHazard = ast.is_potentially_hazardous_asteroid;
+        const ca = ast.close_approach_data[0] || {};
+        const missKm = ca.miss_distance ? (parseFloat(ca.miss_distance.kilometers) / 1000000).toFixed(2) + 'M km' : '—';
+        const velKmS = ca.relative_velocity ? parseFloat(ca.relative_velocity.kilometers_per_second).toFixed(1) + ' km/s' : '—';
+        const diamMin = ast.estimated_diameter?.meters?.estimated_diameter_min?.toFixed(0) || '—';
+        const diamMax = ast.estimated_diameter?.meters?.estimated_diameter_max?.toFixed(0) || '—';
+
+        return `
+          <div class="asteroid-card">
+            <div class="asteroid-top">
+              <span class="asteroid-title">${ast.name}</span>
+              <span class="hazard-badge ${isHazard ? 'red' : 'green'}">${isHazard ? 'HAZARDOUS' : 'SAFE FLYBY'}</span>
+            </div>
+            <div class="asteroid-numbers">
+              <div><small>MISS DISTANCE</small><b>${missKm}</b></div>
+              <div><small>VELOCITY</small><b>${velKmS}</b></div>
+              <div><small>EST. DIAMETER</small><b>${diamMin}–${diamMax} m</b></div>
+              <div><small>APPROACH TIME</small><b>${ca.close_approach_date_full ? ca.close_approach_date_full.slice(11, 16) + ' UTC' : 'Today'}</b></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+  } catch (_) {
+    if (container) container.innerHTML = '<p class="card-text">NASA NeoWs radar synchronizing…</p>';
+  }
+}
+
+// 6. Area-Wise Intelligence Brief (Open-Meteo Real-time ground sensors)
 async function fetchAreaIntel(lat, lon, cityName) {
   try {
     const res = await fetch(`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=us_aqi,pm2_5,pm10,nitrogen_dioxide,direct_normal_irradiance`);
@@ -130,7 +175,7 @@ async function fetchAreaIntel(lat, lon, cityName) {
   } catch (_) {}
 }
 
-// 6. Launch Manifest (TheSpaceDevs LL2)
+// 7. Launch Manifest (TheSpaceDevs LL2)
 async function fetchLaunches() {
   const container = document.getElementById('launches-container');
   try {
@@ -174,7 +219,7 @@ async function fetchLaunches() {
   }
 }
 
-// 7. NASA DONKI Space Weather
+// 8. NASA DONKI Space Weather
 async function fetchSpaceWeather() {
   const list = document.getElementById('solar-events-list');
   try {
@@ -204,7 +249,7 @@ async function fetchSpaceWeather() {
   }
 }
 
-// 8. USGS Earthquakes
+// 9. USGS Earthquakes
 async function fetchEarthquakes() {
   const list = document.getElementById('quake-events-list');
   const countVal = document.getElementById('quake-count-val');
@@ -236,7 +281,7 @@ async function fetchEarthquakes() {
   }
 }
 
-// 9. NASA APOD
+// 10. NASA APOD
 async function fetchApod() {
   try {
     const res = await fetch('https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY');
@@ -265,7 +310,7 @@ async function fetchApod() {
   } catch (_) {}
 }
 
-// 10. Wikimedia Encyclopedia API
+// 11. Wikimedia Encyclopedia API
 async function searchWiki(query) {
   const container = document.getElementById('wiki-output-container');
   if (!container) return;
@@ -288,7 +333,7 @@ async function searchWiki(query) {
   }
 }
 
-// 11. Toast Notifications & Alert Simulator
+// 12. Toast Notifications
 function showToast(text) {
   const toast = document.getElementById('toast-message');
   if (!toast) return;
@@ -319,13 +364,36 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Settings Sheet
+  // Settings Modal (Handles both desktop sidebar button and mobile top header button)
   const modal = document.getElementById('settings-modal');
-  document.getElementById('open-settings-btn')?.addEventListener('click', () => modal.classList.add('open'));
+  const openButtons = [
+    document.getElementById('open-settings-sidebar-btn'),
+    document.getElementById('open-settings-header-btn')
+  ];
+
+  openButtons.forEach(btn => {
+    btn?.addEventListener('click', () => modal.classList.add('open'));
+  });
+
   document.getElementById('close-settings-btn')?.addEventListener('click', () => modal.classList.remove('open'));
   modal?.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('open'); });
 
-  // Test Alert
+  // Theme switcher
+  document.querySelectorAll('#theme-switcher .seg-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#theme-switcher .seg-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const val = btn.getAttribute('data-theme');
+      if (val === 'system') {
+        const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+      } else {
+        document.documentElement.setAttribute('data-theme', val);
+      }
+    });
+  });
+
+  // Test space notification
   document.getElementById('trigger-test-alert')?.addEventListener('click', async () => {
     const kpThreshold = document.getElementById('pref-solar-kp')?.value || '5';
     const quakeThreshold = document.getElementById('pref-quake-mag')?.value || '5.0';
@@ -336,23 +404,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if ('Notification' in window && Notification.permission === 'granted') {
       new Notification('T&C Space Alert 🚀', {
-        body: `Active filters: Solar Storm (Kp ${kpThreshold}+) | Earthquakes (M ${quakeThreshold}+). All systems operational.`,
+        body: `Active thresholds: Solar Storm Kp ${kpThreshold}+ | Earthquakes M ${quakeThreshold}+. All telemetry streams nominal.`,
         icon: 'assets/space-hub-icon-192.png?v=1'
       });
     }
-    showToast(`Alert threshold saved: Kp ${kpThreshold}+ | M ${quakeThreshold}+`);
+    showToast(`Threshold saved: Kp ${kpThreshold}+ | M ${quakeThreshold}+`);
   });
 
-  // Wikipedia search button
+  // Wikipedia search trigger
   document.getElementById('wiki-search-btn')?.addEventListener('click', () => {
     const q = document.getElementById('wiki-query-input')?.value;
     if (q) searchWiki(q);
   });
 
-  // Refresh button
+  // Refresh feeds
   document.getElementById('refresh-all-btn')?.addEventListener('click', () => {
     fetchLiveIss();
     fetchLaunches();
+    fetchAsteroids();
     fetchSpaceWeather();
     fetchEarthquakes();
     fetchApod();
@@ -362,6 +431,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initial Fetches
   fetchLiveIss();
   fetchLaunches();
+  fetchAsteroids();
   fetchSpaceWeather();
   fetchEarthquakes();
   fetchApod();
