@@ -7,6 +7,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>T&amp;C Space Hub — Mission Control</title>
+  
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <link rel="stylesheet" href="styles.css">
 </head>
@@ -15,60 +16,88 @@
     <!-- Desktop macOS-style Sidebar -->
     <aside class="apple-sidebar" id="sidebar">
       <div class="sidebar-header">
-        <div class="app-icon-badge">
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+        <!-- T&C Custom Space Hub Brand Logo -->
+        <div class="app-logo-wrap">
+          <img src="assets/space-hub-icon-192.png?v=1" alt="T&C Space Hub" class="app-brand-logo" onerror="this.style.display='none'; document.getElementById('logo-fallback').style.display='grid';">
+          <div id="logo-fallback" class="logo-fallback-badge">T&amp;C</div>
         </div>
         <div class="header-titles">
           <span class="app-title">SPACE HUB</span>
-          <span class="app-subtitle" data-i18n="mission_control">MISSION CONTROL</span>
+          <span class="app-subtitle">MISSION CONTROL</span>
         </div>
       </div>
 
       <nav class="sidebar-nav" aria-label="Spaces">
-        <div class="nav-group-title" data-i18n="nav_spaces">SPACES</div>
+        <div class="nav-group-title">COMMAND SPACES</div>
         <button class="nav-item active" data-space="overview">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
-          <span data-i18n="nav_overview">Overview</span>
+          <span>Overview</span>
         </button>
-        <button class="nav-item" data-space="orbital-map">
+        <button class="nav-item" data-space="tracking">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
-          <span data-i18n="nav_map">Orbital Tracking</span>
+          <span>Orbital Map &amp; 3D</span>
         </button>
         <button class="nav-item" data-space="launches">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/></svg>
-          <span data-i18n="nav_launches">Launch Manifest</span>
+          <span>Rockets &amp; Timers</span>
         </button>
         <button class="nav-item" data-space="planetary">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/></svg>
-          <span data-i18n="nav_planetary">Solar &amp; Earth</span>
+          <span>Solar &amp; Seismic</span>
+        </button>
+        <button class="nav-item" data-space="asteroids">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <span>Asteroid Radar</span>
+        </button>
+        <button class="nav-item" data-space="mars">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3.6 9h16.8"/><path d="M3.6 15h16.8"/></svg>
+          <span>Mars Surface Feeds</span>
+        </button>
+        <button class="nav-item" data-space="area-intel">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          <span>Area Intelligence</span>
         </button>
         <button class="nav-item" data-space="cosmos">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-          <span data-i18n="nav_cosmos">Cosmos &amp; Intel</span>
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+          <span>APOD &amp; Wiki Intel</span>
         </button>
       </nav>
 
       <div class="sidebar-footer">
         <button class="sidebar-action-btn" id="open-settings-btn">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-          <span data-i18n="settings_title">Settings &amp; Alerts</span>
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          <span>Preferences &amp; Alerts</span>
         </button>
       </div>
     </aside>
 
     <!-- Main Workspace -->
     <main class="apple-main">
-      <!-- Apple Translucent Header -->
+      <!-- Apple Frosted Header with Dual Clocks -->
       <header class="apple-header">
         <div class="header-left">
-          <span class="view-eyebrow">SPACE HUB</span>
-          <h1 class="view-title" id="page-title">Mission Control</h1>
-        </div>
-        <div class="header-right">
-          <div class="live-clock-pill">
-            <span class="pulsing-green-dot"></span>
-            <span id="utc-clock">--:--:-- UTC</span>
+          <div class="mobile-logo-wrap">
+            <img src="assets/space-hub-icon-192.png?v=1" alt="Logo" class="mobile-brand-icon" onerror="this.style.display='none';">
           </div>
+          <div>
+            <span class="view-eyebrow">T&amp;C ECOSYSTEM</span>
+            <h1 class="view-title" id="page-title">Mission Control</h1>
+          </div>
+        </div>
+        
+        <div class="header-right">
+          <!-- Dual Live Clocks: UTC and IST -->
+          <div class="dual-clock-container">
+            <div class="live-clock-pill">
+              <span class="pulsing-green-dot"></span>
+              <span id="utc-clock">--:--:-- UTC</span>
+            </div>
+            <div class="live-clock-pill ist-pill">
+              <span class="pulsing-orange-dot"></span>
+              <span id="ist-clock">--:--:-- IST</span>
+            </div>
+          </div>
+
           <button class="apple-round-btn" id="refresh-data-btn" title="Refresh Live Feeds">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg>
           </button>
@@ -78,132 +107,219 @@
       <!-- Scrollable Container -->
       <div class="apple-content-viewport">
 
-        <!-- SPACE 1: OVERVIEW -->
+        <!-- 1. OVERVIEW SPACE -->
         <section class="space-view active" id="view-overview">
           <div class="apple-card hero-status-card">
             <div class="card-top-row">
               <span class="apple-status-badge live">
                 <span class="pulsing-green-dot"></span>
-                <span>AUTHENTIC TELEMETRY</span>
+                <span>AUTHENTIC LIVE TELEMETRY STREAM</span>
               </span>
-              <span class="data-timestamp" id="last-ping">Connecting…</span>
+              <span class="data-timestamp" id="last-ping">Connecting to sensors…</span>
             </div>
-            <h2 class="hero-headline">Live Global Awareness<span>.</span></h2>
-            <p class="hero-subtext">Real-time planetary data streamed directly from official agency endpoints: NASA, USGS, and WhereTheISS.</p>
+            <h2 class="hero-headline">Planetary Situational Awareness<span>.</span></h2>
+            <p class="hero-subtext">Verified real-time streaming directly from official space and geophysical agency endpoints: NASA, USGS, WhereTheISS, Open-Meteo, and TheSpaceDevs.</p>
           </div>
 
-          <!-- Live Metrics Grid -->
+          <!-- Hero Metrics Grid -->
           <div class="metrics-grid">
             <div class="metric-tile">
-              <div class="metric-label">ISS ALTITUDE</div>
+              <div class="metric-label">ISS ORBITAL ALTITUDE</div>
               <div class="metric-val" id="iss-alt-val"><span class="apple-spinner"></span></div>
-              <div class="metric-foot">WhereTheISS.at live API</div>
+              <div class="metric-foot">WhereTheISS.at REST API</div>
             </div>
             <div class="metric-tile">
               <div class="metric-label">ISS VELOCITY</div>
               <div class="metric-val" id="iss-vel-val"><span class="apple-spinner"></span></div>
-              <div class="metric-foot">Real-time speed</div>
+              <div class="metric-foot">Live orbital speed</div>
             </div>
             <div class="metric-tile">
-              <div class="metric-label">NEXT LAUNCH T-MINUS</div>
-              <div class="metric-val" id="launch-countdown-val"><span class="apple-spinner"></span></div>
-              <div class="metric-foot" id="launch-provider-label">Loading manifest…</div>
+              <div class="metric-label">NEXT ROCKET LAUNCH</div>
+              <div class="metric-val countdown-accent" id="hero-countdown-val"><span class="apple-spinner"></span></div>
+              <div class="metric-foot" id="hero-countdown-name">Querying flight manifest…</div>
             </div>
             <div class="metric-tile">
-              <div class="metric-label">SEISMIC ACTIVITY (24H)</div>
+              <div class="metric-label">ACTIVE SEISMIC EVENTS (24H)</div>
               <div class="metric-val" id="quake-count-val"><span class="apple-spinner"></span></div>
-              <div class="metric-foot">USGS M2.5+ Global sensors</div>
+              <div class="metric-foot">USGS M2.5+ Global Network</div>
             </div>
           </div>
 
-          <!-- Highlight Cards -->
-          <div class="dual-grid">
-            <div class="apple-card">
-              <div class="card-eyebrow">NEXT GLOBAL FLIGHT</div>
-              <h3 class="card-title" id="next-launch-title">Retrieving flight manifest…</h3>
-              <p class="card-description" id="next-launch-desc">Tracking upcoming orbital missions.</p>
-              <div class="tag-row" id="next-launch-tags">
-                <span class="apple-tag" id="next-launch-pad">Spaceport: —</span>
-                <span class="apple-tag" id="next-launch-vehicle">Vehicle: —</span>
+          <!-- Spotlight Launch Card -->
+          <div class="apple-card spotlight-card">
+            <div class="card-eyebrow">NEXT GLOBAL LIFTOFF</div>
+            <div class="spotlight-content">
+              <div>
+                <h3 class="card-title" id="spotlight-name">Scanning spaceports…</h3>
+                <p class="card-description" id="spotlight-desc">Live manifests streamed from Launch Library 2.</p>
+                <div class="tag-row">
+                  <span class="apple-tag" id="spotlight-provider">Provider: —</span>
+                  <span class="apple-tag" id="spotlight-rocket">Vehicle: —</span>
+                  <span class="apple-tag" id="spotlight-pad">Pad: —</span>
+                </div>
               </div>
-            </div>
-
-            <div class="apple-card">
-              <div class="card-eyebrow">NASA TODAY</div>
-              <h3 class="card-title" id="apod-mini-title">Astronomy Picture of the Day</h3>
-              <p class="card-description" id="apod-mini-desc">Retrieving latest capture from NASA APOD…</p>
-              <button class="apple-secondary-btn" onclick="navigateToSpace('cosmos')">Open Astronomy Feed ↗</button>
+              <div class="countdown-display-box">
+                <span class="countdown-label">T-MINUS COUNTDOWN</span>
+                <span class="countdown-clock" id="countdown-ticker">--d --h --m --s</span>
+                <span class="countdown-sub" id="countdown-date">Calculating window…</span>
+              </div>
             </div>
           </div>
         </section>
 
-        <!-- SPACE 2: ORBITAL TRACKING -->
-        <section class="space-view" id="view-orbital-map">
+        <!-- 2. ORBITAL MAP & 3D GLOBE SPACE -->
+        <section class="space-view" id="view-tracking">
           <div class="apple-card map-wrapper-card">
             <div class="map-controls-header">
               <div>
-                <h3 class="card-title">Real-Time Orbital Map</h3>
-                <p class="card-description">Live sub-satellite tracking polled directly from official sensor streams.</p>
+                <h3 class="card-title">Live Planetary Map &amp; Hazard Radar</h3>
+                <p class="card-description">Verified live plotted coordinates: ISS (WhereTheISS), Earthquakes (USGS), and Volcanoes/Fires (NASA EONET).</p>
               </div>
-              <div class="apple-segmented-control" id="map-layer-selector">
-                <button class="segment active" data-layer="iss">ISS Telemetry</button>
-                <button class="segment" data-layer="quakes">Quakes (USGS)</button>
-                <button class="segment" data-layer="eonet">Hazards (EONET)</button>
+              <div class="apple-segmented-control" id="map-mode-selector">
+                <button class="segment active" data-map-mode="2d">2D High-Def Map</button>
+                <button class="segment" data-map-mode="3d">3D WebGL Earth</button>
               </div>
             </div>
-            <div id="sat-leaflet-map" class="apple-leaflet-frame"></div>
-            <div class="map-telemetry-strip" id="map-telemetry-readout">
+
+            <!-- 2D Leaflet Container (Key-free OpenStreetMap without watermarks) -->
+            <div id="sat-leaflet-frame" class="map-container-frame">
+              <div id="sat-leaflet-map" class="apple-leaflet-map"></div>
+              
+              <!-- Apple Glass Map Legend Overlay -->
+              <div class="map-glass-legend">
+                <div class="legend-item"><span class="legend-indicator blue"></span> <span>ISS Satellite</span></div>
+                <div class="legend-item"><span class="legend-indicator orange"></span> <span>Earthquake (M2.5–M4.9)</span></div>
+                <div class="legend-item"><span class="legend-indicator red"></span> <span>Major Quake (M5.0+)</span></div>
+                <div class="legend-item"><span class="legend-indicator purple"></span> <span>Volcano / Wildfire (EONET)</span></div>
+              </div>
+            </div>
+
+            <!-- 3D WebGL Globe Container -->
+            <div id="sat-globe-frame" class="map-container-frame" style="display: none;">
+              <div id="sat-globe-3d" class="apple-globe-canvas"></div>
+            </div>
+
+            <div class="map-telemetry-strip">
               <div><span>LATITUDE: </span><b id="map-lat">—</b></div>
               <div><span>LONGITUDE: </span><b id="map-lon">—</b></div>
               <div><span>ALTITUDE: </span><b id="map-alt">—</b></div>
-              <div><span>ORBITAL SPEED: </span><b id="map-spd">—</b></div>
+              <div><span>VELOCITY: </span><b id="map-spd">—</b></div>
             </div>
           </div>
         </section>
 
-        <!-- SPACE 3: LAUNCHES -->
+        <!-- 3. ROCKETS & TIMERS SPACE -->
         <section class="space-view" id="view-launches">
-          <div class="apple-card header-banner-card">
-            <div class="card-eyebrow">ORBITAL MANIFEST</div>
+          <div class="apple-card">
+            <div class="card-eyebrow">GLOBAL ORBITAL MANIFEST</div>
             <h2 class="card-title">Verified Upcoming Launches</h2>
-            <p class="card-description">Direct from Launch Library 2 (TheSpaceDevs). Live countdowns, pad coordinates, and webcast links.</p>
+            <p class="card-description">Live launch schedules from Launch Library 2 (TheSpaceDevs). Filtered and updated in real-time.</p>
           </div>
           <div class="launches-container" id="launches-list">
             <div class="loading-state"><span class="apple-spinner large"></span><p>Streaming launch manifest…</p></div>
           </div>
         </section>
 
-        <!-- SPACE 4: PLANETARY & SOLAR -->
+        <!-- 4. SOLAR & SEISMIC SPACE -->
         <section class="space-view" id="view-planetary">
           <div class="dual-grid">
             <!-- Solar Weather -->
             <div class="apple-card">
-              <div class="card-eyebrow">NASA DONKI · SPACE WEATHER</div>
-              <h3 class="card-title">Solar Flares &amp; Geomagnetic Events</h3>
-              <p class="card-description">Live reports from NASA DONKI sensors observing the solar disk.</p>
+              <div class="card-eyebrow">NASA DONKI · HELIOPHYSICS</div>
+              <h3 class="card-title">Live Solar Flares (Past 7 Days)</h3>
+              <p class="card-description">Solar observations streamed directly from NASA DONKI sensors.</p>
               <div class="event-feed-list" id="solar-events-list">
-                <div class="loading-state"><span class="apple-spinner"></span><p>Querying NASA DONKI…</p></div>
+                <div class="loading-state"><span class="apple-spinner"></span><p>Querying solar observatories…</p></div>
               </div>
             </div>
 
             <!-- USGS Earthquakes -->
             <div class="apple-card">
               <div class="card-eyebrow">USGS GLOBAL SEISMIC NETWORK</div>
-              <h3 class="card-title">Earthquakes (M2.5+ Past 24h)</h3>
-              <p class="card-description">Direct seismic sensor feed from the U.S. Geological Survey.</p>
+              <h3 class="card-title">Seismic Events (M2.5+ Past 24h)</h3>
+              <p class="card-description">Global earthquakes reported in real-time by USGS seismometers.</p>
               <div class="event-feed-list" id="earthquake-events-list">
-                <div class="loading-state"><span class="apple-spinner"></span><p>Contacting USGS sensors…</p></div>
+                <div class="loading-state"><span class="apple-spinner"></span><p>Contacting seismic stations…</p></div>
               </div>
             </div>
           </div>
         </section>
 
-        <!-- SPACE 5: COSMOS & INTEL -->
+        <!-- 5. NEAR-EARTH ASTEROIDS (NEOWS) SPACE -->
+        <section class="space-view" id="view-asteroids">
+          <div class="apple-card">
+            <div class="card-eyebrow">NASA JPL · NEOWS RADAR</div>
+            <h2 class="card-title">Near-Earth Asteroid Close Approaches</h2>
+            <p class="card-description">Live tracking of asteroids approaching within 7 days. Miss distances and diameters computed by NASA JPL.</p>
+          </div>
+          <div class="neo-grid" id="neo-asteroids-list">
+            <div class="loading-state"><span class="apple-spinner large"></span><p>Scanning near-Earth space…</p></div>
+          </div>
+        </section>
+
+        <!-- 6. MARS SURFACE LIVE FEEDS SPACE -->
+        <section class="space-view" id="view-mars">
+          <div class="apple-card">
+            <div class="card-eyebrow">NASA MARS ROVER OBSERVATIONS</div>
+            <h2 class="card-title">Latest Images from Curiosity &amp; Perseverance</h2>
+            <p class="card-description">Raw telemetry photos transmitted directly from the Martian surface via NASA's Mars Exploration Rover API.</p>
+          </div>
+          <div class="mars-photo-grid" id="mars-photo-container">
+            <div class="loading-state"><span class="apple-spinner large"></span><p>Receiving Deep Space Network signal…</p></div>
+          </div>
+        </section>
+
+        <!-- 7. AREA-WISE INTELLIGENCE BRIEF SPACE -->
+        <section class="space-view" id="view-area-intel">
+          <div class="apple-card">
+            <div class="card-eyebrow">REGIONAL ENVIRONMENTAL TELEMETRY</div>
+            <h2 class="card-title">Area-Wise Intelligence Brief</h2>
+            <p class="card-description">Live groundwater index, air quality, particulate matter, UV, and solar radiation powered by Open-Meteo live sensor APIs.</p>
+            
+            <div class="apple-search-field">
+              <input type="search" id="area-search-input" placeholder="Enter city (e.g., Hyderabad, Delhi, Tokyo, London, New York)…" value="Hyderabad">
+              <button class="apple-primary-btn" id="area-search-btn">Analyze Telemetry</button>
+            </div>
+
+            <div class="area-quick-chips">
+              <button class="chip active" data-city="Hyderabad" data-lat="17.3850" data-lon="78.4867">Hyderabad</button>
+              <button class="chip" data-city="New Delhi" data-lat="28.6139" data-lon="77.2090">New Delhi</button>
+              <button class="chip" data-city="Tokyo" data-lat="35.6762" data-lon="139.6503">Tokyo</button>
+              <button class="chip" data-city="London" data-lat="51.5074" data-lon="-0.1278">London</button>
+              <button class="chip" data-city="New York" data-lat="40.7128" data-lon="-74.0060">New York</button>
+            </div>
+          </div>
+
+          <div class="intel-metrics-grid" id="intel-readout">
+            <div class="metric-tile">
+              <div class="metric-label">AIR QUALITY (US AQI)</div>
+              <div class="metric-val" id="aqi-val"><span class="apple-spinner"></span></div>
+              <div class="metric-foot" id="aqi-status">Open-Meteo Air Sensor</div>
+            </div>
+            <div class="metric-tile">
+              <div class="metric-label">PM2.5 / PM10 PARTICULATE</div>
+              <div class="metric-val" id="pm-val"><span class="apple-spinner"></span></div>
+              <div class="metric-foot">Micrograms / m³</div>
+            </div>
+            <div class="metric-tile">
+              <div class="metric-label">SOLAR DIRECT RADIATION</div>
+              <div class="metric-val" id="radiation-val"><span class="apple-spinner"></span></div>
+              <div class="metric-foot">W/m² Surface flux</div>
+            </div>
+            <div class="metric-tile">
+              <div class="metric-label">SOIL MOISTURE / GROUNDWATER</div>
+              <div class="metric-val" id="moisture-val"><span class="apple-spinner"></span></div>
+              <div class="metric-foot">m³/m³ Subsurface saturation</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 8. COSMOS & WIKIPEDIA INTEL SPACE -->
         <section class="space-view" id="view-cosmos">
-          <!-- APOD Showcase -->
+          <!-- NASA APOD Feature -->
           <div class="apple-card apod-feature-card">
-            <div class="card-eyebrow">ASTRONOMY PICTURE OF THE DAY</div>
-            <h2 class="card-title" id="apod-full-title">Loading astronomy feature…</h2>
+            <div class="card-eyebrow">NASA · ASTRONOMY PICTURE OF THE DAY</div>
+            <h2 class="card-title" id="apod-full-title">Loading universe feature…</h2>
             <div class="apod-media-box" id="apod-media-container">
               <span class="apple-spinner large"></span>
             </div>
@@ -211,14 +327,13 @@
             <div class="apod-footer" id="apod-meta"></div>
           </div>
 
-          <!-- Wikipedia Live Intel Search -->
+          <!-- Wikipedia REST API Explorer -->
           <div class="apple-card wiki-search-card">
             <div class="card-eyebrow">WIKIMEDIA REST API</div>
-            <h3 class="card-title">Live Space Knowledge</h3>
+            <h3 class="card-title">Space Knowledge Hub</h3>
             <div class="apple-search-field">
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-              <input type="search" id="wiki-input" placeholder="Search mission, spacecraft, observatory or asteroid…" value="James Webb Space Telescope">
-              <button class="apple-primary-btn" id="wiki-search-trigger">Search</button>
+              <input type="search" id="wiki-input" placeholder="Search spacecraft, asteroid, star or mission…" value="James Webb Space Telescope">
+              <button class="apple-primary-btn" id="wiki-search-trigger">Search Intel</button>
             </div>
             <div id="wiki-output-box" class="wiki-output"></div>
           </div>
@@ -228,13 +343,13 @@
         <footer class="apple-footer">
           <div class="footer-meta">
             <b>T&amp;C SPACE HUB</b>
-            <p>100% Verified Real-time Science APIs · Zero Fake Telemetry</p>
+            <p>Curiosity has no borders · 100% Genuine Real-Time Science Telemetry</p>
           </div>
           <div class="footer-links">
             <a href="https://tastyandcomfort.github.io/T-C/" target="_blank" rel="noopener">T&amp;C Main</a>
             <a href="https://tastyandcomfort.github.io/news/" target="_blank" rel="noopener">News Hub</a>
             <a href="https://api.nasa.gov/" target="_blank" rel="noopener">NASA Open API</a>
-            <a href="https://earthquake.usgs.gov/" target="_blank" rel="noopener">USGS</a>
+            <a href="https://earthquake.usgs.gov/" target="_blank" rel="noopener">USGS Feeds</a>
           </div>
         </footer>
       </div>
@@ -243,23 +358,27 @@
       <nav class="mobile-dock" aria-label="Mobile Navigation">
         <button class="dock-item active" data-space="overview">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
-          <span data-i18n="nav_overview">Overview</span>
+          <span>Overview</span>
         </button>
-        <button class="dock-item" data-space="orbital-map">
+        <button class="dock-item" data-space="tracking">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
-          <span data-i18n="nav_map">Tracking</span>
+          <span>Map/3D</span>
         </button>
         <button class="dock-item" data-space="launches">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/></svg>
-          <span data-i18n="nav_launches">Launches</span>
+          <span>Rockets</span>
         </button>
         <button class="dock-item" data-space="planetary">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="M2 12h2"/><path d="M20 12h2"/></svg>
-          <span data-i18n="nav_planetary">Earth</span>
+          <span>Earth</span>
         </button>
-        <button class="dock-item" data-space="cosmos">
+        <button class="dock-item" data-space="asteroids">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-          <span data-i18n="nav_cosmos">Cosmos</span>
+          <span>Asteroids</span>
+        </button>
+        <button class="dock-item" data-space="area-intel">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          <span>Intel</span>
         </button>
       </nav>
     </main>
@@ -270,15 +389,14 @@
     <div class="apple-sheet" role="dialog" aria-modal="true">
       <div class="sheet-grabber"></div>
       <div class="sheet-header">
-        <h3 class="sheet-title" data-i18n="settings_title">Preferences &amp; Alerts</h3>
+        <h3 class="sheet-title">Preferences &amp; Space Alerts</h3>
         <button class="sheet-close-btn" id="close-settings-btn">Done</button>
       </div>
       <div class="sheet-body">
-        <!-- Appearance -->
         <div class="sheet-group">
-          <div class="group-title" data-i18n="appearance">APPEARANCE</div>
+          <div class="group-title">APPEARANCE</div>
           <div class="sheet-row">
-            <span data-i18n="theme">Theme</span>
+            <span>Theme Mode</span>
             <div class="apple-segmented-control small" id="theme-switcher">
               <button class="segment" data-theme-val="light">Light</button>
               <button class="segment active" data-theme-val="dark">Dark</button>
@@ -287,42 +405,24 @@
           </div>
         </div>
 
-        <!-- Language -->
         <div class="sheet-group">
-          <div class="group-title" data-i18n="language">LANGUAGE</div>
-          <div class="sheet-row">
-            <span data-i18n="language_label">Interface Language</span>
-            <select class="apple-select" id="language-select">
-              <option value="en">English (US)</option>
-              <option value="es">Español</option>
-              <option value="fr">Français</option>
-              <option value="de">Deutsch</option>
-              <option value="ja">日本語</option>
-              <option value="hi">हिन्दी</option>
-              <option value="zh">中文</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- Push Notifications -->
-        <div class="sheet-group">
-          <div class="group-title" data-i18n="push_alerts">LIVE SPACE ALERTS</div>
+          <div class="group-title">LIVE SPACE NOTIFICATIONS</div>
           <div class="sheet-row">
             <div>
               <b>Solar Storm Alerts</b>
-              <small>Notify on Geomagnetic storm Kp 5.0+</small>
+              <small>Notify when Kp index exceeds 5.0</small>
             </div>
             <input type="checkbox" class="apple-switch" id="alert-solar-check" checked>
           </div>
           <div class="sheet-row">
             <div>
-              <b>Orbital Liftoff Alerts</b>
-              <small>Reminders for rocket countdowns</small>
+              <b>Rocket Liftoff Reminders</b>
+              <small>Notify on upcoming orbital launches</small>
             </div>
             <input type="checkbox" class="apple-switch" id="alert-launch-check" checked>
           </div>
-          <div class="sheet-action-row">
-            <button class="apple-secondary-btn full-width" id="test-alert-btn">Trigger Test Alert</button>
+          <div class="sheet-action-row" style="margin-top: 14px;">
+            <button class="apple-secondary-btn full-width" id="test-alert-btn">🔔 Send Real-Time Alert Notification</button>
           </div>
         </div>
       </div>
@@ -331,8 +431,10 @@
 
   <div class="apple-toast" id="toast-message"></div>
 
-  <!-- Scripts -->
+  <!-- Third Party CDNs -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+  <script src="https://unpkg.com/globe.gl@2.32.1/dist/globe.gl.min.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
