@@ -1,3 +1,4 @@
+
 /* T&C Space Hub — Complete Web Space Intelligence Platform
    100% Verified Telemetry · Apple HIG Aesthetics · Rotating Telemetry Carousel · World Wall Clocks · Model B Cinema 3D HUD · Day/Night Terminator */
 (() => {
@@ -413,7 +414,7 @@
     state.globeTrack = trackPts;
     renderGlobeLayers();
 
-    // Embedded Cockpit In-Map HUD update
+    // Embedded Cockpit In-Map HUD update (Top-Right)
     const panel = $("selected-satellite-panel");
     if (panel) {
       const meanMotion = Number(state.currentOmm.MEAN_MOTION) || 15.5;
@@ -932,7 +933,7 @@
     } catch (_) {}
   }
 
-  // --- 9. T&C DEEP LABS: REAL MARS TIMESTAMPS ---
+  // --- 9. T&C DEEP LABS: BOUNDED MARS ROVER & FAILOVER ---
   async function loadMarsRover(rover = "perseverance") {
     state.activeRover = rover;
     const container = $("mars-photo-container");
@@ -1311,7 +1312,7 @@
     setInterval(updateLaunchCountdown, 1000);
     setInterval(updateSatelliteUI, 1200);
     setInterval(updateDeepSpaceTelemetry, 15000);
-    setInterval(cycleOverviewTelemetry, 8000); // Auto-cycles Overview Tiles every 8 seconds
+    setInterval(cycleOverviewTelemetry, 8000);
     setInterval(refreshAll, CONFIG.REFRESH_MS);
   }
 
