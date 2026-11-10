@@ -768,7 +768,7 @@
     if (!topic) return;
     try {
       const data = await cachedFetch(CONFIG.APIS.wikipedia(topic), 24 * 3600000);
-      if ($("wiki-title")) $("wiki-title").textContent = data.displaytitle || data.title || topic;
+      if ($("wiki-title")) if ($("wiki-title")) {   // Use plain clean title or strip HTML tags from displaytitle   $("wiki-title").textContent = data.title || (data.displaytitle ? data.displaytitle.replace(/<[^>]*>/g, '') : topic); }
       if ($("wiki-extract")) $("wiki-extract").textContent = data.extract || "No summary available.";
       if ($("wiki-desc-tag")) $("wiki-desc-tag").textContent = (data.description || "ENCYCLOPEDIC BRIEF").toUpperCase();
       if ($("wiki-link")) $("wiki-link").href = data.content_urls?.desktop?.page || `https://en.wikipedia.org/wiki/${encodeURIComponent(topic)}`;
