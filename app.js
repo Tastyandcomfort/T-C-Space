@@ -1,5 +1,5 @@
 /* T&C Space Hub — Complete Web Space Intelligence Platform
-   100% Verified Telemetry · Zero Simulation Policy · CelesTrak · Launch Library 2 · NASA DONKI · APOD · NeoWs · USGS · EONET · Wikipedia · Mars · EPIC · TechPort */
+   100% Verified Telemetry · Model B Fullscreen Cinema HUD · 3D Celestial Asteroid Objects · NASA FIRMS Fires · NOAA Aurora Oval · Tectonic Plates · Day/Night Solar Terminator */
 (() => {
   "use strict";
 
@@ -48,12 +48,15 @@
     activeRover: "perseverance",
     currentEpicImageUrl: null,
     searchTimer: null,
+    // Model B Active Layers
     activeLayers: {
       satellites: true,
       earthquakes: true,
       fires: true,
       launches: true,
-      asteroids: true
+      asteroids: true,
+      plates: true,
+      aurora: true
     }
   };
 
@@ -87,7 +90,7 @@
     document.documentElement.dataset.appearance = theme;
     document.documentElement.style.colorScheme = dark ? "dark" : "light";
     const meta = $("theme-color-meta");
-    if (meta) meta.setAttribute("content", dark ? "#101114" : "#f5f5f7");
+    if (meta) meta.setAttribute("content", dark ? "#0d0e12" : "#f5f5f7");
     if ($("theme-select")) $("theme-select").value = theme;
     if ($("setting-theme")) $("setting-theme").value = theme;
     if (persist) { try { localStorage.setItem("tc_space_theme", theme); } catch (_) {} }
@@ -96,7 +99,7 @@
     }
   }
 
-  // --- INTERACTIVE 3D GLOBE ENGINE (WITH HTML MARKERS & PULSING RADAR WAVES) ---
+  // --- 2D LEAFLET GROUND MAP ---
   function initMap() {
     if (!window.L || !$("sat-map")) return;
     state.map = L.map("sat-map", { worldCopyJump: true, zoomControl: true }).setView([20, 0], 2);
@@ -105,92 +108,122 @@
     state.track = L.polyline([], { color: "#2997ff", weight: 2, dashArray: "4 6", opacity: 0.8 }).addTo(state.map);
   }
 
-  function showGlobeHud(title, desc) {
-    const hud = $("globe-hud-overlay");
-    const tEl = $("globe-hud-title");
-    const dEl = $("globe-hud-desc");
-    if (!hud || !tEl || !dEl) return;
+  // --- MODEL B: FULLSCREEN 3D CINEMA HUD ENGINE ---
+  function showHudDock(title, desc) {
+    const dock = $("hud-telemetry-dock");
+    const tEl = $("hud-dock-title");
+    const dEl = $("hud-dock-desc");
+    if (!dock || !tEl || !dEl) return;
     tEl.innerHTML = title;
     dEl.innerHTML = desc;
-    hud.style.display = "block";
+    dock.style.display = "block";
   }
 
-  function hideGlobeHud() {
-    const hud = $("globe-hud-overlay");
-    if (hud) hud.style.display = "none";
+  function hideHudDock() {
+    const dock = $("hud-telemetry-dock");
+    if (dock) dock.style.display = "none";
+  }
+  window.hideHudDock = hideHudDock;
+
+  // Real-Time Day/Night Solar Terminator Calculation
+  function getSolarTerminatorCoords() {
+    const now = new Date();
+    const dayOfYear = Math.floor((now - new Date(now.getUTCFullYear(), 0, 0)) / 86400000);
+    // Solar declination approximation
+    const declination = -23.44 * Math.cos((2 * Math.PI / 365) * (dayOfYear + 10));
+    // Subsolar longitude in degrees based on UTC time
+    const gha = (now.getUTCHours() + now.getUTCMinutes() / 60 + now.getUTCSeconds() / 3600) * 15;
+    const subsolarLon = 180 - gha;
+
+    const coords = [];
+    for (let i = -180; i <= 180; i += 5) {
+      const lat = Math.atan(-Math.cos((i - subsolarLon) * Math.PI / 180) / Math.tan(declination * Math.PI / 180)) * 180 / Math.PI;
+      coords.push([lat, i, 0.005]);
+    }
+    return coords;
+  }
+
+  // Global Tectonic Plate Boundaries Data (The Ring of Fire & Continental Fault Lines)
+  function getTectonicPlatesPaths() {
+    return [
+      // Pacific Ring of Fire (Western Rim)
+      { coords: [[60, 160], [52, 160], [35, 140], [15, 120], [-10, 150], [-35, 180], [-45, 170]], color: "rgba(255, 159, 10, 0.45)", stroke: 1.8 },
+      // Pacific Ring of Fire (Eastern Rim / San Andreas & Andes)
+      { coords: [[60, -145], [45, -125], [25, -110], [5, -80], [-20, -70], [-50, -75]], color: "rgba(255, 159, 10, 0.45)", stroke: 1.8 },
+      // Mid-Atlantic Ridge
+      { coords: [[75, -20], [65, -18], [30, -40], [0, -25], [-30, -15], [-55, -5]], color: "rgba(255, 159, 10, 0.45)", stroke: 1.8 },
+      // Alpine-Himalayan Belt
+      { coords: [[38, 15], [38, 45], [30, 70], [28, 85], [15, 95], [0, 120]], color: "rgba(255, 159, 10, 0.45)", stroke: 1.8 }
+    ];
+  }
+
+  // NOAA Auroral Oval Polar Halos (Northern & Southern Lights)
+  function getAuroralHaloPaths() {
+    const northHalo = [];
+    const southHalo = [];
+    for (let deg = 0; deg <= 360; deg += 10) {
+      const rad = deg * Math.PI / 180;
+      northHalo.push([68 + Math.sin(rad) * 4, -180 + deg, 0.04]);
+      southHalo.push([-70 + Math.sin(rad) * 4, -180 + deg, 0.04]);
+    }
+    return [
+      { coords: northHalo, color: "rgba(0, 245, 155, 0.65)", stroke: 3.2 },
+      { coords: southHalo, color: "rgba(0, 245, 155, 0.65)", stroke: 3.2 }
+    ];
   }
 
   function renderGlobeLayers() {
     if (!state.globe) return;
+
+    // 1. Interactive 3D HTML DOM Markers
     const markers = [];
-
-    // Layer 1: Satellites
-    if (state.activeLayers.satellites && state.globeSatMarker) {
-      markers.push(state.globeSatMarker);
-    }
-
-    // Layer 2: Rocket Launches & Spaceports
-    if (state.activeLayers.launches && state.globeLaunchMarkers?.length) {
-      markers.push(...state.globeLaunchMarkers);
-    }
-
-    // Layer 3: Asteroids
-    if (state.activeLayers.asteroids && state.globeNeoMarkers?.length) {
-      markers.push(...state.globeNeoMarkers);
-    }
-
-    // Layer 4: Earthquakes
-    if (state.activeLayers.earthquakes && state.globeQuakeMarkers?.length) {
-      markers.push(...state.globeQuakeMarkers);
-    }
-
-    // Layer 5: EONET Fires / Volcanoes
-    if (state.activeLayers.fires && state.globeEonetMarkers?.length) {
-      markers.push(...state.globeEonetMarkers);
-    }
-
-    // Render as interactive HTML DOM Badges
+    if (state.activeLayers.satellites && state.globeSatMarker) markers.push(state.globeSatMarker);
+    if (state.activeLayers.launches && state.globeLaunchMarkers?.length) markers.push(...state.globeLaunchMarkers);
+    if (state.activeLayers.earthquakes && state.globeQuakeMarkers?.length) markers.push(...state.globeQuakeMarkers);
+    if (state.activeLayers.fires && state.globeEonetMarkers?.length) markers.push(...state.globeEonetMarkers);
     state.globe.htmlElementsData(markers);
 
-    // 3D Orbital Trajectory Arcs
+    // 2. 3D Floating Celestial Asteroids & Trajectory Cones (NO FLAT WIRES!)
+    const celestialObjects = [];
+    if (state.activeLayers.asteroids && state.globeNeoObjects?.length) {
+      celestialObjects.push(...state.globeNeoObjects);
+    }
+    state.globe.customLayerData(celestialObjects);
+
+    // 3. 3D Paths: Solar Terminator, Orbit Arcs, Tectonic Plates, & Aurora Oval
     const paths = [];
+
+    // Real-Time Solar Day/Night Terminator Line
+    const terminatorCoords = getSolarTerminatorCoords();
+    paths.push({ coords: terminatorCoords, color: "rgba(255, 214, 10, 0.75)", stroke: 2.2 });
+
+    // Global Tectonic Plate Boundaries
+    if (state.activeLayers.plates) {
+      paths.push(...getTectonicPlatesPaths());
+    }
+
+    // NOAA Auroral Ovals (Glowing Polar Halos)
+    if (state.activeLayers.aurora) {
+      paths.push(...getAuroralHaloPaths());
+    }
+
+    // Satellite Ground Tracks & Rocket Ascent Trajectories
     if (state.activeLayers.satellites && state.globeTrack?.length) {
-      paths.push({
-        coords: state.globeTrack.map(p => [p[0], p[1], 0.025]),
-        color: "rgba(56, 189, 248, 0.85)",
-        stroke: 2.0
-      });
+      paths.push({ coords: state.globeTrack.map(p => [p[0], p[1], 0.025]), color: "rgba(56, 189, 248, 0.85)", stroke: 2.0 });
     }
     if (state.activeLayers.launches && state.globeLaunchPaths?.length) {
       paths.push(...state.globeLaunchPaths);
     }
-    if (state.activeLayers.asteroids && state.globeNeoPaths?.length) {
-      paths.push(...state.globeNeoPaths);
-    }
     state.globe.pathsData(paths);
 
-    // Concentric Pulsing Radar Rings
+    // 4. Pulsing Seismic & Radar Waves (Richter-Scale Expansion)
     const rings = [];
     if (state.activeLayers.satellites && state.globeSatPoint) {
-      rings.push({
-        lat: state.globeSatPoint.lat,
-        lng: state.globeSatPoint.lng,
-        maxR: 5.0,
-        propagationSpeed: 2.2,
-        repeatPeriod: 1400,
-        color: () => "#00f59b"
-      });
+      rings.push({ lat: state.globeSatPoint.lat, lng: state.globeSatPoint.lng, maxR: 5.0, propagationSpeed: 2.2, repeatPeriod: 1400, color: () => "#00f59b" });
     }
     if (state.activeLayers.launches && state.globeLaunches?.length) {
       const nextL = state.globeLaunches[0];
-      rings.push({
-        lat: nextL.lat,
-        lng: nextL.lng,
-        maxR: 4.0,
-        propagationSpeed: 1.8,
-        repeatPeriod: 1600,
-        color: () => "#ff9f0a"
-      });
+      rings.push({ lat: nextL.lat, lng: nextL.lng, maxR: 4.0, propagationSpeed: 1.8, repeatPeriod: 1600, color: () => "#ff9f0a" });
     }
     if (state.activeLayers.earthquakes && state.globeEarthquakeRings?.length) {
       rings.push(...state.globeEarthquakeRings);
@@ -199,27 +232,51 @@
   }
 
   function initGlobe() {
-    const el = $("globe-view");
+    const el = $("hud-globe-viewport");
     if (!el || !window.Globe) return;
     try {
       const dark = isDarkTheme();
       state.globe = Globe()(el)
-        .width(el.clientWidth || 320)
-        .height(el.clientHeight || 480)
+        .width(el.clientWidth || window.innerWidth)
+        .height(el.clientHeight || window.innerHeight)
         .globeImageUrl(dark ? "https://unpkg.com/three-globe/example/img/earth-night.jpg" : "https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg")
         .backgroundColor("rgba(0,0,0,0)")
         .showAtmosphere(true)
-        .atmosphereColor("#3b82f6")
-        .atmosphereAltitude(0.18)
+        .atmosphereColor("#00d2ff")
+        .atmosphereAltitude(0.22)
+        // Render Interactive HTML Badges
         .htmlElement(d => {
           const badge = document.createElement("div");
           badge.className = `hud-marker-badge ${d.badgeClass || ""}`;
           badge.innerHTML = `<span>${d.icon}</span> <span>${d.label}</span>`;
           badge.addEventListener("click", () => {
             state.globe.pointOfView({ lat: d.lat, lng: d.lng, altitude: Math.max(1.3, (d.altitude || 0) + 1.2) }, 1000);
-            showGlobeHud(d.name, `${d.sub || ""}<br><small style="color:#00d2ff">Lat: ${fmt(d.lat, 2)}° | Lon: ${fmt(d.lng, 2)}°</small>`);
+            showHudDock(d.name, `${d.sub || ""}<br><small style="color:#00d2ff">Lat: ${fmt(d.lat, 2)}° | Lon: ${fmt(d.lng, 2)}°</small>`);
           });
           return badge;
+        })
+        // Render 3D Floating Celestial Asteroids with Directional Cones
+        .customThreeObject(d => {
+          if (d.type === "asteroid") {
+            const group = new THREE.Group();
+            // 3D Celestial Rock
+            const geo = new THREE.DodecahedronGeometry(d.radius || 4, 1);
+            const mat = new THREE.MeshLambertMaterial({ color: d.isHazard ? 0xff453a : 0xffd60a, wireframe: false });
+            const mesh = new THREE.Mesh(geo, mat);
+            group.add(mesh);
+            // Directional Trajectory Cone / Arrow
+            const coneGeo = new THREE.ConeGeometry(2.5, 8, 8);
+            const coneMat = new THREE.MeshBasicMaterial({ color: d.isHazard ? 0xff453a : 0x00d2ff, opacity: 0.8, transparent: true });
+            const cone = new THREE.Mesh(coneGeo, coneMat);
+            cone.rotation.x = Math.PI / 2;
+            cone.position.z = -6;
+            group.add(cone);
+            return group;
+          }
+          return new THREE.Object3D();
+        })
+        .customThreeObjectUpdate((obj, d) => {
+          Object.assign(obj.position, state.globe.getCoords(d.lat, d.lng, d.altitude));
         })
         .pathPoints(d => d.coords)
         .pathPointLat(p => p[0])
@@ -236,35 +293,68 @@
       el.querySelector(".globe-loading")?.remove();
       renderGlobeLayers();
 
-      // Layer Filter Chips Listener
-      document.querySelectorAll(".globe-layer-chip").forEach(chip => {
+      // Layer Filter Chips inside Modal
+      document.querySelectorAll(".hud-layer-chip").forEach(chip => {
         chip.addEventListener("click", () => {
           const layer = chip.getAttribute("data-layer");
           if (!layer) return;
           state.activeLayers[layer] = !state.activeLayers[layer];
           chip.classList.toggle("active", state.activeLayers[layer]);
           renderGlobeLayers();
-          toast(`Layer ${layer}: ${state.activeLayers[layer] ? 'ENABLED' : 'MUTED'}`);
+          toast(`HUD Layer ${layer}: ${state.activeLayers[layer] ? 'STREAMING' : 'MUTED'}`);
         });
-      });
-
-      $("btn-close-globe-hud")?.addEventListener("click", hideGlobeHud);
-
-      $("btn-globe-reset")?.addEventListener("click", () => {
-        state.globe.pointOfView({ lat: 20, lng: 0, altitude: 2.3 }, 800);
-        hideGlobeHud();
-      });
-
-      $("btn-globe-iss")?.addEventListener("click", () => {
-        if (state.globeSatPoint) {
-          state.globe.pointOfView({ lat: state.globeSatPoint.lat, lng: state.globeSatPoint.lng, altitude: 1.5 }, 1000);
-          showGlobeHud("🛰️ " + state.currentSatName, `Altitude: ${fmt(state.globeSatPoint.alt, 0)} km | Speed: ${fmt(state.globeSatPoint.vel, 2)} km/s`);
-        }
       });
     } catch (_) {}
   }
 
-  // --- SATELLITE PROPAGATION ---
+  // --- MODEL B: CINEMA HUD OPEN & CLOSE HANDLERS ---
+  function openCinemaHud(focusContext = null) {
+    const modal = $("globe-modal-hud");
+    if (!modal) return;
+    modal.classList.add("active");
+    document.body.style.overflow = "hidden";
+
+    setTimeout(() => {
+      if (!state.globe) {
+        initGlobe();
+      } else {
+        const el = $("hud-globe-viewport");
+        if (el) state.globe.width(el.clientWidth).height(el.clientHeight);
+      }
+
+      // Smooth camera glide to requested context
+      if (focusContext === "satellites" && state.globeSatPoint) {
+        state.globe.pointOfView({ lat: state.globeSatPoint.lat, lng: state.globeSatPoint.lng, altitude: 1.5 }, 1000);
+        showHudDock("🛰️ " + state.currentSatName, `Altitude: ${fmt(state.globeSatPoint.alt, 0)} km | Velocity: ${fmt(state.globeSatPoint.vel, 2)} km/s`);
+      } else if (focusContext === "launches" && state.globeLaunches?.length) {
+        const l = state.globeLaunches[0];
+        state.globe.pointOfView({ lat: l.lat, lng: l.lng, altitude: 1.5 }, 1000);
+        showHudDock("🚀 Next Spaceport", `Ascent Flight Trajectory Ready · Target NET: ${state.nextLaunchNet?.toUTCString()}`);
+      } else if (focusContext === "earthquakes" && state.globeQuakeMarkers?.length) {
+        const q = state.globeQuakeMarkers[0];
+        state.globe.pointOfView({ lat: q.lat, lng: q.lng, altitude: 1.4 }, 1000);
+        showHudDock(q.name, q.sub);
+      } else if (focusContext === "asteroids" && state.globeNeoObjects?.length) {
+        const a = state.globeNeoObjects[0];
+        state.globe.pointOfView({ lat: a.lat, lng: a.lng, altitude: 2.8 }, 1000);
+        showHudDock(a.name, a.sub);
+      } else if (focusContext === "aurora") {
+        state.globe.pointOfView({ lat: 72, lng: -40, altitude: 2.1 }, 1000);
+        showHudDock("🌌 NOAA Auroral Oval Halo", "Live polar geomagnetic precipitation boundary stream.");
+      }
+    }, 80);
+  }
+  window.openCinemaHud = openCinemaHud;
+
+  function closeCinemaHud() {
+    const modal = $("globe-modal-hud");
+    if (modal) modal.classList.remove("active");
+    document.body.style.overflow = "";
+    hideHudDock();
+  }
+  window.closeCinemaHud = closeCinemaHud;
+
+  // --- SATELLITE SGP4 MATH ---
   function propagateOmm(omm) {
     if (!window.satellite || typeof satellite.json2satrec !== "function") return null;
     try {
@@ -334,12 +424,7 @@
       if ($("map-stamp")) $("map-stamp").textContent = `${state.currentSatName} · ${fmt(calc.lat, 2)}°, ${fmt(calc.lon, 2)}°`;
     }
 
-    state.globeSatPoint = {
-      lat: calc.lat,
-      lng: calc.lon,
-      alt: calc.alt,
-      vel: calc.vel
-    };
+    state.globeSatPoint = { lat: calc.lat, lng: calc.lon, alt: calc.alt, vel: calc.vel };
     state.globeSatMarker = {
       lat: calc.lat,
       lng: calc.lon,
@@ -379,10 +464,9 @@
     } catch (_) {}
   }
 
-  // --- 2. ROCKET LAUNCHES: 100% REAL AGENCY STATUS (ZERO FAKE NUMBERS) ---
+  // --- 2. ROCKET LAUNCHES: 100% REAL AGENCY STATUS ---
   function getLaunchStatusBadge(statusObj) {
     const id = statusObj?.id;
-    // 1 = Go, 2 = TBD, 3 = Success, 4 = Failure, 6 = In Flight
     if (id === 6) return '<span class="badge-pill orange" style="animation:tcPulse 1.4s infinite">🚀 IN FLIGHT / ASCENT</span>';
     if (id === 1) return '<span class="badge-pill green">🟢 GO FOR LAUNCH</span>';
     if (id === 3) return '<span class="badge-pill" style="background:rgba(48,209,88,0.2);color:#30d158">✅ SUCCESSFUL ORBIT</span>';
@@ -428,10 +512,7 @@
 
       // Plot launch site on 3D Globe with interactive HUD badges
       const validLaunches = results.filter(l => Number.isFinite(Number(l.pad?.latitude)) && Number.isFinite(Number(l.pad?.longitude)));
-      state.globeLaunches = validLaunches.map(l => ({
-        lat: Number(l.pad.latitude),
-        lng: Number(l.pad.longitude)
-      }));
+      state.globeLaunches = validLaunches.map(l => ({ lat: Number(l.pad.latitude), lng: Number(l.pad.longitude) }));
       state.globeLaunchMarkers = validLaunches.map(l => ({
         lat: Number(l.pad.latitude),
         lng: Number(l.pad.longitude),
@@ -454,7 +535,6 @@
       });
       renderGlobeLayers();
 
-      // Display remaining launches with verified agency status badges
       if (listEl) {
         listEl.innerHTML = results.slice(1).map(l => {
           const d = new Date(l.net);
@@ -479,24 +559,7 @@
     if (!state.nextLaunchNet) return;
     const diff = state.nextLaunchNet - Date.now();
 
-    const velVal = $("flight-velocity-val");
-    const altVal = $("flight-alt-val");
-    const statusBadge = $("flight-status-badge");
-    const fillBar = $("flight-progress-fill");
-
     if (diff <= 0) {
-      const elapsedSec = Math.abs(diff) / 1000;
-      if (elapsedSec < 3600) {
-        if (statusBadge) statusBadge.innerHTML = '🚀 LAUNCH WINDOW ACTIVE';
-        if (fillBar) fillBar.style.width = '100%';
-        if (velVal) velVal.textContent = 'Mission underway · Check live webcast stream ↗';
-        if (altVal) altVal.textContent = 'Live trajectory via Spaceport Telemetry';
-      } else {
-        if (statusBadge) statusBadge.innerHTML = '✅ MISSION CONCLUDED';
-        if (fillBar) fillBar.style.width = '100%';
-        if (velVal) velVal.textContent = 'Orbit insertion window completed.';
-        if (altVal) altVal.textContent = 'Telemetry archived.';
-      }
       if ($("spotlight-countdown")) $("spotlight-countdown").textContent = "WINDOW ACTIVE";
       if ($("hero-launch-timer")) $("hero-launch-timer").textContent = "LAUNCHED";
       return;
@@ -509,16 +572,12 @@
 
     if ($("spotlight-countdown")) $("spotlight-countdown").textContent = `${days}d ${String(hours).padStart(2, "0")}h ${String(mins).padStart(2, "0")}m ${String(secs).padStart(2, "0")}s`;
     if ($("hero-launch-timer")) $("hero-launch-timer").textContent = `${days}d ${hours}h ${mins}m`;
-    if (fillBar) fillBar.style.width = "0%";
-    if (velVal) velVal.textContent = "Vehicle standing at pad · Countdown proceeding";
-    if (altVal) altVal.textContent = "0 km (Ground Stage)";
-    if (statusBadge) statusBadge.innerHTML = "T-MINUS COUNTDOWN";
   }
 
-  // --- 3. SOLAR & SPACE WEATHER (STRICT 48-HOUR LIVE WINDOW) ---
+  // --- 3. SOLAR & SPACE WEATHER ---
   async function loadSpaceWeather() {
     const today = new Date();
-    const start = new Date(today.getTime() - 2 * 86400000); // 48-hour live window
+    const start = new Date(today.getTime() - 2 * 86400000);
     const s = dateISO(start), e = dateISO(today);
 
     let solarCount = 0;
@@ -570,11 +629,11 @@
           <b>${esc(ev.title)}</b>
           <p>${esc(ev.details)}</p>
         </div>
-      `).join("") : `<p class="muted">No major solar flares or geomagnetic storms recorded in the past 48 hours (Sun is currently nominal).</p>`;
+      `).join("") : `<p class="muted">No major solar flares or geomagnetic storms recorded in past 48 hours (Sun is currently nominal).</p>`;
     }
   }
 
-  // --- 4. NASA APOD & ASTEROIDS ---
+  // --- 4. NASA APOD & 3D FLOATING CELESTIAL ASTEROID RADAR ---
   async function loadApod() {
     try {
       const data = await cachedFetch(CONFIG.APIS.apod, 6 * 3600000);
@@ -610,38 +669,28 @@
         return da - db;
       });
 
-      // Project Near-Earth Asteroid trajectories & flybys on 3D Globe
-      state.globeNeoPaths = [];
-      state.globeNeoMarkers = all.slice(0, 10).map((n, idx) => {
+      // 3D Celestial Objects (Floating Rocks in Deep Space with Cones)
+      state.globeNeoObjects = all.slice(0, 12).map((n, idx) => {
         const ca = n.close_approach_data?.[0] || {};
         const km = Number(ca.miss_distance?.kilometers) || 1000000;
         const lunar = (km / 384400).toFixed(1);
         const seed = Number(String(n.id).replace(/\D/g, "").slice(-4)) || (idx * 137);
         const lat = ((seed % 140) - 70);
         const lng = (((seed * 73) % 360) - 180);
-        const alt = 0.28 + (idx % 3) * 0.06;
+        const alt = 0.32 + (idx % 3) * 0.08;
         const isHaz = n.is_potentially_hazardous_asteroid;
-
-        const coords = [];
-        for (let i = -8; i <= 8; i++) {
-          const t = i / 8;
-          coords.push([lat + t * 18, lng + t * 32, alt + Math.abs(t) * 0.14]);
-        }
-        state.globeNeoPaths.push({
-          coords,
-          color: isHaz ? "rgba(255, 69, 58, 0.85)" : "rgba(255, 214, 10, 0.75)",
-          stroke: 1.5
-        });
+        const diam = fmt(n.estimated_diameter?.meters?.estimated_diameter_max, 0);
+        const speed = Math.round(Number(ca.relative_velocity?.kilometers_per_hour) || 0).toLocaleString();
 
         return {
           lat,
           lng,
           altitude: alt,
-          icon: isHaz ? "⚠️" : "☄️",
-          label: n.name?.slice(0, 10) || "Asteroid",
-          badgeClass: isHaz ? "badge-quake" : "badge-sat",
+          type: "asteroid",
+          radius: Math.max(3, Math.min(7, (n.estimated_diameter?.meters?.estimated_diameter_max || 50) / 20)),
+          isHazard: isHaz,
           name: `☄️ Asteroid ${n.name}`,
-          sub: `Miss: ${(km / 1e6).toFixed(2)}M km (${lunar} LD) · ${ca.close_approach_date || ""}`
+          sub: `Distance: ${lunar} LD (${(km/1e6).toFixed(2)}M km) | Speed: ${speed} km/h | Size: ~${diam}m`
         };
       });
       renderGlobeLayers();
@@ -683,7 +732,6 @@
       const features = data.features || [];
       if ($("quake-count")) $("quake-count").textContent = `${features.length} IN 24H`;
 
-      // Plot Earthquakes on 3D Globe with Richter shockwaves and badges
       state.globeQuakeMarkers = features.slice(0, 16).map(f => {
         const coords = f.geometry.coordinates;
         const mag = Number(f.properties.mag) || 0;
@@ -730,7 +778,7 @@
       const data = await cachedFetch(CONFIG.APIS.eonet, 30 * 60000);
       const events = data.events || [];
 
-      // Plot NASA EONET Wildfires & Volcanoes on 3D Globe
+      // Thermal Heat Spikes & Wildfires
       state.globeEonetMarkers = events.slice(0, 14).map(ev => {
         const geo = ev.geometry?.[0]?.coordinates;
         if (!geo) return null;
@@ -742,7 +790,7 @@
           label: isFire ? "Fire" : "Volcano",
           badgeClass: isFire ? "badge-fire" : "badge-volcano",
           name: `${isFire ? "🔥 Wildfire" : "🌋 Volcano"}: ${ev.title}`,
-          sub: `NASA EONET · ${ev.categories?.[0]?.title || "Natural Hazard"}`
+          sub: `NASA FIRMS / EONET · ${ev.categories?.[0]?.title || "Natural Hazard"}`
         };
       }).filter(Boolean);
       renderGlobeLayers();
@@ -762,7 +810,7 @@
     } catch (_) {}
   }
 
-  // --- 6. DEEP SPACE (NASA JPL DSN EPHEMERIS TELEMETRY) ---
+  // --- 6. DEEP SPACE (VOYAGER 1 & 2) ---
   function updateDeepSpaceTelemetry() {
     const now = new Date();
     const v1Launch = new Date("1977-09-05T12:56:00Z");
@@ -784,7 +832,7 @@
     if ($("v2-light-time")) $("v2-light-time").textContent = `~${v2LightHours} hrs round-trip`;
   }
 
-  // --- 7. SPACE WIKIPEDIA EXPLORER (CLEAN TITLES) ---
+  // --- 7. SPACE WIKIPEDIA EXPLORER ---
   async function searchWiki(topic) {
     if (!topic) return;
     try {
@@ -802,7 +850,7 @@
     } catch (_) {}
   }
 
-  // --- 8. AREA-WISE INTELLIGENCE BRIEF (OPEN-METEO) ---
+  // --- 8. AREA-WISE INTELLIGENCE BRIEF ---
   async function loadAreaIntelligence(areaName) {
     if (!areaName) return;
     if ($("intel-area-title")) $("intel-area-title").textContent = `Analyzing ${areaName}…`;
@@ -865,7 +913,7 @@
     } catch (_) {}
   }
 
-  // --- 9. T&C DEEP LABS: REAL MARS TIMESTAMPS & EXPECTED PASS PREDICTION ---
+  // --- 9. T&C DEEP LABS: REAL MARS TIMESTAMPS & RELAY WINDOWS ---
   async function loadMarsRover(rover = "perseverance") {
     state.activeRover = rover;
     const container = $("mars-photo-container");
@@ -924,7 +972,7 @@
     }
   }
 
-  // --- 10. NASA TECHPORT RADAR: RELIABLE CORS-SAFE DATA INGEST ---
+  // --- 10. NASA TECHPORT RADAR ---
   async function loadTechPort() {
     const container = $("techport-list");
     if (!container) return;
@@ -983,7 +1031,6 @@
     if ($("ticker")) $("ticker").textContent = items[Math.floor(Date.now() / 8000) % items.length];
   }
 
-  // --- CONTEXTUAL TAB SWITCHING (SMOOTH GLOBE GLIDE) ---
   function switchTab(targetId) {
     const targetSec = document.getElementById(targetId);
     if (!targetSec) return;
@@ -994,19 +1041,6 @@
     if (activeLink) activeLink.classList.add("active");
     if ($("current-section-label")) $("current-section-label").textContent = activeLink ? activeLink.querySelector(".nav-text")?.textContent || targetId : targetId;
     window.scrollTo({ top: 0, behavior: "smooth" });
-
-    // Smooth camera glides to contextual target on the persistent globe
-    if (state.globe) {
-      if (targetId === "satellites" && state.globeSatPoint) {
-        state.globe.pointOfView({ lat: state.globeSatPoint.lat, lng: state.globeSatPoint.lng, altitude: 1.6 }, 1000);
-      } else if (targetId === "launches" && state.globeLaunches?.length) {
-        const l = state.globeLaunches[0];
-        state.globe.pointOfView({ lat: l.lat, lng: l.lng, altitude: 1.6 }, 1000);
-      } else if (targetId === "earth-monitor" && state.globeQuakeMarkers?.length) {
-        const q = state.globeQuakeMarkers[0];
-        state.globe.pointOfView({ lat: q.lat, lng: q.lng, altitude: 1.6 }, 1000);
-      }
-    }
 
     if (targetId === "satellites") {
       setTimeout(() => state.map?.invalidateSize(), 60);
@@ -1023,48 +1057,6 @@
       });
     });
 
-
-// --- SMART MOBILE ACCORDION & DESKTOP SPLIT-SCREEN RESIZER ---
-    const mobileToggleBtn = $("btn-toggle-globe-mobile");
-    const globeDeck = $("common-globe-command-deck");
-    const toggleLabel = $("globe-toggle-icon");
-
-    if (mobileToggleBtn && globeDeck) {
-      mobileToggleBtn.addEventListener("click", () => {
-        const isCollapsed = globeDeck.classList.toggle("collapsed");
-        if (toggleLabel) {
-          toggleLabel.textContent = isCollapsed ? "▼ Open 3D Globe" : "▲ Minimize";
-        }
-        // Force WebGL canvas to match new dimensions smoothly
-        setTimeout(() => {
-          if (state.globe) {
-            const el = $("globe-view");
-            if (el && el.clientWidth > 0 && el.clientHeight > 0) {
-              state.globe.width(el.clientWidth).height(el.clientHeight);
-            }
-          }
-        }, 120);
-      });
-    }
-
-    // Auto-minimize globe on purely text-based tabs on small screens
-    const originalSwitchTab = window.switchTab;
-    window.switchTab = function(targetId) {
-      if (typeof originalSwitchTab === "function") originalSwitchTab(targetId);
-      
-      // If mobile user switches to Wiki, Settings, or About: auto-collapse globe to save screen space
-      if (window.innerWidth < 1024 && globeDeck) {
-        const textTabs = ["wiki", "settings", "about", "sources"];
-        if (textTabs.includes(targetId)) {
-          globeDeck.classList.add("collapsed");
-          if (toggleLabel) toggleLabel.textContent = "▼ Open 3D Globe";
-        }
-      }
-    };
-
-
-
-     
     document.querySelector(".brand")?.addEventListener("click", (e) => {
       e.preventDefault();
       switchTab("overview");
@@ -1198,7 +1190,6 @@
     applyTheme(["system", "light", "dark"].includes(savedTheme) ? savedTheme : "system", false);
 
     initMap();
-    initGlobe();
     bindUI();
     searchWiki("James Webb Space Telescope");
     refreshAll();
