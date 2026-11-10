@@ -14,20 +14,31 @@
   <link rel="stylesheet" href="styles.css">
 
   <style>
-    /* Pure CSS: Hide install UI when running inside installed standalone PWA */
+    /* PURE CSS: Hide install prompts when inside installed standalone PWA */
     @media (display-mode: standalone), (display-mode: fullscreen), (display-mode: minimal-ui) {
       #open-install-modal, #side-install-nav, .app-banner-card, #install-modal {
         display: none !important;
       }
     }
 
-    /* Natural, Uncongested Layout for all Tabs */
+    /* Layout Baseline */
+    .app-shell {
+      min-height: 100vh;
+      display: flex;
+    }
+    .main-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
     .content-wrap {
+      flex: 1;
       display: block;
       width: 100%;
       max-width: 1380px;
       margin: 0 auto;
-      padding: 0 16px;
+      padding: 0 18px 40px 18px;
     }
 
     /* Live Pulsing Beacon Animation */
@@ -49,159 +60,287 @@
     }
 
     /* ==============================================================
-       MODEL B: FULL-SCREEN CINEMA 3D HUD OVERLAY (RESPONSIVE)
+       EXECUTIVE HOTEL-STYLE WORLD WALL CLOCKS (STICKY TOP TICKER)
        ============================================================== */
+    .world-clocks-bar {
+      display: flex;
+      align-items: center;
+      background: rgba(14, 18, 25, 0.95);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 8px 18px;
+      overflow-x: auto;
+      gap: 16px;
+      white-space: nowrap;
+      scrollbar-width: thin;
+    }
+    .world-clock-item {
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid rgba(255, 255, 255, 0.08);
+      padding-right: 16px;
+      min-width: 120px;
+    }
+    .world-clock-item:last-child {
+      border-right: none;
+    }
+    .world-clock-city {
+      font-size: 0.68rem;
+      letter-spacing: 0.8px;
+      color: var(--muted);
+      font-weight: 700;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .world-clock-time {
+      font-family: monospace;
+      font-size: 0.92rem;
+      font-weight: bold;
+      color: var(--fg);
+    }
+    .world-clock-date {
+      font-size: 0.65rem;
+      color: var(--muted);
+      opacity: 0.85;
+    }
+
+    /* Light Mode Contrast for 3D HUD Button */
+    .btn-cinema-hud-launch {
+      padding: 7px 15px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+      border: 1px solid #0071e3;
+      background: #0071e3;
+      color: #ffffff !important;
+    }
+    html[data-theme="dark"] .btn-cinema-hud-launch {
+      background: rgba(41, 151, 255, 0.18);
+      border-color: #2997ff;
+      color: #2997ff !important;
+    }
+    .btn-cinema-hud-launch:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(41, 151, 255, 0.35);
+    }
+
+    /* Interactive Clickable Metric Tiles in Overview */
+    .metric-card.interactive-tile {
+      cursor: pointer;
+      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+    }
+    .metric-card.interactive-tile:hover {
+      transform: translateY(-3px);
+      border-color: #2997ff;
+      box-shadow: 0 8px 24px rgba(41, 151, 255, 0.18);
+    }
+    .metric-hero-sub {
+      font-size: 1.15rem !important;
+      font-weight: 800;
+      color: var(--fg);
+      display: block;
+      margin: 4px 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Integrated 2D Map Quick-Select Presets */
+    .map-preset-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+    .map-preset-btn {
+      padding: 4px 10px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 14px;
+      font-size: 0.74rem;
+      font-weight: 600;
+      color: var(--fg);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .map-preset-btn:hover {
+      background: rgba(41, 151, 255, 0.2);
+      border-color: #2997ff;
+      color: #2997ff;
+    }
+
+    /* Scientific Evaluation Gauges for Intel Brief */
+    .intel-gauge-box {
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      font-size: 0.7rem;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .intel-gauge-bar {
+      height: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .intel-gauge-fill {
+      height: 100%;
+      border-radius: 2px;
+      transition: width 0.4s ease;
+    }
+
+    /* ==============================================================
+       PERMANENT STICKY FOOTER & T&C ECOSYSTEM DOCK
+       ============================================================== */
+    .docked-sticky-footer {
+      position: sticky;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: rgba(12, 14, 20, 0.94);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      z-index: 50;
+      padding: 10px 20px;
+      box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.5);
+    }
+    .docked-footer-inner {
+      max-width: 1380px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .docked-ecosystem-strip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .docked-eco-btn {
+      padding: 5px 12px;
+      border-radius: 6px;
+      font-size: 0.74rem;
+      font-weight: 700;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--fg);
+      transition: all 0.2s;
+    }
+    .docked-eco-btn:hover {
+      background: rgba(41, 151, 255, 0.15);
+      border-color: #2997ff;
+      color: #2997ff;
+    }
+    .docked-meta-credits {
+      font-size: 0.72rem;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Model B Cinema HUD Overlay */
     .globe-modal-hud {
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
       background: rgba(8, 10, 14, 0.96);
       backdrop-filter: blur(18px);
       -webkit-backdrop-filter: blur(18px);
       z-index: 999999;
       display: none;
       flex-direction: column;
-      animation: fadeInCinema 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+      animation: fadeInCinema 0.25s ease-out;
     }
-    .globe-modal-hud.active {
-      display: flex;
-    }
+    .globe-modal-hud.active { display: flex; }
     @keyframes fadeInCinema {
       from { opacity: 0; transform: scale(0.98); }
       to { opacity: 1; transform: scale(1); }
     }
-
     .hud-header-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 12px 20px;
+      padding: 10px 20px;
       background: rgba(14, 18, 25, 0.95);
       border-bottom: 1px solid rgba(41, 151, 255, 0.25);
       z-index: 10;
-    }
-    .hud-title-wrap {
-      display: flex;
-      align-items: center;
+      flex-wrap: wrap;
       gap: 10px;
     }
     .hud-layer-toolbar {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
-      align-items: center;
+      gap: 6px;
     }
     .hud-layer-chip {
-      padding: 5px 12px;
-      border-radius: 16px;
-      font-size: 0.76rem;
+      padding: 4px 10px;
+      border-radius: 14px;
+      font-size: 0.74rem;
       font-weight: 600;
       cursor: pointer;
       border: 1px solid rgba(255,255,255,0.15);
       background: rgba(255,255,255,0.04);
       color: var(--muted);
-      transition: all 0.2s ease;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
+      transition: all 0.2s;
     }
     .hud-layer-chip.active {
       background: rgba(41, 151, 255, 0.22);
       border-color: #2997ff;
       color: #fff;
-      box-shadow: 0 0 12px rgba(41, 151, 255, 0.4);
     }
     .hud-close-btn {
-      padding: 8px 18px;
+      padding: 6px 14px;
       background: rgba(255, 69, 58, 0.15);
       border: 1px solid rgba(255, 69, 58, 0.4);
       color: #ff453a;
-      border-radius: 8px;
+      border-radius: 6px;
       font-weight: bold;
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       cursor: pointer;
-      transition: all 0.2s;
     }
-    .hud-close-btn:hover {
-      background: rgba(255, 69, 58, 0.3);
-      color: #fff;
-    }
-
-    /* 3D WebGL Viewport */
     #hud-globe-viewport {
       flex: 1;
       width: 100%;
       height: 100%;
       position: relative;
     }
-
-    /* Interactive HUD Telemetry Card inside Modal */
     .hud-telemetry-dock {
       position: absolute;
-      top: 80px;
-      right: 24px;
-      max-width: 340px;
+      top: 75px; right: 20px;
+      max-width: 330px;
       background: rgba(11, 14, 20, 0.94);
       backdrop-filter: blur(14px);
       -webkit-backdrop-filter: blur(14px);
       border: 1px solid rgba(41, 151, 255, 0.5);
-      border-radius: 12px;
-      padding: 16px;
+      border-radius: 10px;
+      padding: 14px;
       color: #fff;
       z-index: 20;
-      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.8);
       display: none;
-      animation: slideInHud 0.25s ease-out;
     }
-    @keyframes slideInHud {
-      from { opacity: 0; transform: translateX(12px); }
-      to { opacity: 1; transform: translateX(0); }
-    }
-    .hud-telemetry-dock h4 {
-      margin: 0 0 6px 0;
-      font-size: 1rem;
-      color: #00d2ff;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .hud-telemetry-dock p {
-      margin: 0;
-      font-size: 0.82rem;
-      color: #ccc;
-      line-height: 1.5;
-    }
-
-    /* 3D DOM Marker Badges on the Globe */
-    .hud-marker-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      padding: 4px 9px;
-      border-radius: 12px;
-      font-size: 11px;
-      font-weight: bold;
-      color: #fff;
-      cursor: pointer;
-      box-shadow: 0 3px 10px rgba(0,0,0,0.7);
-      backdrop-filter: blur(4px);
-      -webkit-backdrop-filter: blur(4px);
-      white-space: nowrap;
-      pointer-events: auto;
-      transition: transform 0.2s ease;
-      border: 1px solid rgba(255,255,255,0.25);
-    }
-    .hud-marker-badge:hover {
-      transform: scale(1.18);
-      z-index: 1000 !important;
-    }
-    .badge-sat { background: rgba(0, 245, 155, 0.25); border-color: #00f59b; color: #00f59b; }
-    .badge-quake { background: rgba(255, 69, 58, 0.3); border-color: #ff453a; color: #ff9f0a; }
-    .badge-fire { background: rgba(255, 55, 95, 0.3); border-color: #ff375f; color: #ff375f; }
-    .badge-volcano { background: rgba(191, 90, 242, 0.3); border-color: #bf5af2; color: #bf5af2; }
-    .badge-launch { background: rgba(255, 159, 10, 0.3); border-color: #ff9f0a; color: #ffd60a; }
+    .hud-telemetry-dock h4 { margin: 0 0 6px 0; font-size: 0.95rem; color: #00d2ff; }
+    .hud-telemetry-dock p { margin: 0; font-size: 0.8rem; color: #ccc; line-height: 1.5; }
 
     /* Deep Labs Grid & Photo Actions */
     .deep-labs-grid {
@@ -247,44 +386,6 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      transition: background 0.2s;
-    }
-    .action-btn-sm:hover { background: rgba(255,255,255,0.15); }
-
-    /* Real-Time Dual Clock (UTC & IST) */
-    .clock-pill-wrap {
-      display: flex;
-      align-items: center;
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 20px;
-      padding: 3px 10px;
-      font-family: monospace;
-      font-size: 0.85rem;
-    }
-    .clock-pill-wrap select {
-      background: transparent;
-      border: none;
-      color: var(--fg);
-      font-weight: bold;
-      font-family: inherit;
-      cursor: pointer;
-      outline: none;
-      margin-left: 5px;
-    }
-    .tc-highlight-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 14px;
-      background: rgba(41, 151, 255, 0.12);
-      border: 1px solid rgba(41, 151, 255, 0.3);
-      color: var(--accent, #2997ff);
-      border-radius: 20px;
-      font-size: 0.8rem;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-      margin-bottom: 12px;
     }
   </style>
 </head>
@@ -310,7 +411,7 @@
         <a href="#deep-labs" data-nav="deep-labs" style="border-left: 3px solid #2997ff; background: rgba(41, 151, 255, 0.08);">
           <span class="nav-icon">🪐</span>
           <span class="nav-text"><b>T&C Deep Labs</b></span>
-          <small class="badge-pill green" style="font-size: 8px;">TOP PICK</small>
+          <small class="badge-pill green" style="font-size: 8px;">FLAGSHIP</small>
         </a>
 
         <a href="#satellites" data-nav="satellites">
@@ -374,6 +475,7 @@
 
     <!-- Main Content Area -->
     <main class="main-area">
+      <!-- Topbar Header -->
       <header class="topbar">
         <div class="mobile-brand">
           <img class="brand-icon" src="assets/space-hub-icon-192.png?v=1" alt="Space Hub">
@@ -383,25 +485,15 @@
           <span>Space Hub</span><i>/</i><b id="current-section-label">Overview</b>
         </div>
         <div class="top-actions">
-          <!-- 1-Tap 3D Cinema HUD Launcher -->
-          <button type="button" class="action-btn-sm" onclick="openCinemaHud()" style="background: rgba(41, 151, 255, 0.2); border-color: #2997ff; color: #fff;">
-            🌐 <b>Launch 3D Command HUD</b>
+          <!-- Model B 3D Cinema HUD Launcher (High-Contrast Theme-Safe) -->
+          <button type="button" class="btn-cinema-hud-launch" onclick="openCinemaHud()">
+            🌐 <span>Launch 3D Command HUD</span>
           </button>
 
           <button id="open-install-modal" onclick="triggerPWAInstall()" class="install-pill-btn" aria-label="Install or Open Space Hub App">
             <span class="install-pill-icon">⬇</span>
             <span class="install-pill-text" id="install-btn-text">Install App</span>
           </button>
-
-          <!-- Dual Timezone Selector Clock (UTC & IST) -->
-          <div class="clock-pill-wrap" title="Toggle UTC / IST Time">
-            <span class="pulse-ring"></span>
-            <span id="live-clock-digits">--:--:--</span>
-            <select id="time-zone-select" aria-label="Select Timezone">
-              <option value="UTC" selected>UTC</option>
-              <option value="IST">IST (+5:30)</option>
-            </select>
-          </div>
 
           <label class="lang-picker" title="Change Language">
             <span>🌐</span>
@@ -426,6 +518,43 @@
           <button id="refresh-all" class="icon-btn" title="Refresh data" aria-label="Refresh all data">↻</button>
         </div>
       </header>
+
+      <!-- EXECUTIVE HOTEL-STYLE WORLD WALL CLOCKS -->
+      <section class="world-clocks-bar" aria-label="Global Time Protocol">
+        <div style="font-size:0.68rem; font-weight:800; color:var(--muted); letter-spacing:0.8px; margin-right:4px;">
+          <span class="pulse-ring"></span> GLOBAL TIME
+        </div>
+        <div class="world-clock-item">
+          <span class="world-clock-city">🇮🇳 NEW DELHI / MUMBAI</span>
+          <span class="world-clock-time" id="clock-delhi">--:--:--</span>
+          <span class="world-clock-date" id="date-delhi">-- --- ----</span>
+        </div>
+        <div class="world-clock-item">
+          <span class="world-clock-city">🇬🇧 LONDON</span>
+          <span class="world-clock-time" id="clock-london">--:--:--</span>
+          <span class="world-clock-date" id="date-london">-- --- ----</span>
+        </div>
+        <div class="world-clock-item">
+          <span class="world-clock-city">🇺🇸 NEW YORK</span>
+          <span class="world-clock-time" id="clock-ny">--:--:--</span>
+          <span class="world-clock-date" id="date-ny">-- --- ----</span>
+        </div>
+        <div class="world-clock-item">
+          <span class="world-clock-city">🇯🇵 TOKYO</span>
+          <span class="world-clock-time" id="clock-tokyo">--:--:--</span>
+          <span class="world-clock-date" id="date-tokyo">-- --- ----</span>
+        </div>
+        <div class="world-clock-item">
+          <span class="world-clock-city">🇦🇺 SYDNEY</span>
+          <span class="world-clock-time" id="clock-sydney">--:--:--</span>
+          <span class="world-clock-date" id="date-sydney">-- --- ----</span>
+        </div>
+        <div class="world-clock-item">
+          <span class="world-clock-city">🌌 UTC (ZULU)</span>
+          <span class="world-clock-time" id="clock-utc">--:--:--</span>
+          <span class="world-clock-date" id="date-utc">-- --- ----</span>
+        </div>
+      </section>
 
       <div class="content-wrap">
         <!-- SECTION 0: OVERVIEW -->
@@ -469,31 +598,38 @@
             <div class="ticker-time">100% REAL-TIME DATA</div>
           </section>
 
-          <!-- Overview Metrics Grid -->
+          <!-- INTERACTIVE CLICKABLE OVERVIEW METRICS GRID -->
           <section class="metrics-grid" aria-label="Space overview metrics">
-            <article class="metric-card">
-              <div class="metric-top"><span>SELECTED ALTITUDE</span><span class="metric-symbol blue">◎</span></div>
+            <!-- Card 1: ISS Altitude (Jumps to #satellites) -->
+            <article class="metric-card interactive-tile" onclick="window.switchTab('satellites')" title="Click to view ISS in Satellites tab">
+              <div class="metric-top"><span>ISS ORBITAL ALTITUDE</span><span class="metric-symbol blue">◎</span></div>
               <strong id="iss-alt">Loading…</strong>
               <small>kilometres above Earth</small>
-              <div class="metric-bottom"><span class="tiny-dot green"></span> Keplerian / SGP4</div>
+              <div class="metric-bottom"><span class="tiny-dot green"></span> Keplerian / SGP4 ➔</div>
             </article>
-            <article class="metric-card">
-              <div class="metric-top"><span>SELECTED VELOCITY</span><span class="metric-symbol purple">⌁</span></div>
+
+            <!-- Card 2: ISS Velocity (Jumps to #satellites) -->
+            <article class="metric-card interactive-tile" onclick="window.switchTab('satellites')" title="Click to view ISS in Satellites tab">
+              <div class="metric-top"><span>ISS ORBITAL VELOCITY</span><span class="metric-symbol purple">⌁</span></div>
               <strong id="iss-velocity">Loading…</strong>
               <small>kilometres per second</small>
-              <div class="metric-bottom" id="iss-name-metric">International Space Station</div>
+              <div class="metric-bottom" id="iss-name-metric">International Space Station ➔</div>
             </article>
-            <article class="metric-card">
+
+            <!-- Card 3: Next Launch (Jumps to #launches) -->
+            <article class="metric-card interactive-tile" onclick="window.switchTab('launches')" title="Click to view Countdown in Launches tab">
               <div class="metric-top"><span>NEXT ROCKET LAUNCH</span><span class="metric-symbol orange">🚀</span></div>
               <strong id="hero-launch-timer">--:--:--</strong>
-              <small id="hero-launch-name">Fetching upcoming missions…</small>
-              <div class="metric-bottom" id="hero-launch-provider">TheSpaceDevs LL2 Feed</div>
+              <span class="metric-hero-sub" id="hero-launch-name">Upcoming Flight</span>
+              <div class="metric-bottom" id="hero-launch-provider">TheSpaceDevs LL2 Feed ➔</div>
             </article>
-            <article class="metric-card">
-              <div class="metric-top"><span>SOLAR WIND &amp; STORMS</span><span class="metric-symbol teal">☼</span></div>
-              <strong id="hero-solar-status">Normal</strong>
-              <small id="hero-solar-count">DONKI reports loaded</small>
-              <div class="metric-bottom"><span class="tiny-dot green"></span> Space Weather Watch</div>
+
+            <!-- Card 4: Space Weather (Jumps to #space-weather) -->
+            <article class="metric-card interactive-tile" onclick="window.switchTab('space-weather')" title="Click to inspect Heliophysics tab">
+              <div class="metric-top"><span>SOLAR WIND &amp; DONKI</span><span class="metric-symbol teal">☼</span></div>
+              <strong id="hero-solar-status">Nominal</strong>
+              <small id="hero-solar-count">Reports verified live</small>
+              <div class="metric-bottom"><span class="tiny-dot green"></span> Space Weather Watch ➔</div>
             </article>
           </section>
         </section>
@@ -585,7 +721,7 @@
               <div class="photo-actions-strip">
                 <button class="action-btn-sm" id="btn-download-epic" type="button">⬇ Download HD Image</button>
                 <button class="action-btn-sm" id="btn-share-epic" type="button">🔗 Share Planetary View</button>
-                <button class="action-btn-sm" onclick="openCinemaHud('epic')" type="button">🌐 View in 3D HUD</button>
+                <button class="action-btn-sm" onclick="openCinemaHud('satellites')" type="button">🌐 View in 3D HUD</button>
               </div>
             </article>
 
@@ -606,72 +742,66 @@
           </div>
         </section>
 
-        <!-- SECTION 1: SATELLITES & 2D ORBITAL MAP -->
+        <!-- SECTION 1: SATELLITES & UNIFIED 2D MAP COCKPIT -->
         <section class="section-block" id="satellites">
           <div class="section-title">
             <div>
               <div class="eyebrow">ORBITAL INTELLIGENCE &amp; GROUND TRACK</div>
-              <h2>Global Satellite Tracking</h2>
+              <h2>Global Satellite Tracking &amp; Cockpit</h2>
               <p>Real-time SGP4 Keplerian orbital calculations with 2D ground track projections.</p>
             </div>
             <div style="display:flex; gap:10px; align-items:center;">
-              <button type="button" class="action-btn-sm" onclick="openCinemaHud('satellites')" style="background:rgba(0,245,155,0.15); border-color:#00f59b; color:#00f59b;">
-                🛰️ <b>Inspect Satellites in 3D HUD</b>
+              <button type="button" class="btn-cinema-hud-launch" onclick="openCinemaHud('satellites')">
+                🛰️ <span>Inspect Satellites in 3D HUD</span>
               </button>
               <span class="section-count">01 / ORBIT</span>
             </div>
           </div>
 
-          <div class="dashboard-grid">
-            <article class="surface map-card">
-              <div class="card-heading">
-                <div>
-                  <div class="eyebrow">2D GROUND TRACK</div>
-                  <h3>Worldwide Orbital Map</h3>
-                  <p>Select any catalogued satellite or search CelesTrak to follow its live position.</p>
-                </div>
-                <span class="live-tag"><span class="pulse-ring"></span> TRACKING</span>
+          <!-- UNIFIED 2D MAP COCKPIT (SEARCH + PRESETS EMBEDDED DIRECTLY) -->
+          <article class="surface map-card" style="margin-top:16px;">
+            <div class="card-heading">
+              <div>
+                <div class="eyebrow">INTEGRATED ORBITAL COCKPIT</div>
+                <h3>Worldwide Satellite Ground Track</h3>
+                <p>Search 14,000+ CelesTrak NORAD catalogued objects or select an instant telemetry preset:</p>
               </div>
-              <div class="map-toolbar">
-                <label class="select-label" for="sat-select">TRACK OBJECT</label>
-                <select id="sat-select" aria-label="Choose satellite">
-                  <option value="25544">International Space Station (ISS)</option>
-                  <option value="48274">CSS Tianhe (Tiangong)</option>
-                  <option value="20580">Hubble Space Telescope (HST)</option>
-                  <option value="43013">NOAA 20 (Weather)</option>
-                </select>
-                <button id="load-starlink" class="subtle-button">Load Starlink Sample</button>
-              </div>
-              <div id="sat-map" class="map"></div>
-              <div class="map-foot">
-                <span><i class="legend-dot"></i> Current Position</span>
-                <span><i class="legend-dot legend-blue"></i> Projected Ground Track</span>
-                <span id="map-stamp" class="mono">Orbital Elements: CelesTrak</span>
-              </div>
-            </article>
+              <span class="live-tag"><span class="pulse-ring"></span> TRACKING</span>
+            </div>
 
-            <!-- Satellite Search Panel -->
-            <article class="surface search-card">
-              <div class="card-heading">
-                <div>
-                  <div class="eyebrow">CELESTRAK LIVE CATALOGUE</div>
-                  <h3>Search 14,000+ Satellites</h3>
-                  <p>Type any satellite name or NORAD ID to query real-time orbital elements (TLE / OMM).</p>
-                </div>
-                <span class="small-chip">100% LIVE DATA</span>
-              </div>
-              <form id="sat-search-form" class="search-form" autocomplete="off">
-                <input id="sat-search" type="search" placeholder="Type satellite name (e.g. Starlink, NOAA, GPS)…" required>
-                <button class="primary-button" type="submit">Track Satellite <span>↗</span></button>
+            <!-- Integrated Search & Preset Bar Over Map -->
+            <div style="padding: 0 16px 12px 16px;">
+              <form id="sat-search-form" class="search-form" autocomplete="off" style="margin-bottom:8px;">
+                <input id="sat-search" type="search" placeholder="Type satellite name or NORAD ID (e.g. Starlink, Hubble, NOAA, GPS, ISS)…" aria-label="Search 14000+ satellites" required>
+                <button class="primary-button" type="submit">Track Object <span>↗</span></button>
               </form>
               <div id="sat-suggestions" class="suggestion-list" role="listbox" hidden></div>
-              <div id="selected-satellite-panel" class="selected-satellite-panel">
-                <div class="selected-empty">
-                  ◎ <b>No custom satellite selected</b>
-                  <span>Search and choose any satellite to display its individual telemetry parameters.</span>
-                </div>
+
+              <!-- Quick Presets Directly on Map -->
+              <div class="map-preset-pills">
+                <span style="font-size:0.75rem; font-weight:700; color:var(--muted); align-self:center;">PRESETS:</span>
+                <button type="button" class="map-preset-btn" onclick="window.selectSatelliteDirect('25544')">🛰️ ISS</button>
+                <button type="button" class="map-preset-btn" onclick="window.selectSatelliteDirect('48274')">🇨🇳 Tiangong (CSS)</button>
+                <button type="button" class="map-preset-btn" onclick="window.selectSatelliteDirect('20580')">🔭 Hubble (HST)</button>
+                <button type="button" class="map-preset-btn" onclick="window.selectSatelliteDirect('43013')">🌦️ NOAA-20</button>
+                <button type="button" class="map-preset-btn" id="load-starlink">📡 Starlink Sample</button>
               </div>
-            </article>
+            </div>
+
+            <div id="sat-map" class="map" style="min-height:460px;"></div>
+            <div class="map-foot">
+              <span><i class="legend-dot"></i> Current Position</span>
+              <span><i class="legend-dot legend-blue"></i> Projected Ground Track</span>
+              <span id="map-stamp" class="mono">Orbital Elements: CelesTrak</span>
+            </div>
+          </article>
+
+          <!-- Selected Satellite Telemetry Panel -->
+          <div id="selected-satellite-panel" class="selected-satellite-panel" style="margin-top:16px;">
+            <div class="selected-empty">
+              ◎ <b>No custom satellite selected</b>
+              <span>Search and choose any satellite to display its individual telemetry parameters.</span>
+            </div>
           </div>
         </section>
 
@@ -684,8 +814,8 @@
               <p>Live schedule from Launch Library 2 with verified mission status badges, launchpad coordinates, and mission encyclopedia links.</p>
             </div>
             <div style="display:flex; gap:10px; align-items:center;">
-              <button type="button" class="action-btn-sm" onclick="openCinemaHud('launches')" style="background:rgba(255,159,10,0.15); border-color:#ff9f0a; color:#ff9f0a;">
-                🚀 <b>Inspect Launchpads in 3D HUD</b>
+              <button type="button" class="btn-cinema-hud-launch" onclick="openCinemaHud('launches')">
+                🚀 <span>Inspect Launchpads in 3D HUD</span>
               </button>
               <span class="section-count">02 / FLIGHTS</span>
             </div>
@@ -704,6 +834,28 @@
                 <div><small>PROVIDER / AGENCY</small><b id="spotlight-provider">—</b></div>
                 <div><small>LAUNCH PAD</small><b id="spotlight-pad">—</b></div>
                 <div><small>TARGET ORBIT</small><b id="spotlight-orbit">Low Earth Orbit</b></div>
+              </div>
+
+              <!-- Flight Ascent Profile Bar -->
+              <div class="flight-journey-box">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <b style="font-size:0.85rem;"><span class="pulse-ring"></span> FLIGHT ASCENT TELEMETRY PROFILE</b>
+                  <span id="flight-status-badge" class="badge-pill green">PRE-FLIGHT COUNTDOWN</span>
+                </div>
+                <div class="flight-progress-bar">
+                  <div class="flight-progress-fill" id="flight-progress-fill"></div>
+                </div>
+                <div class="flight-stages-grid">
+                  <span>Liftoff</span>
+                  <span>Max-Q</span>
+                  <span>MECO</span>
+                  <span>Stage 2 Separation</span>
+                  <span>Orbit Insertion</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; margin-top:10px; font-size:0.85rem;">
+                  <div><small style="color:var(--muted)">FLIGHT STATUS: </small><b id="flight-velocity-val">Vehicle standing at pad · Countdown proceeding</b></div>
+                  <div><small style="color:var(--muted)">TRAJECTORY: </small><b id="flight-alt-val">0 km (Ground Stage)</b></div>
+                </div>
               </div>
 
               <div class="spotlight-actions" style="margin-top:14px; display:flex; gap:10px;">
@@ -735,8 +887,8 @@
               <p>Solar flares, coronal mass ejections (CMEs) and geomagnetic storms reported by NASA DONKI.</p>
             </div>
             <div style="display:flex; gap:10px; align-items:center;">
-              <button type="button" class="action-btn-sm" onclick="openCinemaHud('aurora')" style="background:rgba(0,245,155,0.15); border-color:#00f59b; color:#00f59b;">
-                🌌 <b>View Aurora Oval in 3D HUD</b>
+              <button type="button" class="btn-cinema-hud-launch" onclick="openCinemaHud('aurora')">
+                🌌 <span>View Aurora Oval in 3D HUD</span>
               </button>
               <span class="section-count">03 / SOLAR</span>
             </div>
@@ -773,22 +925,38 @@
           </article>
         </section>
 
-        <!-- SECTION 4: NEAR-EARTH ASTEROIDS & APOD -->
+        <!-- SECTION 4: NEAR-EARTH ASTEROIDS (RADAR SWAPPED TO TOP) & APOD -->
         <section class="section-block" id="astronomy">
           <div class="section-title">
             <div>
-              <div class="eyebrow">CELESTIAL RADAR &amp; DISCOVERY</div>
-              <h2>Astronomy Picture &amp; Near-Earth Asteroid Radar</h2>
-              <p>Near-Earth Asteroid close approaches with relative velocity, lunar distance (LD), diameter, and NASA APOD.</p>
+              <div class="eyebrow">CELESTIAL THREAT RADAR &amp; DISCOVERY</div>
+              <h2>Near-Earth Asteroid Radar &amp; Astronomy Picture</h2>
+              <p>Critical close-approach asteroid radar prioritized with Lunar Distance (LD), velocity, and NASA APOD.</p>
             </div>
             <div style="display:flex; gap:10px; align-items:center;">
-              <button type="button" class="action-btn-sm" onclick="openCinemaHud('asteroids')" style="background:rgba(255,214,10,0.15); border-color:#ffd60a; color:#ffd60a;">
-                ☄️ <b>Inspect Asteroids in 3D HUD</b>
+              <button type="button" class="btn-cinema-hud-launch" onclick="openCinemaHud('asteroids')">
+                ☄️ <span>Inspect Asteroids in 3D HUD</span>
               </button>
               <span class="section-count">04 / RADAR</span>
             </div>
           </div>
 
+          <!-- 1. Asteroid Radar Swapped Directly to Top -->
+          <article class="surface neo-panel" style="margin-bottom: 24px;">
+            <div class="card-heading">
+              <div>
+                <span class="badge-pill orange">PRIMARY CELESTIAL RADAR</span>
+                <h3>Near-Earth Object Radar (Close Approaches)</h3>
+                <p>Active close approach flybys: distance in Lunar Distance (LD), relative speed, and hazard level.</p>
+              </div>
+              <span class="small-chip">NASA NeoWs API</span>
+            </div>
+            <div id="neo-list" class="neo-list">
+              <p class="muted">Scanning near-Earth space radar…</p>
+            </div>
+          </article>
+
+          <!-- 2. APOD Cosmic Picture Showcase Below -->
           <article class="surface apod-layout">
             <div id="apod-media" class="apod-media">
               <div class="media-placeholder">✧</div>
@@ -804,20 +972,6 @@
               </div>
             </div>
           </article>
-
-          <!-- Scientific Asteroid Radar -->
-          <article class="surface neo-panel">
-            <div class="card-heading">
-              <div>
-                <h3>Near-Earth Object Radar (Close Approaches)</h3>
-                <p>Next 7 days: distance in Lunar Distance (LD), relative velocity vector, and hazardous status.</p>
-              </div>
-              <span class="small-chip">NASA NeoWs API</span>
-            </div>
-            <div id="neo-list" class="neo-list">
-              <p class="muted">Scanning near-Earth space radar…</p>
-            </div>
-          </article>
         </section>
 
         <!-- SECTION 5: EARTH MONITORING -->
@@ -829,8 +983,8 @@
               <p>USGS global seismic network (M2.5+ earthquakes) and NASA EONET active natural hazard events.</p>
             </div>
             <div style="display:flex; gap:10px; align-items:center;">
-              <button type="button" class="action-btn-sm" onclick="openCinemaHud('earthquakes')" style="background:rgba(255,69,58,0.15); border-color:#ff453a; color:#ff453a;">
-                ⚡ <b>Inspect Seismic Shocks in 3D HUD</b>
+              <button type="button" class="btn-cinema-hud-launch" onclick="openCinemaHud('earthquakes')">
+                ⚡ <span>Inspect Seismic Shocks in 3D HUD</span>
               </button>
               <span class="section-count">05 / EARTH</span>
             </div>
@@ -867,20 +1021,20 @@
           </div>
         </section>
 
-        <!-- SECTION 5B: INTEL BRIEF -->
+        <!-- SECTION 5B: INTEL BRIEF WITH SCIENTIFIC EVALUATION GAUGES -->
         <section class="section-block" id="intel-brief">
           <div class="section-title">
             <div>
               <div class="eyebrow">REGIONAL ENVIRONMENTAL &amp; RESOURCE INTELLIGENCE</div>
               <h2>Area-Wise Intelligence Brief</h2>
-              <p>Live groundwater levels, air quality, greenery, pollution, radiation, and natural resources for any region.</p>
+              <p>Live groundwater levels, air quality, greenery, pollution, radiation, and natural resources evaluated with baseline standards.</p>
             </div>
             <span class="section-count">05B / INTEL BRIEF</span>
           </div>
 
           <article class="surface intel-panel">
             <div class="wiki-search-box">
-              <input id="intel-area-input" type="search" placeholder="Enter any city or region (e.g., Hyderabad, Tokyo, New York, Amazon, London, Delhi)…" aria-label="Search area for intelligence brief">
+              <input id="intel-area-input" type="search" placeholder="Enter any city or region (e.g., Hyderabad, Tokyo, New York, London, Delhi)…" aria-label="Search area for intelligence brief">
               <button id="intel-search-btn" class="primary-button" type="button">Analyze Area <span>↗</span></button>
             </div>
             <div class="wiki-pills" id="intel-presets">
@@ -904,42 +1058,62 @@
               <p id="intel-area-summary" class="intel-summary-text">Loading regional intelligence brief and environmental telemetry…</p>
             </div>
 
+            <!-- Enhanced Environmental Metric Grid with Evaluation Gauges -->
             <div class="intel-metrics-grid">
               <article class="metric-card">
                 <div class="metric-top"><span>AIR QUALITY (US AQI)</span><span class="metric-symbol green">🌬️</span></div>
                 <strong id="intel-aqi">—</strong>
                 <small id="intel-aqi-status">Calculating AQI…</small>
-                <div class="metric-bottom">Open-Meteo Air Quality</div>
+                <div class="intel-gauge-box">
+                  <div class="intel-gauge-bar"><div class="intel-gauge-fill" id="gauge-aqi" style="width:0%; background:#30d158;"></div></div>
+                  <span style="color:var(--muted)">0–50 Good | 51–100 Mod | 151+ Haz</span>
+                </div>
               </article>
+
               <article class="metric-card">
                 <div class="metric-top"><span>POLLUTION (PM2.5 / PM10)</span><span class="metric-symbol orange">🏭</span></div>
                 <strong id="intel-pollution">—</strong>
                 <small id="intel-pollution-sub">NO₂ &amp; Ozone levels</small>
-                <div class="metric-bottom">Particulate Matter</div>
+                <div class="intel-gauge-box">
+                  <span style="color:var(--muted)">WHO Guidance Baseline: &lt;15 µg/m³</span>
+                </div>
               </article>
+
               <article class="metric-card">
                 <div class="metric-top"><span>GROUNDWATER &amp; SOIL</span><span class="metric-symbol blue">💧</span></div>
                 <strong id="intel-groundwater">—</strong>
                 <small id="intel-groundwater-sub">Subsurface moisture index</small>
-                <div class="metric-bottom">Hydrological Telemetry</div>
+                <div class="intel-gauge-box">
+                  <div class="intel-gauge-bar"><div class="intel-gauge-fill" id="gauge-gw" style="width:0%; background:#2997ff;"></div></div>
+                  <span style="color:var(--muted)">&lt;25% Dry | 25–45% Normal | &gt;45% High</span>
+                </div>
               </article>
+
               <article class="metric-card">
                 <div class="metric-top"><span>GREENERY &amp; CANOPY</span><span class="metric-symbol teal">🌿</span></div>
                 <strong id="intel-greenery">—</strong>
                 <small id="intel-greenery-sub">Vegetation &amp; biome index</small>
-                <div class="metric-bottom">Ecological Cover</div>
+                <div class="intel-gauge-box">
+                  <span style="color:var(--muted)">NDVI Vegetation Cover Index</span>
+                </div>
               </article>
+
               <article class="metric-card">
                 <div class="metric-top"><span>RADIATION (SOLAR &amp; UV)</span><span class="metric-symbol purple">☢️</span></div>
                 <strong id="intel-radiation">—</strong>
                 <small id="intel-radiation-sub">Shortwave W/m² &amp; UV</small>
-                <div class="metric-bottom">Solar &amp; Cosmic Flux</div>
+                <div class="intel-gauge-box">
+                  <span style="color:var(--muted)">0–2 Low | 3–5 Mod | 6–7 Very High | 8+ Ext</span>
+                </div>
               </article>
+
               <article class="metric-card">
                 <div class="metric-top"><span>NATURAL RESOURCES</span><span class="metric-symbol orange">⛏️</span></div>
                 <strong id="intel-resources">—</strong>
                 <small id="intel-resources-sub">Regional reserves &amp; renewables</small>
-                <div class="metric-bottom">Resource Profile</div>
+                <div class="intel-gauge-box">
+                  <span style="color:var(--muted)">Regional Resource Profile</span>
+                </div>
               </article>
             </div>
           </article>
@@ -1043,7 +1217,7 @@
           </article>
         </section>
 
-        <!-- SECTION 8: SETTINGS & NOTIFICATION ENGINE -->
+        <!-- SECTION 8: SETTINGS & PREFERENCES -->
         <section class="section-block" id="settings">
           <div class="section-title">
             <div>
@@ -1137,27 +1311,6 @@
           </div>
         </section>
 
-        <!-- T&C ECOSYSTEM PANEL -->
-        <section class="ecosystem-panel" aria-label="Explore T&C websites">
-          <div class="ecosystem-copy">
-            <div class="eyebrow">THE T&amp;C ECOSYSTEM</div>
-            <h2>More from T&amp;C<span>.</span></h2>
-            <p>Explore our other independent websites and public platforms.</p>
-          </div>
-          <div class="ecosystem-badges">
-            <a class="ecosystem-badge" href="https://tastyandcomfort.github.io/T-C/" target="_blank" rel="noopener">
-              <span class="ecosystem-icon">T&amp;C</span>
-              <span><b>T&amp;C Stall</b><small>Tasty &amp; Comfort · 1st website</small></span>
-              <span class="ecosystem-arrow">↗</span>
-            </a>
-            <a class="ecosystem-badge" href="https://tastyandcomfort.github.io/news/" target="_blank" rel="noopener">
-              <span class="ecosystem-icon news-icon">N</span>
-              <span><b>T&amp;C News Hub</b><small>News, updates &amp; information</small></span>
-              <span class="ecosystem-arrow">↗</span>
-            </a>
-          </div>
-        </section>
-
         <!-- SECTION 10: ABOUT -->
         <section class="section-block" id="about">
           <div class="section-title">
@@ -1190,30 +1343,45 @@
             </article>
           </div>
         </section>
-
-        <!-- Footer -->
-        <footer class="footer">
-          <img class="footer-icon" src="assets/space-hub-icon-192.png?v=1" alt="T&C Space Hub">
-          <div>
-            <b>T&amp;C SPACE HUB · MISSION CONTROL</b>
-            <p>Curiosity has no borders · Real-time space intelligence platform.</p>
-          </div>
-          <div class="footer-right">
-            An independent T&amp;C project · Powered by public science APIs from NASA, CelesTrak, TheSpaceDevs &amp; USGS.
-          </div>
-        </footer>
       </div>
+
+      <!-- ============================================================== -->
+      <!-- PERMANENT STICKY DOCKED FOOTER & INTEGRATED T&C ECOSYSTEM     -->
+      <!-- ============================================================== -->
+      <footer class="docked-sticky-footer">
+        <div class="docked-footer-inner">
+          <div class="docked-ecosystem-strip">
+            <span style="font-size:0.75rem; font-weight:800; color:var(--muted); letter-spacing:0.8px;">T&amp;C ECOSYSTEM:</span>
+            <a class="docked-eco-btn" href="https://tastyandcomfort.github.io/T-C/" target="_blank" rel="noopener">
+              <span>🏪</span> <span>T&amp;C Stall</span>
+            </a>
+            <a class="docked-eco-btn" href="https://tastyandcomfort.github.io/news/" target="_blank" rel="noopener">
+              <span>📰</span> <span>T&amp;C News Hub</span>
+            </a>
+            <a class="docked-eco-btn" href="https://tastyandcomfort.github.io/farmer/" target="_blank" rel="noopener">
+              <span>🌾</span> <span>T&amp;C Farmer</span>
+            </a>
+          </div>
+
+          <div class="docked-meta-credits">
+            <span>© T&amp;C Platform</span>
+            <span>·</span>
+            <span>Murali Manohar</span>
+            <span>·</span>
+            <span class="pulse-ring"></span>
+            <span>Mission Control Live</span>
+          </div>
+        </div>
+      </footer>
     </main>
   </div>
 
-  <!-- ============================================================== -->
-  <!-- MODEL B: CINEMA 3D HUD OVERLAY MODAL (FULLSCREEN HUD)          -->
-  <!-- ============================================================== -->
+  <!-- MODEL B: CINEMA 3D HUD OVERLAY MODAL -->
   <div class="globe-modal-hud" id="globe-modal-hud">
     <div class="hud-header-bar">
       <div class="hud-title-wrap">
         <span class="pulse-ring"></span>
-        <b style="color:#00d2ff; letter-spacing:0.5px; font-size:0.92rem;">T&C 3D MISSION COMMAND THEATER</b>
+        <b style="color:#00d2ff; letter-spacing:0.5px; font-size:0.92rem;">T&amp;C 3D MISSION COMMAND THEATER</b>
       </div>
       <div class="hud-layer-toolbar">
         <button class="hud-layer-chip active" data-layer="satellites" type="button">🛰️ Satellites</button>
@@ -1465,10 +1633,10 @@
               userAgent: navigator.userAgent
             });
 
-            console.log('✅ Device saved to Firestore! Token:', token);
+            console.log('Thank you for enabling notifications-T&C! Token:', token);
 
             swReg.showNotification('T&C Space Hub Alert 🚀', {
-              body: 'Connected! Device registered in space_fcm_tokens. You will now receive APOD, Mars Rover, and storm alerts!',
+              body: 'Connected! Device registered in space_fcm_tokens. You will now receive verified telemetry alerts!',
               icon: 'assets/space-hub-icon-192.png?v=1',
               badge: 'assets/space-hub-icon-192.png?v=1'
             });
@@ -1521,7 +1689,7 @@
             preferences: prefs,
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
           }, { merge: true });
-          alert("✅ Preferences Saved! You will only receive alerts for your chosen categories.");
+          alert("Thank you preferences are saved! You will only receive notifications for your chosen categories.");
         }
       } catch (e) {
         alert("Please enable notification permissions first by clicking 'Test Notification'.");
