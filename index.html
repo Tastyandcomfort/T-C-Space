@@ -1044,29 +1044,47 @@
               </div>
             </article>
 
-            <article class="surface settings-card">
-              <h3>Real-Time Alerts &amp; Notification Engine</h3>
-              <p class="muted">Configured threshold alerts for critical space and geophysical phenomena.</p>
-              <div class="toggle-list">
+              <article class="surface settings-card">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h3>Real-Time Alerts &amp; Notification Engine</h3>
+                <button type="button" class="subtle-button" id="toggle-all-alerts-btn" style="font-size:0.75rem;">Deselect All</button>
+              </div>
+              <p class="muted">Select the specific subjects you want to receive real-time push alerts for:</p>
+              
+              <div class="toggle-list" id="alerts-toggle-list">
                 <label class="toggle-row">
-                  <div><b>ISS Overhead Pass Alert</b><small>Notify when Space Station approaches regional horizon</small></div>
-                  <input type="checkbox" checked class="apple-toggle" id="toggle-iss">
+                  <div><b>🛰️ Satellite Passes (ISS / Satellites)</b><small>Notify on visible regional passes</small></div>
+                  <input type="checkbox" checked class="apple-toggle" data-category="satellite">
                 </label>
                 <label class="toggle-row">
-                  <div><b>Severe Solar Storm Alert</b><small>Notify on Geomagnetic Storms Kp 5.0+</small></div>
-                  <input type="checkbox" checked class="apple-toggle" id="toggle-solar">
+                  <div><b>☀️ Solar Storms &amp; Space Weather</b><small>Notify on active Geomagnetic Storms Kp 5.0+</small></div>
+                  <input type="checkbox" checked class="apple-toggle" data-category="solar">
                 </label>
                 <label class="toggle-row">
-                  <div><b>Rocket Launch Countdowns</b><small>Notify 1 hour prior to major orbital launches</small></div>
-                  <input type="checkbox" checked class="apple-toggle" id="toggle-launches">
+                  <div><b>🚀 Rocket Launch Countdowns</b><small>Notify 1 hour prior to major orbital launches</small></div>
+                  <input type="checkbox" checked class="apple-toggle" data-category="launch">
                 </label>
                 <label class="toggle-row">
-                  <div><b>Major Earthquake Alerts</b><small>Notify on global seismic events M 5.0+</small></div>
-                  <input type="checkbox" checked class="apple-toggle" id="toggle-quake">
+                  <div><b>☄️ Near-Earth Asteroid Radar</b><small>Notify on close approach flybys &amp; hazard objects</small></div>
+                  <input type="checkbox" checked class="apple-toggle" data-category="asteroid">
+                </label>
+                <label class="toggle-row">
+                  <div><b>🔴 Mars Rover Surface Cam</b><small>Notify when new raw Martian photos downlink</small></div>
+                  <input type="checkbox" checked class="apple-toggle" data-category="mars">
+                </label>
+                <label class="toggle-row">
+                  <div><b>🌌 Astronomy Picture of the Day (APOD)</b><small>Daily featured cosmic photo notification</small></div>
+                  <input type="checkbox" checked class="apple-toggle" data-category="apod">
+                </label>
+                <label class="toggle-row">
+                  <div><b>⚡ Major Earthquakes (M4.5+)</b><small>USGS real-time seismic event warnings</small></div>
+                  <input type="checkbox" checked class="apple-toggle" data-category="earthquake">
                 </label>
               </div>
-              <div class="setting-actions">
-                <button id="test-alert-btn" class="subtle-button">🔔 Test Space Alert Notification</button>
+
+              <div class="setting-actions" style="margin-top:14px; display:flex; gap:10px;">
+                <button id="save-alert-prefs-btn" class="primary-button" type="button">💾 Save Alert Preferences</button>
+                <button id="test-alert-btn" class="subtle-button" type="button">🔔 Test Notification</button>
               </div>
             </article>
           </div>
