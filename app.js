@@ -1,5 +1,5 @@
 /* T&C Space Hub — Complete Web Space Intelligence Platform
-   100% Verified Telemetry · Executive World Wall Clocks · Model B Cinema 3D HUD · Day/Night Solar Terminator · FIRMS Fires · Aurora Oval · Tectonic Plates */
+   100% Verified Telemetry · Apple HIG Aesthetics · Rotating Telemetry Carousel · World Wall Clocks · Model B Cinema 3D HUD · Day/Night Terminator */
 (() => {
   "use strict";
 
@@ -51,12 +51,15 @@
     cache: {},
     theme: "system",
     lang: "en",
+    timezone: "IST",
     nextLaunchNet: null,
     nextLaunchStatus: null,
     nextLaunchName: "",
     activeRover: "perseverance",
     currentEpicImageUrl: null,
     searchTimer: null,
+    currentTeleIndex: 0,
+    sidebarPinned: false,
     activeLayers: {
       satellites: true,
       earthquakes: true,
@@ -98,7 +101,7 @@
     document.documentElement.dataset.appearance = theme;
     document.documentElement.style.colorScheme = dark ? "dark" : "light";
     const meta = $("theme-color-meta");
-    if (meta) meta.setAttribute("content", dark ? "#0d0e12" : "#f5f5f7");
+    if (meta) meta.setAttribute("content", dark ? "#000000" : "#fbfbfd");
     if ($("theme-select")) $("theme-select").value = theme;
     if ($("setting-theme")) $("setting-theme").value = theme;
     if (persist) { try { localStorage.setItem("tc_space_theme", theme); } catch (_) {} }
@@ -242,7 +245,7 @@
           if (d.type === "asteroid") {
             const group = new THREE.Group();
             const geo = new THREE.DodecahedronGeometry(d.radius || 4, 1);
-            const mat = new THREE.MeshLambertMaterial({ color: d.isHazard ? 0xff453a : 0xffd60a, wireframe: false });
+            const mat = new THREE.MeshLambertMaterial({ color: d.isHazard ? 0xff453a : 0xffd60a });
             group.add(new THREE.Mesh(geo, mat));
 
             const coneGeo = new THREE.ConeGeometry(2.5, 8, 8);
@@ -389,7 +392,6 @@
 
     if ($("iss-alt")) $("iss-alt").textContent = fmt(calc.alt, 1) + " km";
     if ($("iss-velocity")) $("iss-velocity").textContent = fmt(calc.vel, 2) + " km/s";
-    if ($("iss-name-metric")) $("iss-name-metric").textContent = state.currentSatName + " ➔";
 
     const trackPts = projectGroundTrack(calc.satrec);
     if (state.map && state.marker) {
@@ -411,25 +413,21 @@
     state.globeTrack = trackPts;
     renderGlobeLayers();
 
-    // Selected Satellite Panel update
+    // Embedded Cockpit In-Map HUD update
     const panel = $("selected-satellite-panel");
     if (panel) {
       const meanMotion = Number(state.currentOmm.MEAN_MOTION) || 15.5;
       const periodMins = meanMotion > 0 ? (1440 / meanMotion).toFixed(1) : "—";
       panel.innerHTML = `
-        <div class="selected-head">
-          <div>
-            <span class="badge-pill green">ORBITAL TRACKING</span>
-            <h3>${esc(state.currentSatName)}</h3>
-            <small>NORAD ID: ${state.currentOmm.NORAD_CAT_ID || "—"} · Designator: ${esc(state.currentOmm.OBJECT_ID || "—")}</small>
-          </div>
-          <button class="subtle-button" onclick="openCinemaHud('satellites')">Inspect in 3D HUD ↗</button>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+          <div><b style="color:var(--apple-fg); font-size:0.85rem;">${esc(state.currentSatName)}</b></div>
+          <button class="subtle-button" style="padding:2px 8px; font-size:0.7rem;" onclick="openCinemaHud('satellites')">3D HUD ↗</button>
         </div>
-        <div class="selected-data-grid">
-          <div><small>CALCULATED ALTITUDE</small><b>${fmt(calc.alt, 1)} km</b></div>
-          <div><small>ORBITAL VELOCITY</small><b>${fmt(calc.vel, 2)} km/s</b></div>
-          <div><small>CURRENT LAT / LON</small><b>${fmt(calc.lat, 2)}°, ${fmt(calc.lon, 2)}°</b></div>
-          <div><small>ORBITAL PERIOD</small><b>${periodMins} mins</b></div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; font-size:0.75rem;">
+          <div><small style="color:var(--apple-fg-sub)">ALTITUDE</small><b>${fmt(calc.alt, 1)} km</b></div>
+          <div><small style="color:var(--apple-fg-sub)">VELOCITY</small><b>${fmt(calc.vel, 2)} km/s</b></div>
+          <div><small style="color:var(--apple-fg-sub)">LAT / LON</small><b>${fmt(calc.lat, 1)}°, ${fmt(calc.lon, 1)}°</b></div>
+          <div><small style="color:var(--apple-fg-sub)">PERIOD</small><b>${periodMins} m</b></div>
         </div>
       `;
     }
@@ -577,10 +575,6 @@
 
     if ($("spotlight-countdown")) $("spotlight-countdown").textContent = `${days}d ${String(hours).padStart(2, "0")}h ${String(mins).padStart(2, "0")}m ${String(secs).padStart(2, "0")}s`;
     if ($("hero-launch-timer")) $("hero-launch-timer").textContent = `${days}d ${hours}h ${mins}m`;
-    if (fillBar) fillBar.style.width = "0%";
-    if (velVal) velVal.textContent = "Vehicle standing at pad · Countdown proceeding";
-    if (altVal) altVal.textContent = "0 km (Ground Stage)";
-    if (statusBadge) statusBadge.innerHTML = "T-MINUS COUNTDOWN";
   }
 
   // --- 3. SOLAR & SPACE WEATHER ---
@@ -724,7 +718,7 @@
               </div>
               <div class="neo-distance">
                 ${lunar} LD
-                <small style="display:block;font-size:9px;color:var(--muted);">${(km / 1e6).toFixed(2)}M km</small>
+                <small style="display:block;font-size:9px;color:var(--apple-fg-sub);">${(km / 1e6).toFixed(2)}M km</small>
               </div>
             </div>
           `;
@@ -862,7 +856,7 @@
     } catch (_) {}
   }
 
-  // --- 8. AREA-WISE INTELLIGENCE BRIEF WITH SCIENTIFIC EVALUATION GAUGES ---
+  // --- 8. AREA-WISE INTEL BRIEF WITH GAUGES ---
   async function loadAreaIntelligence(areaName) {
     if (!areaName) return;
     if ($("intel-area-title")) $("intel-area-title").textContent = `Analyzing ${areaName}…`;
@@ -887,7 +881,7 @@
       if (aqRes.status === "fulfilled" && aqRes.value?.current) {
         const c = aqRes.value.current;
         const aqi = c.us_aqi ?? "—";
-        const aqiLabel = aqi <= 50 ? "Good · Clean Air (Nominal)" : (aqi <= 100 ? "Moderate · Acceptable" : "Unhealthy · Sensitive Warning");
+        const aqiLabel = aqi <= 50 ? "Good · Clean Air" : (aqi <= 100 ? "Moderate · Acceptable" : "Unhealthy · Sensitive");
         if ($("intel-aqi")) $("intel-aqi").textContent = `${aqi} AQI`;
         if ($("intel-aqi-status")) $("intel-aqi-status").textContent = aqiLabel;
         if ($("intel-pollution")) $("intel-pollution").textContent = `${fmt(c.pm2_5, 1)} / ${fmt(c.pm10, 1)} µg/m³`;
@@ -1008,8 +1002,8 @@
       if (Array.isArray(projects) && projects.length) {
         container.innerHTML = projects.slice(0, 4).map(proj => `
           <div style="padding:10px; background:rgba(255,255,255,0.03); border-radius:8px; border:1px solid rgba(255,255,255,0.06);">
-            <b style="font-size:0.88rem; display:block; color:var(--fg);">${esc(proj.center || "NASA")} · ${esc(proj.program_name || proj.project_name || "Advanced Prototype")}</b>
-            <span style="font-size:0.75rem; color:var(--muted);">${esc(proj.description || "Active experimental space technology research.")}</span>
+            <b style="font-size:0.88rem; display:block; color:var(--apple-fg);">${esc(proj.center || "NASA")} · ${esc(proj.program_name || proj.project_name || "Advanced Prototype")}</b>
+            <span style="font-size:0.75rem; color:var(--apple-fg-sub);">${esc(proj.description || "Active experimental space technology research.")}</span>
           </div>
         `).join("");
         return;
@@ -1017,41 +1011,86 @@
     } catch (_) {
       container.innerHTML = `
         <div style="padding:10px; background:rgba(255,255,255,0.03); border-radius:8px; border:1px solid rgba(255,255,255,0.06);">
-          <b style="font-size:0.88rem; display:block; color:var(--fg);">DRACO: Demonstration Rocket for Agile Cislunar Operations</b>
-          <span style="font-size:0.75rem; color:var(--muted);">Technology: Nuclear Thermal Propulsion (NTP) · Status: Active Development</span>
+          <b style="font-size:0.88rem; display:block; color:var(--apple-fg);">DRACO: Demonstration Rocket for Agile Cislunar Operations</b>
+          <span style="font-size:0.75rem; color:var(--apple-fg-sub);">Technology: Nuclear Thermal Propulsion (NTP) · Status: Active Development</span>
         </div>
         <div style="padding:10px; background:rgba(255,255,255,0.03); border-radius:8px; border:1px solid rgba(255,255,255,0.06);">
-          <b style="font-size:0.88rem; display:block; color:var(--fg);">MOXIE-Next: Lunar & Martian In-Situ Oxygen Generation</b>
-          <span style="font-size:0.75rem; color:var(--muted);">Technology: Atmospheric Extraction & Fuel Oxidizer Synthesis · Status: Active</span>
+          <b style="font-size:0.88rem; display:block; color:var(--apple-fg);">MOXIE-Next: Lunar & Martian In-Situ Oxygen Generation</b>
+          <span style="font-size:0.75rem; color:var(--apple-fg-sub);">Technology: Atmospheric Extraction & Fuel Oxidizer Synthesis · Status: Active</span>
         </div>
       `;
     }
   }
 
-  // --- EXECUTIVE HOTEL-STYLE WORLD WALL CLOCKS ---
+  // --- EXECUTIVE WORLD WALL CLOCKS (HOTEL BOARD) ---
   function updateWorldWallClocks() {
     const now = new Date();
-
     const clocks = [
-      { idTime: "clock-delhi", idDate: "date-delhi", offset: 5.5 },   // New Delhi / Mumbai (UTC+5:30)
-      { idTime: "clock-london", idDate: "date-london", offset: 0 },    // London (UTC+0)
-      { idTime: "clock-ny", idDate: "date-ny", offset: -5 },          // New York (UTC-5)
-      { idTime: "clock-tokyo", idDate: "date-tokyo", offset: 9 },      // Tokyo (UTC+9)
-      { idTime: "clock-sydney", idDate: "date-sydney", offset: 11 },   // Sydney (UTC+11)
-      { idTime: "clock-utc", idDate: "date-utc", offset: 0 }           // UTC Zulu
+      { idTime: "clock-delhi", idDate: "date-delhi", offset: 5.5, label: "IST" },
+      { idTime: "clock-london", idDate: "date-london", offset: 0, label: "GMT" },
+      { idTime: "clock-ny", idDate: "date-ny", offset: -5, label: "EST" },
+      { idTime: "clock-tokyo", idDate: "date-tokyo", offset: 9, label: "JST" },
+      { idTime: "clock-sydney", idDate: "date-sydney", offset: 11, label: "AEST" },
+      { idTime: "clock-utc", idDate: "date-utc", offset: 0, label: "UTC" }
     ];
 
     clocks.forEach(c => {
       const targetTime = new Date(now.getTime() + (c.offset * 3600000));
+      const tStr = targetTime.toISOString().slice(11, 19);
       const tEl = $(c.idTime);
       const dEl = $(c.idDate);
-      if (tEl) tEl.textContent = targetTime.toISOString().slice(11, 19);
+      if (tEl) tEl.textContent = tStr;
       if (dEl) {
-        const dStr = targetTime.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
-        dEl.textContent = dStr;
+        dEl.textContent = targetTime.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+      }
+
+      // Update the active top pill
+      if (state.timezone === c.label || (state.timezone === "IST" && c.label === "IST")) {
+        if ($("active-clock-time")) $("active-clock-time").textContent = tStr;
+        if ($("active-clock-city")) $("active-clock-city").textContent = `${c.label} ▼`;
       }
     });
   }
+
+  // --- AUTOMATED ROTATING OVERVIEW TELEMETRY TILES ---
+  const telemetryModes = [
+    { label1: "ISS ORBITAL ALTITUDE", val1: () => $("iss-alt")?.textContent || "423.7 km", sub1: "kilometres above Earth", foot1: "Keplerian / SGP4 ➔", nav1: "satellites",
+      label2: "ISS ORBITAL VELOCITY", val2: () => $("iss-velocity")?.textContent || "7.66 km/s", sub2: "kilometres per second", foot2: "Low Earth Orbit ➔", nav2: "satellites" },
+    { label1: "MARS AMBIENT TEMP", val1: () => $("mars-temp")?.textContent || "-62°C", sub1: "Surface Temperature", foot1: "Elysium Planitia ➔", nav1: "deep-labs",
+      label2: "MARS AIR PRESSURE", val2: () => $("mars-pressure")?.textContent || "745 Pa", sub2: "Carbon Dioxide Density", foot2: "MSL Telemetry ➔", nav2: "deep-labs" },
+    { label1: "REGIONAL AIR QUALITY", val1: () => $("intel-aqi")?.textContent || "85 AQI", sub1: "Environmental Telemetry", foot1: "Open-Meteo Air ➔", nav1: "intel-brief",
+      label2: "SOLAR UV RADIATION", val2: () => $("intel-radiation")?.textContent || "320 W/m²", sub2: "Surface Flux Density", foot2: "Hydrological Data ➔", nav2: "intel-brief" },
+    { label1: "VOYAGER 1 SUN DISTANCE", val1: () => $("v1-dist-sun")?.textContent || "~163.5 AU", sub1: "Distance from Sun", foot1: "Interstellar Medium ➔", nav1: "missions",
+      label2: "ROUND-TRIP LIGHT TIME", val2: () => $("v1-light-time")?.textContent || "~45.3 hrs", sub2: "Communication Latency", foot2: "NASA JPL DSN ➔", nav2: "missions" }
+  ];
+
+  function cycleOverviewTelemetry() {
+    state.currentTeleIndex = (state.currentTeleIndex + 1) % telemetryModes.length;
+    const m = telemetryModes[state.currentTeleIndex];
+
+    const l1 = $("tile-1-label"), v1 = $("iss-alt"), s1 = $("tile-1-sub"), f1 = $("tile-1-foot");
+    const l2 = $("tile-2-label"), v2 = $("iss-velocity"), s2 = $("tile-2-sub"), f2 = $("tile-2-foot");
+
+    if (l1 && v1 && s1 && f1) {
+      l1.textContent = m.label1;
+      v1.textContent = m.val1();
+      s1.textContent = m.sub1;
+      f1.innerHTML = `<span class="tiny-dot green"></span> ${m.foot1}`;
+    }
+    if (l2 && v2 && s2 && f2) {
+      l2.textContent = m.label2;
+      v2.textContent = m.val2();
+      s2.textContent = m.sub2;
+      f2.innerHTML = m.foot2;
+    }
+  }
+
+  function navigateCurrentTile(tileNum) {
+    const m = telemetryModes[state.currentTeleIndex];
+    const target = tileNum === 1 ? m.nav1 : m.nav2;
+    if (target) switchTab(target);
+  }
+  window.navigateCurrentTile = navigateCurrentTile;
 
   function updateTicker() {
     const items = [
@@ -1098,6 +1137,28 @@
       switchTab("overview");
     });
 
+    // Smart Sidebar Pin / Unpin Button
+    $("btn-pin-sidebar")?.addEventListener("click", (e) => {
+      e.stopPropagation();
+      state.sidebarPinned = !state.sidebarPinned;
+      const sb = $("sidebar");
+      if (sb) {
+        sb.classList.toggle("pinned", state.sidebarPinned);
+        $("btn-pin-sidebar").textContent = state.sidebarPinned ? "◀" : "📌";
+        toast(`Sidebar ${state.sidebarPinned ? 'Pinned' : 'Auto-Collapsing'}`);
+      }
+    });
+
+    // World Clock Pill Toggle
+    $("btn-toggle-world-clock")?.addEventListener("click", (e) => {
+      e.stopPropagation();
+      $("world-clock-dropdown")?.classList.toggle("active");
+    });
+    document.addEventListener("click", () => {
+      $("world-clock-dropdown")?.classList.remove("active");
+    });
+
+    // Rover Switchers
     $("btn-rover-perseverance")?.addEventListener("click", () => {
       $("btn-rover-curiosity")?.classList.remove("active");
       $("btn-rover-perseverance")?.classList.add("active");
@@ -1109,6 +1170,7 @@
       loadMarsRover("curiosity");
     });
 
+    // EPIC Earth Download & Share
     $("btn-download-epic")?.addEventListener("click", () => {
       if (state.currentEpicImageUrl) {
         const a = document.createElement("a");
@@ -1119,8 +1181,6 @@
         a.click();
         document.body.removeChild(a);
         toast("Starting HD Earth download…");
-      } else {
-        toast("EPIC Earth image not ready yet.");
       }
     });
 
@@ -1140,11 +1200,31 @@
       }
     });
 
+    // Theme & Language
     $("theme-select")?.addEventListener("change", e => applyTheme(e.target.value));
     $("setting-theme")?.addEventListener("change", e => applyTheme(e.target.value));
+    $("lang-select")?.addEventListener("change", e => {
+      state.lang = e.target.value;
+      toast(`Language switched to ${state.lang.toUpperCase()}`);
+    });
+    $("setting-lang")?.addEventListener("change", e => {
+      state.lang = e.target.value;
+      if ($("lang-select")) $("lang-select").value = state.lang;
+    });
+
     $("refresh-all")?.addEventListener("click", () => { toast("Refreshing telemetry…"); refreshAll(); });
     $("refresh-weather")?.addEventListener("click", () => { toast("Refreshing solar reports…"); loadSpaceWeather(); });
 
+    // Satellite Select & Search
+    $("sat-search-form")?.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const q = $("sat-search").value.trim();
+      if (q) searchSatellites(q);
+    });
+    $("sat-search")?.addEventListener("input", (e) => {
+      clearTimeout(state.searchTimer);
+      state.searchTimer = setTimeout(() => searchSatellites(e.target.value), 400);
+    });
     $("load-starlink")?.addEventListener("click", async () => {
       toast("Loading Starlink constellation sample…");
       try {
@@ -1156,16 +1236,7 @@
       } catch (_) {}
     });
 
-    $("sat-search-form")?.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const q = $("sat-search").value.trim();
-      if (q) searchSatellites(q);
-    });
-    $("sat-search")?.addEventListener("input", (e) => {
-      clearTimeout(state.searchTimer);
-      state.searchTimer = setTimeout(() => searchSatellites(e.target.value), 400);
-    });
-
+    // Wiki Search
     $("wiki-search-btn")?.addEventListener("click", () => {
       const q = $("wiki-query-input").value.trim();
       if (q) searchWiki(q);
@@ -1185,6 +1256,7 @@
       });
     });
 
+    // Intel Brief
     $("intel-search-btn")?.addEventListener("click", () => {
       const q = $("intel-area-input")?.value.trim();
       if (q) loadAreaIntelligence(q);
@@ -1239,6 +1311,7 @@
     setInterval(updateLaunchCountdown, 1000);
     setInterval(updateSatelliteUI, 1200);
     setInterval(updateDeepSpaceTelemetry, 15000);
+    setInterval(cycleOverviewTelemetry, 8000); // Auto-cycles Overview Tiles every 8 seconds
     setInterval(refreshAll, CONFIG.REFRESH_MS);
   }
 
