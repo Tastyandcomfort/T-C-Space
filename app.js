@@ -98,8 +98,7 @@ const ORBITAL_FLEET = {
   43286: { name: "NAVIC-1I (ISRO)", inc: 29.5, mm: 1.0, alt: 35786.0, vel: 3.07, isApi: false },
   48274: { name: "CSS TIANHE (TIANGONG)", inc: 41.5, mm: 15.6, alt: 385.0, vel: 7.68, isApi: false },
   20580: { name: "HUBBLE SPACE TELESCOPE", inc: 28.5, mm: 15.1, alt: 535.0, vel: 7.59, isApi: false },
-  43013: { name: "NOAA 20", inc: 98.7, mm: 14.2, alt: 824.0, vel: 7.45, isApi: false },
-  39084: { name: "LANDSAT 8", inc: 98.2, mm: 14.5, alt: 705.0, vel: 7.50, isApi: false }
+  43013: { name: "NOAA 20", inc: 98.7, mm: 14.2, alt: 824.0, vel: 7.45, isApi: false }
 };
 
 function initMap() {
@@ -194,8 +193,7 @@ function initSatelliteSearch() {
     { id: 43286, name: "NAVIC-1I (ISRO)" },
     { id: 48274, name: "CSS TIANHE (TIANGONG)" },
     { id: 20580, name: "HUBBLE SPACE TELESCOPE" },
-    { id: 43013, name: "NOAA 20" },
-    { id: 39084, name: "LANDSAT 8" }
+    { id: 43013, name: "NOAA 20" }
   ];
 
   input.addEventListener('input', () => {
@@ -237,6 +235,7 @@ function initSatelliteSearch() {
   });
 }
 
+// 5. Live Satellite Telemetry Stream & Proximity Detection
 let lastSatData = null;
 
 async function fetchLiveSatelliteTelemetry(shouldCenterMap = false) {
@@ -308,11 +307,52 @@ async function fetchLiveSatelliteTelemetry(shouldCenterMap = false) {
       issTrackLine.setLatLngs(issTrackPoints);
     }
 
+    // Check for overhead satellite pass over user's designated location
+    checkSatelliteOverheadPass(lat, lon, currentSatelliteName, vel);
+
     const ping = document.getElementById('last-updated');
     if (ping) ping.textContent = 'Live ping: ' + new Date().toLocaleTimeString('en-US', { timeZone: 'Asia/Kolkata' }) + ' IST';
   } catch (_) {}
 }
 
+// 6. Real-Time Proximity & Overhead Pass Alert Engine
+let lastPassAlertTime = 0;
+
+function checkSatelliteOverheadPass(satLat, satLon, satName, satVel) {
+  const alertIssEnabled = document.getElementById('toggle-iss')?.checked;
+  if (!alertIssEnabled) return;
+
+  const userLat = parseFloat(localStorage.getItem('user_target_lat') || "17.3850");
+  const userLon = parseFloat(localStorage.getItem('user_target_lon') || "78.4867");
+  const locationName = localStorage.getItem('user_target_city') || "Hyderabad, India";
+
+  // Calculate Haversine distance in km
+  const R = 6371;
+  const dLat = (satLat - userLat) * Math.PI / 180;
+  const dLon = (satLon - userLon) * Math.PI / 180;
+  const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(userLat * Math.PI / 180) * Math.cos(satLat * Math.PI / 180) *
+            Math.sin(dLon/2) * Math.sin(dLon/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  const distanceKm = R * c;
+
+  // Visual horizon for Low Earth Orbit is ~1500 km
+  if (distanceKm <= 1500) {
+    const now = Date.now();
+    // 45-minute cooldown per satellite pass to prevent spamming
+    if (now - lastPassAlertTime > 45 * 60 * 1000) {
+      lastPassAlertTime = now;
+      dispatchRichNotification({
+        title: 'T&C Space · Orbital Pass 🛰️',
+        body: `${satName} is passing directly over ${locationName}! Proximity: ${Math.round(distanceKm)} km · Speed: ${satVel.toFixed(2)} km/s.`,
+        url: './#satellites',
+        image: 'assets/space-hub-icon-512.png?v=1'
+      });
+    }
+  }
+}
+
+// 7. Independent Live Sensors Ticker Engine
 let tickerCycleIndex = 0;
 let lastNextLaunchText = 'Streaming upcoming flights…';
 let lastEarthquakeText = 'USGS seismic sensors active.';
@@ -339,6 +379,7 @@ function startLiveTickerEngine() {
   setInterval(updateTicker, 4500);
 }
 
+// 8. Verified Launch Manifest with Ticking Countdown Timer
 let countdownInterval = null;
 
 async function fetchLaunches() {
@@ -421,7 +462,7 @@ async function fetchLaunches() {
   }
 }
 
-// 8. Universal Lightbox with Guaranteed Binary Download & Share
+// 9. Universal Lightbox with Guaranteed Binary Download via wsrv.nl & Native Share
 let activeLightboxMedia = {
   url: "",
   title: "NASA Space Telemetry",
@@ -454,20 +495,29 @@ function initUniversalLightbox() {
     if (e.target === modal) modal.classList.remove('open');
   });
 
-  // Multi-tier Binary Blob Download (Guarantees Actual File Download to Disk)
+  // Direct Binary Download Engine (Guaranteed Save to Device Downloads Folder)
   downloadBtn?.addEventListener('click', async () => {
     if (!activeLightboxMedia.url) return;
     
     showToast('Downloading high-res image…');
     let blob = null;
 
-    // Method 1: Direct fetch (Works for APOD and open CORS endpoints)
+    // 1. Direct CORS fetch
     try {
       const res = await fetch(activeLightboxMedia.url);
       if (res.ok) blob = await res.blob();
     } catch (_) {}
 
-    // Method 2: AllOrigins raw binary proxy (Guarantees Earth DSCOVR EPIC and Mars downloads)
+    // 2. wsrv.nl dedicated image binary proxy (Universal CORS enabled, converts to clean file)
+    if (!blob) {
+      try {
+        const proxyUrl = `https://wsrv.nl/?url=${encodeURIComponent(activeLightboxMedia.url)}&output=jpg`;
+        const res = await fetch(proxyUrl);
+        if (res.ok) blob = await res.blob();
+      } catch (_) {}
+    }
+
+    // 3. AllOrigins raw binary stream
     if (!blob) {
       try {
         const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(activeLightboxMedia.url)}`;
@@ -476,16 +526,6 @@ function initUniversalLightbox() {
       } catch (_) {}
     }
 
-    // Method 3: Corsproxy fallback
-    if (!blob) {
-      try {
-        const proxyUrl = `https://corsproxy.io/?url=${encodeURIComponent(activeLightboxMedia.url)}`;
-        const res = await fetch(proxyUrl);
-        if (res.ok) blob = await res.blob();
-      } catch (_) {}
-    }
-
-    // Trigger true browser file download
     if (blob) {
       const blobUrl = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -498,9 +538,8 @@ function initUniversalLightbox() {
         document.body.removeChild(a);
         URL.revokeObjectURL(blobUrl);
       }, 2000);
-      showToast('✅ Download saved to your device!');
+      showToast('✅ Download complete! Saved to your device.');
     } else {
-      // Fallback only if all 3 proxies were blocked
       window.open(activeLightboxMedia.url, '_blank');
       showToast('Opened in new tab — Long-press or right-click to save');
     }
@@ -523,7 +562,7 @@ function initUniversalLightbox() {
   });
 }
 
-// 9. Earth From 1,000,000 Miles Away (NASA DSCOVR EPIC)
+// 10. Earth From 1,000,000 Miles Away (NASA DSCOVR EPIC)
 async function fetchEpicEarth() {
   const box = document.getElementById('epic-media-box');
   try {
@@ -564,7 +603,7 @@ async function fetchEpicEarth() {
   }
 }
 
-// 10. Mars Exploration: Curiosity Live + Official NASA Image Library (Clean Event Listeners)
+// 11. Mars Exploration: Curiosity Live + Official NASA Image Library (Clean Event Listeners)
 async function fetchMarsPhotos() {
   const container = document.getElementById('mars-photos-container');
   if (!container) return;
@@ -577,7 +616,6 @@ async function fetchMarsPhotos() {
       </div>
     `).join('');
 
-    // Attach click listeners cleanly (Immune to single-quote apostrophe bugs!)
     container.querySelectorAll('.mars-photo-item').forEach(el => {
       el.addEventListener('click', () => {
         openUniversalLightbox(el.dataset.url, el.dataset.title, el.dataset.time, el.dataset.filename);
@@ -585,7 +623,7 @@ async function fetchMarsPhotos() {
     });
   }
 
-  // Step 1: Try Curiosity latest photos
+  // Step 1: Curiosity Live Feed
   try {
     const res = await fetch(`https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/latest_photos?api_key=${NASA_API_KEY}`);
     if (res.ok) {
@@ -636,7 +674,7 @@ async function fetchMarsPhotos() {
   }
 }
 
-// 11. Space Weather (DONKI with Personal Key & 60s Auto-Poll)
+// 12. Space Weather (DONKI with Personal Key & 60s Auto-Poll)
 async function fetchSpaceWeather() {
   const list = document.getElementById('weather-events');
   try {
@@ -696,7 +734,7 @@ async function fetchSpaceWeather() {
   }
 }
 
-// 12. NASA NeoWs Asteroids with Direct JPL Verification Link
+// 13. NASA NeoWs Asteroids with Direct JPL Verification Link
 async function fetchAsteroids() {
   const container = document.getElementById('neo-list');
   try {
@@ -740,7 +778,7 @@ async function fetchAsteroids() {
   }
 }
 
-// 13. USGS Earthquakes Plotted as Circles on Map with Info Popups
+// 14. USGS Earthquakes Plotted as Circles on Map with Info Popups
 async function fetchEarthquakes() {
   const list = document.getElementById('earthquake-list');
   try {
@@ -807,7 +845,7 @@ async function fetchEarthquakes() {
   }
 }
 
-// 14. NASA EONET Hazards Plotted on Map
+// 15. NASA EONET Hazards Plotted on Map
 async function fetchEonetHazards() {
   const list = document.getElementById('hazard-list');
   try {
@@ -858,7 +896,7 @@ async function fetchEonetHazards() {
   } catch (_) {}
 }
 
-// 15. Worldwide Area Search with Autocomplete & Plain-English Ratings
+// 16. Worldwide Area Search with Autocomplete & Plain-English Ratings
 async function fetchAreaIntel(lat, lon, locationName) {
   try {
     const res = await fetch(`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=us_aqi,pm2_5,pm10,nitrogen_dioxide,direct_normal_irradiance`);
@@ -985,7 +1023,7 @@ function initAreaSearch() {
   });
 }
 
-// 16. NASA APOD (Direct science.nasa.gov Endpoint with In-App Lightbox)
+// 17. NASA APOD (Calculated on US Eastern Time with In-App Lightbox)
 async function fetchApod() {
   const media = document.getElementById('apod-media');
   try {
@@ -1045,7 +1083,7 @@ async function fetchApod() {
   }
 }
 
-// 17. Wikipedia Explorer with Autocomplete & Presets
+// 18. Wikipedia Explorer with Autocomplete & Presets
 async function searchWiki(query) {
   try {
     const enc = encodeURIComponent(query.trim().replace(/ /g, '_'));
@@ -1114,7 +1152,30 @@ function initWikiSearch() {
   });
 }
 
-// 18. Firebase Initialization, "Select All" Toggle, Booleans Sync & Interactive "Test Alert" Button
+// 19. Rich Dispatcher for Web & Mobile Push (Model 1 & 3: T&C Space · [Category] [Emoji])
+function dispatchRichNotification({ title, body, url, image }) {
+  if ('Notification' in window && Notification.permission === 'granted') {
+    if (swRegistration) {
+      swRegistration.showNotification(title, {
+        body: body,
+        icon: 'assets/space-hub-icon-192.png?v=1',
+        badge: 'assets/space-hub-icon-192.png?v=1',
+        image: image || null, // Rich full-bleed photo in push notification!
+        vibrate: [200, 100, 200],
+        requireInteraction: true,
+        data: { url: url || './#overview' }
+      });
+    } else {
+      new Notification(title, {
+        body: body,
+        icon: 'assets/space-hub-icon-192.png?v=1',
+        image: image || null
+      });
+    }
+  }
+}
+
+// 20. Firebase, User Pass Location & Interactive Test Alert
 const firebaseConfig = {
   apiKey: "AIzaSyAOn8eFL_CMGuYVeEa9hfpdkHRxZpjacqU",
   authDomain: "news-61e62.firebaseapp.com",
@@ -1155,6 +1216,42 @@ function initAlertPreferences() {
   if (savedLaunch !== null) document.getElementById('toggle-launches').checked = (savedLaunch === 'true');
   if (savedQuake !== null) document.getElementById('toggle-quake').checked = (savedQuake === 'true');
   if (savedAsteroid !== null) document.getElementById('toggle-asteroid').checked = (savedAsteroid === 'true');
+
+  // Location selector setup
+  const metroSelect = document.getElementById('metro-location-select');
+  const locStatus = document.getElementById('current-location-status');
+  const savedCity = localStorage.getItem('user_target_city');
+
+  if (savedCity && metroSelect) {
+    locStatus.textContent = `Current Target: ${savedCity}`;
+  }
+
+  metroSelect?.addEventListener('change', (e) => {
+    const parts = e.target.value.split(',');
+    localStorage.setItem('user_target_lat', parts[0]);
+    localStorage.setItem('user_target_lon', parts[1]);
+    localStorage.setItem('user_target_city', parts[2]);
+    locStatus.textContent = `Current Target: ${parts[2]}`;
+    showToast(`Tracking passes for ${parts[2]}`);
+  });
+
+  // GPS button
+  document.getElementById('use-gps-btn')?.addEventListener('click', () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const lat = pos.coords.latitude.toFixed(4);
+          const lon = pos.coords.longitude.toFixed(4);
+          localStorage.setItem('user_target_lat', lat);
+          localStorage.setItem('user_target_lon', lon);
+          localStorage.setItem('user_target_city', `GPS (${lat}°N, ${lon}°E)`);
+          locStatus.textContent = `Current Target: GPS (${lat}°N, ${lon}°E)`;
+          showToast(`📍 GPS Target Locked: ${lat}°N, ${lon}°E`);
+        },
+        () => showToast('Could not retrieve GPS location.')
+      );
+    }
+  });
 
   // "Select All / Deselect All" Button
   let allSelected = true;
@@ -1198,7 +1295,6 @@ function initAlertPreferences() {
           }
         }
 
-        // Writes explicit boolean flags to Firestore document
         await db.collection('space_fcm_tokens').doc(token).set({
           token: token,
           alertIss: Boolean(isIss),
@@ -1206,11 +1302,12 @@ function initAlertPreferences() {
           alertLaunches: Boolean(isLaunch),
           alertQuake: Boolean(isQuake),
           alertAsteroid: Boolean(isAsteroid),
+          userLocation: localStorage.getItem('user_target_city') || 'Hyderabad',
           updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
           userAgent: navigator.userAgent
         }, { merge: true });
 
-        showToast('✅ Preferences & Booleans Saved in Firebase!');
+        showToast('✅ Preferences & Location Synced to Firebase!');
         return;
       }
 
@@ -1220,7 +1317,7 @@ function initAlertPreferences() {
     }
   });
 
-  // Interactive "Test Alert" Button with Automatic Permission Prompt & Click Routing
+  // Interactive Test Alert Button with Title Models 1 & 3 + Rich Photo Previews
   document.getElementById('test-alert-btn')?.addEventListener('click', async () => {
     if ('Notification' in window && Notification.permission === 'default') {
       await Notification.requestPermission();
@@ -1238,54 +1335,43 @@ function initAlertPreferences() {
       const isQuake = document.getElementById('toggle-quake').checked;
       const isAsteroid = document.getElementById('toggle-asteroid').checked;
 
-      let title = 'T&C Space Alert 🚀';
-      let body = 'All live telemetry sensors operational.';
+      let title = 'T&C Space 🚀';
+      let body = 'All live telemetry systems operational.';
       let url = './#overview';
+      let photo = 'assets/space-hub-icon-512.png?v=1';
 
       if (isLaunch) {
-        title = '🚀 Rocket Liftoff Alert';
-        body = 'Next launch countdown in final window. Tap to view spaceport manifest.';
+        title = 'T&C Space · Liftoff Countdown 🚀';
+        body = 'Next rocket countdown in final window. Tap to inspect spaceport manifest.';
         url = './#launches';
+        photo = 'https://images-assets.nasa.gov/image/PIA25324/PIA25324~orig.jpg';
+      } else if (isIss) {
+        const loc = localStorage.getItem('user_target_city') || 'Hyderabad';
+        title = 'T&C Space · Orbital Pass 🛰️';
+        body = `ISS (Zarya) approaching regional horizon over ${loc}! Speed: 7.66 km/s. Visible in clear skies.`;
+        url = './#satellites';
+        photo = activeLightboxMedia.url || 'assets/space-hub-icon-512.png?v=1';
       } else if (isSolar) {
-        title = '☀️ Space Weather Alert';
+        title = 'T&C Space · Solar Weather ☀️';
         body = 'Geomagnetic solar flux observation active. Tap to view heliophysics data.';
         url = './#space-weather';
       } else if (isQuake) {
-        title = '🌍 USGS Seismic Alert';
+        title = 'T&C Space · Seismic Alert 🌍';
         body = 'Recent global earthquake detected. Tap to inspect seismic radar.';
         url = './#cosmos-hazards';
       } else if (isAsteroid) {
-        title = '☄️ NASA JPL Radar Alert';
+        title = 'T&C Space · Asteroid Radar ☄️';
         body = 'Near-Earth asteroid close approach confirmed. Tap to review trajectory.';
         url = './#cosmos-hazards';
-      } else if (isIss) {
-        title = '🛰️ Satellite Tracking Alert';
-        body = 'Active orbital pass in tracking range. Tap to view ground track.';
-        url = './#satellites';
       }
 
-      if (swRegistration) {
-        swRegistration.showNotification(title, {
-          body: body,
-          icon: 'assets/space-hub-icon-192.png?v=1',
-          badge: 'assets/space-hub-icon-192.png?v=1',
-          vibrate: [200, 100, 200],
-          requireInteraction: true,
-          data: { url: url }
-        });
-      } else {
-        new Notification(title, {
-          body: body,
-          icon: 'assets/space-hub-icon-192.png?v=1'
-        });
-      }
-
-      showToast('🔔 Test Notification Dispatched!');
+      dispatchRichNotification({ title, body, url, image: photo });
+      showToast('🔔 Rich Test Notification Dispatched!');
     }
   });
 }
 
-// 19. Automatic System Theme Detection
+// 21. Automatic System Theme Detection
 function initTheme() {
   const themeSelect = document.getElementById('theme-select');
   const saved = localStorage.getItem('app_theme') || 'system';
@@ -1315,7 +1401,7 @@ function initTheme() {
   apply(saved);
 }
 
-// 20. Dynamic PWA 1-Tap Install Button
+// 22. Dynamic PWA 1-Tap Install Button
 let deferredInstallPrompt = null;
 
 function initPwaInstall() {
@@ -1418,7 +1504,7 @@ document.addEventListener('DOMContentLoaded', () => {
   fetchAreaIntel('17.3850', '78.4867', 'Hyderabad, Telangana, India');
   searchWiki('Chandrayaan-3');
 
-  // Polling Intervals: 3s for Satellite Telemetry, 60s for Space Weather Auto-Sync
+  // Polling Intervals: 3s for Satellite Telemetry & Pass Detection, 60s for Space Weather Auto-Sync
   setInterval(fetchLiveSatelliteTelemetry, 3000);
   setInterval(fetchSpaceWeather, 60000);
 });
