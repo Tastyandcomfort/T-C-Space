@@ -53,9 +53,13 @@
           <span class="nav-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span>
           <span>Cosmos &amp; Asteroids</span>
         </a>
+        <a class="nav-link" href="#mars-exploration" data-nav="mars-exploration">
+          <span class="nav-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="8" cy="9" r="1.5"/><circle cx="15" cy="14" r="2"/></svg></span>
+          <span>Mars Exploration</span>
+        </a>
         <a class="nav-link" href="#earth-monitor" data-nav="earth-monitor">
           <span class="nav-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg></span>
-          <span>Earthquakes (USGS)</span>
+          <span>Earth Hazards (USGS)</span>
         </a>
         <a class="nav-link" href="#intel-brief" data-nav="intel-brief">
           <span class="nav-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></span>
@@ -100,7 +104,7 @@
         </div>
 
         <div class="top-actions">
-          <!-- Dual IST & UTC Clocks -->
+          <!-- Live Dual IST & UTC Clocks -->
           <div class="utc-clock" title="Indian Standard Time & UTC">
             <span class="live-dot"></span>
             <div class="clock-duo">
@@ -177,27 +181,48 @@
           </div>
         </section>
 
-        <!-- 2. SATELLITES & 2D MAP -->
+        <!-- 2. SATELLITES & MULTI-LAYER MAP (Full Interactive Layers, Legend, HUD) -->
         <section class="section-block" id="satellites">
           <div class="section-title">
             <div>
-              <div class="eyebrow">ORBITAL INTELLIGENCE</div>
-              <h2>Real-Time Satellite Tracking</h2>
-              <p>Live sub-satellite tracking polled directly from WhereTheISS telemetry with clean, watermark-free map canvas.</p>
+              <div class="eyebrow">ORBITAL SITUATIONAL AWARENESS</div>
+              <h2>Interactive Planetary Map &amp; Tracking</h2>
+              <p>Real-time satellite positions, active earthquakes, and natural hazard overlays on a clean, watermark-free canvas.</p>
             </div>
           </div>
 
           <article class="surface map-card">
-            <div class="card-heading">
-              <div>
-                <h3>Global Satellite Position</h3>
-                <p>Tracking the International Space Station with zero watermark clutter.</p>
+            <!-- Map Layer Toggles -->
+            <div class="map-toolbar-row">
+              <div class="map-layer-chips">
+                <button class="layer-chip active" id="toggle-layer-iss">🛰️ ISS Active</button>
+                <button class="layer-chip active" id="toggle-layer-quakes">🌍 Quakes (USGS)</button>
+                <button class="layer-chip active" id="toggle-layer-hazards">🌋 Hazards (EONET)</button>
+                <button class="layer-chip active" id="toggle-layer-track">⌖ Ground Track</button>
               </div>
-              <span class="live-tag"><i></i> LIVE SENSOR</span>
             </div>
 
-            <!-- Leaflet Map Container -->
-            <div id="sat-map" class="map"></div>
+            <!-- Leaflet Map Container with HUD & Legend Overlays -->
+            <div class="map-viewport-wrapper">
+              <div id="sat-map" class="map"></div>
+
+              <!-- Live HUD Telemetry Chip (Top Left Overlay) -->
+              <div class="map-hud-chip" id="map-hud-overlay">
+                <span class="live-dot"></span>
+                <div>
+                  <b id="hud-sat-name">ISS (ZARYA)</b>
+                  <span id="hud-sat-telemetry">Calculating telemetry…</span>
+                </div>
+              </div>
+
+              <!-- Map Legend (Bottom Left Overlay) -->
+              <div class="map-legend-overlay">
+                <div><span class="legend-color-dot blue"></span> ISS Position</div>
+                <div><span class="legend-color-dot red"></span> Quake M5.0+</div>
+                <div><span class="legend-color-dot orange"></span> Quake M4.0+</div>
+                <div><span class="legend-color-dot purple"></span> Hazard Event</div>
+              </div>
+            </div>
 
             <div class="map-foot">
               <div><span>LATITUDE: </span><b id="map-lat">—</b></div>
@@ -214,7 +239,7 @@
             <div>
               <div class="eyebrow">VERIFIED FLIGHT MANIFEST</div>
               <h2>Rocket Liftoffs &amp; Countdowns</h2>
-              <p>Direct schedule from Launch Library 2: ISRO, SpaceX, NASA, Rocket Lab, ESA, and international launchpads.</p>
+              <p>Direct schedule from Launch Library 2: ISRO, SpaceX, NASA, CASC, Rocket Lab, ESA, and international spaceports.</p>
             </div>
           </div>
 
@@ -278,12 +303,12 @@
           <div class="section-title">
             <div>
               <div class="eyebrow">COSMOS &amp; NEAR-EARTH OBJECTS</div>
-              <h2>Astronomy Picture &amp; Asteroids (NeoWs)</h2>
-              <p>NASA Astronomy Picture of the Day and live radar close approaches from NASA JPL.</p>
+              <h2>Astronomy Picture &amp; Asteroids (NASA JPL Radar)</h2>
+              <p>Official NASA Astronomy Picture of the Day and verified live radar close approaches from NASA JPL CNEOS.</p>
             </div>
           </div>
 
-          <!-- APOD Showcase (Fail-Safe: No App Logo Fallback) -->
+          <!-- APOD Showcase (Dual-Source Verified Fallback) -->
           <article class="surface apod-layout">
             <div id="apod-media" class="apod-media">
               <div class="apple-spinner large"></div>
@@ -300,46 +325,110 @@
             </div>
           </article>
 
-          <!-- NeoWs Asteroid Watch -->
+          <!-- NASA JPL CNEOS Asteroid Radar -->
           <article class="surface neo-panel">
             <div class="card-heading">
               <div>
-                <h3>Near-Earth Object Radar (Asteroid Approaches)</h3>
-                <p>Verified close approaches for today from NASA Jet Propulsion Laboratory.</p>
+                <h3>NASA JPL Near-Earth Asteroid Radar (CNEOS CAD)</h3>
+                <p>Direct close approaches for today from NASA Jet Propulsion Laboratory. No rate limits.</p>
               </div>
-              <span class="small-chip blue">NASA NeoWs</span>
+              <span class="small-chip blue">NASA JPL CNEOS</span>
             </div>
             <div id="neo-list" class="neo-list-scroll">
-              <div class="loading-state"><div class="apple-spinner"></div><p>Scanning NASA NeoWs sensors…</p></div>
+              <div class="loading-state"><div class="apple-spinner"></div><p>Scanning NASA JPL radar…</p></div>
             </div>
           </article>
         </section>
 
-        <!-- 6. EARTH MONITORING (USGS) -->
+        <!-- 6. MARS EXPLORATION (Restored) -->
+        <section class="section-block" id="mars-exploration">
+          <div class="section-title">
+            <div>
+              <div class="eyebrow">INTERPLANETARY SURFACE TELEMETRY</div>
+              <h2>Mars Exploration &amp; Rover Status</h2>
+              <p>Live surface mission status from NASA's Perseverance and Curiosity rovers on the Red Planet.</p>
+            </div>
+          </div>
+
+          <div class="mars-grid">
+            <article class="surface mars-card">
+              <div class="card-heading">
+                <div>
+                  <div class="eyebrow">JEZERO CRATER · NASA MARS 2020</div>
+                  <h3>Perseverance Rover</h3>
+                  <p>Searching for signs of ancient microbial life and caching rock core samples.</p>
+                </div>
+                <span class="status-pill"><i></i> ACTIVE ON MARS</span>
+              </div>
+              <div class="mars-stats-row">
+                <div class="mars-stat"><small>LOCATION</small><b>Jezero Crater Delta</b></div>
+                <div class="mars-stat"><small>CURRENT MISSION SOL</small><b id="perseverance-sol">Sol 1300+</b></div>
+                <div class="mars-stat"><small>SURFACE TEMPERATURE</small><b>-55°C (Average)</b></div>
+                <div class="mars-stat"><small>COMMUNICATION</small><b>Mars Reconnaissance Orbiter</b></div>
+              </div>
+              <p class="mars-summary">Perseverance is actively collecting regolith and sedimentary samples along the rim of Jezero's ancient river delta, operating autonomous navigation sequences.</p>
+            </article>
+
+            <article class="surface mars-card">
+              <div class="card-heading">
+                <div>
+                  <div class="eyebrow">GALE CRATER · NASA MSL</div>
+                  <h3>Curiosity Rover</h3>
+                  <p>Investigating Martian climate, geology, and past planetary habitability.</p>
+                </div>
+                <span class="status-pill"><i></i> ACTIVE ON MARS</span>
+              </div>
+              <div class="mars-stats-row">
+                <div class="mars-stat"><small>LOCATION</small><b>Mount Sharp (Aeolis Mons)</b></div>
+                <div class="mars-stat"><small>CURRENT MISSION SOL</small><b id="curiosity-sol">Sol 4300+</b></div>
+                <div class="mars-stat"><small>DISTANCE TRAVELED</small><b>32.5+ km</b></div>
+                <div class="mars-stat"><small>SAMPLE ANALYSIS</small><b>SAM &amp; CheMin Labs</b></div>
+              </div>
+              <p class="mars-summary">Curiosity is currently climbing the sulfate-bearing unit of Mount Sharp, investigating how ancient water flowed across Martian clay layers billions of years ago.</p>
+            </article>
+          </div>
+        </section>
+
+        <!-- 7. EARTH MONITORING (USGS & EONET) -->
         <section class="section-block" id="earth-monitor">
           <div class="section-title">
             <div>
               <div class="eyebrow">PLANETARY HAZARDS &amp; SEISMOLOGY</div>
-              <h2>Real-Time Earthquakes (USGS)</h2>
-              <p>U.S. Geological Survey worldwide seismic activity (M 2.5+) recorded in the past 24 hours.</p>
+              <h2>Real-Time Earthquakes &amp; Hazards</h2>
+              <p>U.S. Geological Survey worldwide seismic activity (M 2.5+) and NASA EONET active planetary events.</p>
             </div>
           </div>
 
-          <article class="surface earth-card">
-            <div class="card-heading">
-              <div>
-                <h3>USGS Global Seismic Network</h3>
-                <p>Live earthquake sensor log updated automatically.</p>
+          <div class="dual-grid">
+            <article class="surface earth-card">
+              <div class="card-heading">
+                <div>
+                  <h3>USGS Global Seismic Network</h3>
+                  <p>Live earthquake sensor log updated automatically.</p>
+                </div>
+                <span class="small-chip green" id="quake-count">USGS LIVE</span>
               </div>
-              <span class="small-chip green" id="quake-count">USGS LIVE</span>
-            </div>
-            <div id="earthquake-list" class="earthquake-feed">
-              <div class="loading-state"><div class="apple-spinner"></div><p>Contacting USGS seismographs…</p></div>
-            </div>
-          </article>
+              <div id="earthquake-list" class="earthquake-feed">
+                <div class="loading-state"><div class="apple-spinner"></div><p>Contacting USGS seismographs…</p></div>
+              </div>
+            </article>
+
+            <article class="surface earth-card">
+              <div class="card-heading">
+                <div>
+                  <h3>NASA EONET Active Hazards</h3>
+                  <p>Wildfires, active volcanoes, and severe storms.</p>
+                </div>
+                <span class="small-chip blue" id="hazard-count">NASA EONET</span>
+              </div>
+              <div id="hazard-list" class="earthquake-feed">
+                <div class="loading-state"><div class="apple-spinner"></div><p>Querying NASA EONET sensors…</p></div>
+              </div>
+            </article>
+          </div>
         </section>
 
-        <!-- 7. AREA INTELLIGENCE BRIEF -->
+        <!-- 8. AREA INTELLIGENCE BRIEF -->
         <section class="section-block" id="intel-brief">
           <div class="section-title">
             <div>
@@ -430,7 +519,7 @@
           </article>
         </section>
 
-        <!-- 8. SPACE WIKIPEDIA EXPLORER -->
+        <!-- 9. SPACE WIKIPEDIA EXPLORER -->
         <section class="section-block" id="wiki">
           <div class="section-title">
             <div>
@@ -474,7 +563,7 @@
           </article>
         </section>
 
-        <!-- 9. PREFERENCES & ALERTS (Cleaned: No Duplicate Appearance Box) -->
+        <!-- 10. PREFERENCES & ALERTS (Firebase Synced) -->
         <section class="section-block" id="settings">
           <div class="section-title">
             <div>
@@ -561,9 +650,13 @@
       <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/></svg>
       <span>Launches</span>
     </a>
+    <a class="dock-link" href="#mars-exploration" data-nav="mars-exploration">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="8" cy="9" r="1.5"/><circle cx="15" cy="14" r="2"/></svg>
+      <span>Mars</span>
+    </a>
     <a class="dock-link" href="#intel-brief" data-nav="intel-brief">
       <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-      <span>Area Intel</span>
+      <span>Intel</span>
     </a>
     <a class="dock-link" href="#settings" data-nav="settings">
       <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
