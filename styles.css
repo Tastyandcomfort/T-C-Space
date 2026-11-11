@@ -19,7 +19,6 @@
   --red: #ff453a;
   --teal: #64d9e5;
 
-  /* Dynamically synchronized telemetry light color across all tabs */
   --telemetry-status-color: #30d158;
 
   --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, sans-serif;
@@ -51,7 +50,6 @@ html[data-theme="light"] {
   --shadow: 0 10px 32px rgba(20, 30, 50, 0.05);
 }
 
-/* Site-wide synchronized status pulse colors */
 html[data-network="fast"], html[data-network="normal"] { --telemetry-status-color: #30d158; }
 html[data-network="slow"] { --telemetry-status-color: #ff9f0a; }
 html[data-network="offline"] { --telemetry-status-color: #ff453a; }
@@ -106,6 +104,7 @@ button { font-family: inherit; }
   font-size: 11px;
   font-weight: 600;
   color: var(--text);
+  flex-shrink: 0;
 }
 
 /* Layout Shell */
@@ -160,7 +159,7 @@ button { font-family: inherit; }
 .connection-indicator b { margin-left: auto; color: var(--green); font-size: 9px; }
 .sidebar-bottom small { font-size: 9px; color: var(--dim); display: block; margin-top: 4px; }
 
-/* Main Area */
+/* Main Area & Responsive Header */
 .main-area { margin-left: 250px; flex: 1; display: flex; flex-direction: column; min-height: 100vh; min-width: 0; }
 .topbar {
   height: 70px;
@@ -176,13 +175,13 @@ button { font-family: inherit; }
   -webkit-backdrop-filter: var(--blur);
   border-bottom: 1px solid var(--line);
 }
-.mobile-brand { display: none; align-items: center; gap: 10px; }
-.brand-icon-box.small { width: 34px; height: 34px; border-radius: 9px; }
+.mobile-brand { display: none; align-items: center; gap: 10px; flex-shrink: 0; }
+.brand-icon-box.small { width: 34px; height: 34px; border-radius: 9px; flex-shrink: 0; }
 .breadcrumb { font-size: 11px; color: var(--muted); display: flex; gap: 8px; }
 .breadcrumb i { font-style: normal; opacity: 0.5; }
 .breadcrumb b { color: var(--text); font-weight: 600; }
 
-.top-actions { display: flex; align-items: center; gap: 10px; }
+.top-actions { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
 .install-pill-btn {
   display: inline-flex;
   align-items: center;
@@ -195,6 +194,8 @@ button { font-family: inherit; }
   font-size: 11px;
   font-weight: 600;
   cursor: pointer;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 .install-pill-btn:hover { filter: brightness(1.08); }
 
@@ -206,8 +207,9 @@ button { font-family: inherit; }
   border: 1px solid var(--line);
   border-radius: 99px;
   padding: 6px 14px;
+  flex-shrink: 0;
 }
-.clock-duo { display: flex; gap: 8px; font: 11px var(--mono); }
+.clock-duo { display: flex; gap: 8px; font: 11px var(--mono); white-space: nowrap; }
 #ist-clock { font-weight: 700; color: var(--text); }
 #utc-clock { color: var(--muted); }
 
@@ -221,6 +223,7 @@ button { font-family: inherit; }
   background: var(--surface);
   font-size: 10px;
   color: var(--muted);
+  flex-shrink: 0;
 }
 .theme-picker select { border: 0; background: transparent; color: var(--text); font: inherit; font-size: 10px; cursor: pointer; outline: none; }
 .icon-btn {
@@ -234,10 +237,11 @@ button { font-family: inherit; }
   cursor: pointer;
   display: grid;
   place-items: center;
+  flex-shrink: 0;
 }
 .icon-btn:hover { border-color: var(--blue); color: var(--blue); }
 
-/* View Container */
+/* Content Wrap */
 .content-wrap { max-width: 1400px; width: 100%; margin: 0 auto; padding: 28px 36px 40px; flex: 1; min-width: 0; }
 .section-block { display: none; }
 .section-block.active-view { display: block; animation: appleFadeIn 0.22s ease-out; }
@@ -267,7 +271,6 @@ button { font-family: inherit; }
   box-shadow: 0 16px 40px rgba(0, 113, 227, 0.12);
 }
 
-/* Card Accent Widget Colors */
 .card-accent-blue { border-top: 3px solid var(--blue); }
 .card-accent-purple { border-top: 3px solid var(--purple); }
 .card-accent-orange { border-top: 3px solid var(--orange); }
@@ -323,13 +326,6 @@ button { font-family: inherit; }
   min-width: 0;
 }
 .metric-top { display: flex; justify-content: space-between; font-size: 8px; font-weight: 750; letter-spacing: 0.9px; color: var(--dim); }
-.metric-symbol { font-size: 18px; }
-.blue { color: var(--blue); }
-.purple { color: var(--purple); }
-.orange { color: var(--orange); }
-.green { color: var(--green); }
-.teal { color: var(--teal); }
-
 .metric-card strong { font: 700 24px var(--mono); margin: 12px 0 2px; display: block; letter-spacing: -0.5px; overflow-wrap: anywhere; }
 .metric-card small { font-size: 10px; color: var(--muted); }
 .metric-bottom { margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--line); font-size: 9px; color: var(--muted); }
@@ -959,13 +955,13 @@ html[data-theme="dark"] .leaflet-tile {
 /* Mobile Bottom Dock */
 .mobile-dock { display: none; }
 
-/* Responsive Media Queries */
+/* Responsive Media Queries (Mobile Header Decongestion) */
 @media (max-width: 900px) {
   .sidebar { display: none; }
   .main-area { margin-left: 0; padding-bottom: 74px; width: 100vw; }
   .mobile-brand { display: flex; }
-  .topbar { padding: 0 16px; }
-  .content-wrap { padding: 20px 16px 30px; }
+  .topbar { padding: 0 14px; }
+  .content-wrap { padding: 20px 14px 30px; }
   .breadcrumb { display: none; }
   .metrics-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .space-weather-dashboard-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -1012,12 +1008,39 @@ html[data-theme="dark"] .leaflet-tile {
   .dock-link.active { color: var(--blue); font-weight: 600; }
 }
 
-@media (max-width: 520px) {
+/* Mobile Screen (<600px) Apple Header Decongestion */
+@media (max-width: 600px) {
+  .top-actions { gap: 6px; }
+
+  /* Compact Network Status into Micro Status Dot Pill */
+  .network-status-pill { padding: 6px 8px; }
+  #net-text { display: none; }
+
+  /* Compact PWA Install Button to Apple Icon Button */
+  .install-pill-btn {
+    padding: 6px 8px;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    justify-content: center;
+  }
+  .install-pill-btn span { display: none; }
+
+  /* Compact Clocks */
+  .utc-clock { padding: 6px 10px; }
+  .clock-duo { font-size: 10px; }
+
+  /* Compact Theme Picker */
+  .theme-picker { padding: 5px 6px; }
+  .theme-picker select { font-size: 9px; }
+}
+
+@media (max-width: 480px) {
+  #utc-clock { display: none; } /* Only show IST on narrow screens */
   .metrics-grid { grid-template-columns: 1fr; }
-  .space-weather-dashboard-grid { grid-template-columns: 1fr; }
   .intel-metrics-grid { grid-template-columns: 1fr; }
   .spotlight-meta-grid { grid-template-columns: 1fr; }
   .mars-stats-row { grid-template-columns: 1fr; }
   .mars-photos-grid { grid-template-columns: 1fr; }
-  #utc-clock { display: none; }
 }
