@@ -13,19 +13,43 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const messaging = firebase.messaging();
 
-// Rich Mobile Background Notification Handler (Title Model 1 & 3 with Rich Image Preview)
+// Contextual NASA space photography for notification banners (Never your app icon)
+const NOTIFICATION_PHOTOS = {
+  satellite: 'https://images-assets.nasa.gov/image/iss064e007861/iss064e007861~medium.jpg', // ISS orbiting Earth
+  launch: 'https://images-assets.nasa.gov/image/KSC-20221116-PH-KLS01_0003/KSC-20221116-PH-KLS01_0003~medium.jpg', // Rocket liftoff
+  solar: 'https://images-assets.nasa.gov/image/GSFC_20171208_Archive_e001435/GSFC_20171208_Archive_e001435~medium.jpg', // SDO solar flare
+  quake: 'https://images-assets.nasa.gov/image/iss065e094294/iss065e094294~medium.jpg', // Earth atmospheric horizon
+  asteroid: 'https://images-assets.nasa.gov/image/PIA24430/PIA24430~medium.jpg' // Asteroid surface
+};
+
 messaging.onBackgroundMessage((payload) => {
   const category = payload.data?.category || 'Space Alert';
   const emoji = payload.data?.emoji || '🚀';
   const title = payload.notification?.title || payload.data?.title || `T&C Space · ${category} ${emoji}`;
   const targetUrl = payload.data?.url || payload.data?.click_action || './#overview';
-  const imageUrl = payload.notification?.image || payload.data?.image || null;
+  
+  // Pick real space photo banner based on alert type
+  let bannerPhoto = payload.notification?.image || payload.data?.image;
+  if (!bannerPhoto || bannerPhoto.includes('space-hub-icon')) {
+    const catLower = category.toLowerCase();
+    if (catLower.includes('pass') || catLower.includes('orbital') || catLower.includes('sat')) {
+      bannerPhoto = NOTIFICATION_PHOTOS.satellite;
+    } else if (catLower.includes('launch') || catLower.includes('liftoff') || catLower.includes('rocket')) {
+      bannerPhoto = NOTIFICATION_PHOTOS.launch;
+    } else if (catLower.includes('solar') || catLower.includes('sun') || catLower.includes('weather')) {
+      bannerPhoto = NOTIFICATION_PHOTOS.solar;
+    } else if (catLower.includes('seismic') || catLower.includes('quake') || catLower.includes('earth')) {
+      bannerPhoto = NOTIFICATION_PHOTOS.quake;
+    } else {
+      bannerPhoto = NOTIFICATION_PHOTOS.satellite;
+    }
+  }
 
   const options = {
     body: payload.notification?.body || payload.data?.body || 'New live telemetry update available.',
-    icon: 'assets/space-hub-icon-192.png?v=1',
+    icon: 'assets/space-hub-icon-192.png?v=1', // Logo stays ONLY as the small avatar on the left
     badge: 'assets/space-hub-icon-192.png?v=1',
-    image: imageUrl, // Full-bleed notification photo preview
+    image: bannerPhoto, // Real NASA space photograph across top banner
     vibrate: [200, 100, 200],
     requireInteraction: true,
     data: { url: targetUrl }
@@ -34,7 +58,7 @@ messaging.onBackgroundMessage((payload) => {
   self.registration.showNotification(title, options);
 });
 
-// Click-to-Open Navigation: Opens and navigates directly to the alert's specific section
+// Click-to-Open Navigation
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   const targetUrl = event.notification.data?.url || './#overview';
