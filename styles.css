@@ -23,6 +23,7 @@
   --mono: ui-monospace, "SF Mono", Menlo, Monaco, Consolas, monospace;
   --blur: blur(28px) saturate(185%);
   --shadow: 0 12px 36px rgba(0, 0, 0, 0.35);
+  --card-radius: 20px;
 }
 
 html[data-theme="light"] {
@@ -203,10 +204,10 @@ button { font-family: inherit; }
 @keyframes appleFadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 
 /* Cards & Components */
-.surface {
+.surface, .apple-card {
   background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: 20px;
+  border-radius: var(--card-radius);
   box-shadow: var(--shadow);
   backdrop-filter: var(--blur);
   -webkit-backdrop-filter: var(--blur);
@@ -215,14 +216,22 @@ button { font-family: inherit; }
   min-width: 0;
   max-width: 100%;
 }
+
 .clickable-card {
   cursor: pointer;
-  transition: transform 0.18s ease, border-color 0.18s ease;
+  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
 }
 .clickable-card:hover {
   transform: translateY(-2px);
   border-color: color-mix(in srgb, var(--blue) 50%, var(--line));
+  box-shadow: 0 16px 40px rgba(0, 113, 227, 0.12);
 }
+
+/* Card Accent Widget Colors */
+.card-accent-blue { border-top: 3px solid var(--blue); }
+.card-accent-purple { border-top: 3px solid var(--purple); }
+.card-accent-orange { border-top: 3px solid var(--orange); }
+.card-accent-green { border-top: 3px solid var(--green); }
 
 .welcome-row { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 22px; }
 .eyebrow { font-size: 9px; font-weight: 750; color: var(--blue); letter-spacing: 1.2px; margin-bottom: 6px; }
@@ -274,9 +283,30 @@ button { font-family: inherit; }
   min-width: 0;
 }
 .metric-top { display: flex; justify-content: space-between; font-size: 8px; font-weight: 750; letter-spacing: 0.9px; color: var(--dim); }
+.metric-symbol { font-size: 18px; }
+.blue { color: var(--blue); }
+.purple { color: var(--purple); }
+.orange { color: var(--orange); }
+.green { color: var(--green); }
+.teal { color: var(--teal); }
+
 .metric-card strong { font: 700 24px var(--mono); margin: 12px 0 2px; display: block; letter-spacing: -0.5px; overflow-wrap: anywhere; }
 .metric-card small { font-size: 10px; color: var(--muted); }
 .metric-bottom { margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--line); font-size: 9px; color: var(--muted); }
+
+.two-col-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+.card-eyebrow { font-size: 9px; font-weight: 750; color: var(--blue); letter-spacing: 0.8px; margin-bottom: 6px; }
+.card-heading { font-size: 18px; font-weight: 700; letter-spacing: -0.4px; margin-bottom: 6px; }
+.card-text { font-size: 12px; color: var(--muted); line-height: 1.5; margin-bottom: 14px; }
+.tag-cluster { display: flex; gap: 8px; flex-wrap: wrap; }
+.apple-tag {
+  font: 10px var(--font-mono);
+  padding: 4px 10px;
+  border-radius: 99px;
+  background: var(--surface-solid);
+  border: 1px solid var(--line);
+  color: var(--muted);
+}
 
 /* Satellite Search Input on Map */
 .sat-search-container { position: relative; margin-bottom: 12px; }
@@ -339,7 +369,6 @@ button { font-family: inherit; }
 
 .map-viewport-wrapper { position: relative; border-radius: 14px; overflow: hidden; }
 .map { height: 440px; background: #111; }
-/* Clean dark-mode inversion on OpenStreetMap standard tiles */
 html[data-theme="dark"] .leaflet-tile {
   filter: brightness(0.68) invert(1) contrast(2.8) hue-rotate(180deg) saturate(0.35);
 }
@@ -562,7 +591,23 @@ html[data-theme="dark"] .leaflet-tile {
   text-overflow: ellipsis;
 }
 
-/* Space Weather (DONKI) - Uncongested Spacing */
+/* Space Weather Dashboard (4-Tile Heliophysics System) */
+.space-weather-dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+.sw-metric-box {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 16px;
+}
+.sw-label { font-size: 8px; font-weight: 750; color: var(--dim); letter-spacing: 0.8px; display: block; margin-bottom: 6px; }
+.sw-value { font: 700 20px var(--mono); color: var(--text); display: block; margin-bottom: 4px; }
+.sw-status { font: 700 9px var(--mono); }
+.sw-status.green { color: var(--green); }
+
 .event-list-scroll { display: flex; flex-direction: column; gap: 12px; max-height: 440px; overflow-y: auto; }
 .weather-event-row { padding: 14px 16px; border-radius: 14px; background: var(--surface-solid); border: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; min-width: 0; gap: 10px; }
 .weather-event-row b { font-size: 13px; margin-bottom: 3px; display: block; }
@@ -577,6 +622,8 @@ html[data-theme="dark"] .leaflet-tile {
 .hazard-pill.green { background: rgba(48, 209, 88, 0.2); color: var(--green); }
 .neo-item-stats { display: flex; justify-content: space-between; font: 10px var(--mono); color: var(--muted); margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--line); }
 .neo-item-stats b { color: var(--blue); }
+.neo-verify-link { display: inline-block; font-size: 9px; color: var(--blue); margin-top: 8px; text-decoration: none; }
+.neo-verify-link:hover { text-decoration: underline; }
 
 /* APOD Layout */
 .apod-layout { display: grid; grid-template-columns: minmax(280px, 0.9fr) 1.1fr; gap: 24px; min-width: 0; }
@@ -805,6 +852,7 @@ html[data-theme="dark"] .leaflet-tile {
   .content-wrap { padding: 20px 16px 30px; }
   .breadcrumb { display: none; }
   .metrics-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .space-weather-dashboard-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .launches-grid { grid-template-columns: 1fr; }
   .launch-spotlight-card { grid-template-columns: 1fr; }
   .mars-grid { grid-template-columns: 1fr; }
@@ -846,6 +894,7 @@ html[data-theme="dark"] .leaflet-tile {
 
 @media (max-width: 520px) {
   .metrics-grid { grid-template-columns: 1fr; }
+  .space-weather-dashboard-grid { grid-template-columns: 1fr; }
   .intel-metrics-grid { grid-template-columns: 1fr; }
   .spotlight-meta-grid { grid-template-columns: 1fr; }
   .mars-stats-row { grid-template-columns: 1fr; }
