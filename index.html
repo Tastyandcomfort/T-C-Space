@@ -70,7 +70,7 @@
           <span>Space Wiki</span>
         </a>
         <a class="nav-link" href="#settings" data-nav="settings">
-          <span class="nav-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83-2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
+          <span class="nav-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
           <span>Preferences &amp; Alerts</span>
         </a>
       </nav>
@@ -155,7 +155,7 @@
             <div class="ticker-time">100% VERIFIED</div>
           </div>
 
-          <!-- Metrics Grid with Accent Borders -->
+          <!-- Interactive Metrics Grid with Color Accents -->
           <div class="metrics-grid">
             <article class="metric-card card-accent-blue clickable-card" data-goto="satellites" title="Click to view full Satellite Tracker & Map">
               <div class="metric-top"><span>ACTIVE SAT ALTITUDE</span><span class="metric-symbol blue">◎</span></div>
@@ -320,13 +320,13 @@
           </div>
         </section>
 
-        <!-- 4. COMBINED TAB: EARTH & MARS -->
+        <!-- 4. COMBINED TAB: EARTH & MARS (With Working Direct Blob Download & Share) -->
         <section class="section-block" id="interplanetary">
           <div class="section-title">
             <div>
               <div class="eyebrow">INTERPLANETARY OBSERVATIONS</div>
               <h2>Interplanetary Exploration: Earth &amp; Mars</h2>
-              <p>Sunlit Earth viewed from 1 million miles away and raw surface telemetry from Martian rovers. Tap any photo for full lightbox, download &amp; share.</p>
+              <p>Sunlit Earth viewed from 1 million miles away and raw surface telemetry from Martian rovers. Tap any photo for full lightbox, direct download &amp; share.</p>
             </div>
           </div>
 
@@ -387,7 +387,7 @@
               </div>
             </div>
 
-            <h4 style="margin: 18px 0 10px; font-size: 14px;" id="mars-gallery-title">Latest Raw Photos from Mars (Tap photo to view, download &amp; share)</h4>
+            <h4 style="margin: 18px 0 10px; font-size: 14px;" id="mars-gallery-title">Latest Raw Photos from Mars (Tap photo to view, direct download &amp; share)</h4>
             <div class="mars-photos-grid" id="mars-photos-container">
               <div class="loading-state"><div class="apple-spinner"></div><p>Streaming Martian camera frames…</p></div>
             </div>
@@ -454,7 +454,7 @@
 
           <!-- Sub-Section A: APOD (Tap photo to open lightbox with download & share) -->
           <article class="surface apod-layout">
-            <div id="apod-media" class="apod-media clickable-image-box" title="Tap photo to open full view, download & share">
+            <div id="apod-media" class="apod-media clickable-image-box" title="Tap photo to open full view, direct download & share">
               <div class="apple-spinner large"></div>
             </div>
             <div class="apod-copy">
@@ -646,18 +646,38 @@
           </article>
         </section>
 
-        <!-- 9. PREFERENCES & ALERTS (With Select All & Interactive Test Alert Button) -->
+        <!-- 9. PREFERENCES & ALERTS (With User Location Selector for Overhead Passes) -->
         <section class="section-block" id="settings">
           <div class="section-title">
             <div>
               <div class="eyebrow">FIREBASE NOTIFICATION ENGINE</div>
               <h2>Preferences &amp; Space Alerts</h2>
-              <p>Configure device push alerts. Use Test Alert to verify your device's notification channel.</p>
+              <p>Configure device push alerts and set your location to receive satellite overhead flyby alerts.</p>
             </div>
           </div>
 
           <article class="surface settings-card">
-            <div class="alerts-header-row">
+            <!-- Satellite Overhead Pass User Location Selector -->
+            <div class="user-location-setting-box">
+              <div class="eyebrow">OVERHEAD PASS LOCATION</div>
+              <h4 style="margin:4px 0 6px;">Satellite Flyby Proximity Target</h4>
+              <p class="muted">Set your location to trigger notifications when satellites pass overhead.</p>
+
+              <div class="location-btn-row">
+                <button class="apple-btn-secondary" id="use-gps-btn">📍 Use Current GPS Location</button>
+                <select class="apple-select" id="metro-location-select" style="padding:8px 12px;">
+                  <option value="17.3850,78.4867,Hyderabad">Hyderabad (Telangana)</option>
+                  <option value="28.6139,77.2090,New Delhi">New Delhi (NCR)</option>
+                  <option value="12.9716,77.5946,Bengaluru">Bengaluru (Karnataka)</option>
+                  <option value="19.0760,72.8777,Mumbai">Mumbai (Maharashtra)</option>
+                  <option value="13.0827,80.2707,Chennai">Chennai (Tamil Nadu)</option>
+                  <option value="22.5726,88.3639,Kolkata">Kolkata (West Bengal)</option>
+                </select>
+              </div>
+              <small id="current-location-status" style="display:block;margin-top:8px;color:var(--blue);font-family:var(--mono);">Current Target: Hyderabad, India</small>
+            </div>
+
+            <div class="alerts-header-row" style="margin-top:20px;">
               <div>
                 <h3>Real-Time Alerts Configuration</h3>
                 <p class="muted">Check alerts to enable or use Select All. Click Test Alert to verify.</p>
@@ -668,8 +688,8 @@
             <div class="toggle-list">
               <label class="toggle-row">
                 <div>
-                  <b>ISS Overhead Pass Alert</b>
-                  <small>Notify when Space Station elevation is visible from your location</small>
+                  <b>Satellite Overhead Pass Alert</b>
+                  <small>Notify when satellite elevation crosses your regional horizon (&lt;1,500 km)</small>
                 </div>
                 <input type="checkbox" checked class="apple-toggle alert-checkbox" id="toggle-iss">
               </label>
@@ -713,7 +733,7 @@
               
               <!-- Interactive Test Alert Button -->
               <button id="test-alert-btn" class="apple-btn-secondary full-width" style="justify-content:center;padding:12px;">
-                🔔 Test Space Alert Notification (Click to Verify Device)
+                🔔 Test Space Alert (Rich Notification with Photos)
               </button>
             </div>
           </article>
@@ -766,7 +786,7 @@
     </a>
   </nav>
 
-  <!-- Universal In-App Apple Media Lightbox (Earth, Mars & APOD with Working Blob Download & Share) -->
+  <!-- Universal In-App Apple Media Lightbox (Earth, Mars & APOD with Working Direct Blob Download & Share) -->
   <div class="epic-lightbox-backdrop" id="universal-media-lightbox" aria-hidden="true">
     <div class="epic-lightbox-dialog" role="dialog" aria-label="Media Preview">
       <button class="lightbox-close-btn" id="close-universal-lightbox-btn" aria-label="Close Lightbox">✕</button>
