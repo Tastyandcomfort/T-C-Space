@@ -1,9 +1,9 @@
-/* --- T&C Space Hub: Apple Human Interface Guidelines (HIG) --- */
+/* --- T&C News Model: Apple HIG Styling for Space Hub --- */
 :root {
   color-scheme: dark;
-  --bg-base: #000000;
-  --bg-sidebar: rgba(18, 18, 20, 0.75);
-  --bg-surface: rgba(28, 28, 30, 0.72);
+  --bg-main: #000000;
+  --bg-header: rgba(18, 18, 20, 0.78);
+  --bg-card: rgba(28, 28, 30, 0.72);
   --bg-elevated: rgba(44, 44, 46, 0.85);
   --border-subtle: rgba(255, 255, 255, 0.12);
   --text-main: #FFFFFF;
@@ -15,19 +15,18 @@
   --apple-orange: #FF9F0A;
   --apple-red: #FF453A;
   --apple-purple: #BF5AF2;
+  --apple-teal: #64D2FF;
 
   --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
   --font-mono: ui-monospace, "SF Mono", Menlo, Monaco, Consolas, monospace;
-
-  --blur-ultra: blur(28px) saturate(190%);
-  --card-radius: 20px;
+  --blur: blur(28px) saturate(190%);
 }
 
 html[data-theme="light"] {
   color-scheme: light;
-  --bg-base: #F2F2F7;
-  --bg-sidebar: rgba(250, 250, 252, 0.8);
-  --bg-surface: rgba(255, 255, 255, 0.78);
+  --bg-main: #F2F2F7;
+  --bg-header: rgba(250, 250, 252, 0.82);
+  --bg-card: rgba(255, 255, 255, 0.85);
   --bg-elevated: rgba(255, 255, 255, 0.95);
   --border-subtle: rgba(0, 0, 0, 0.08);
   --text-main: #000000;
@@ -39,146 +38,71 @@ html[data-theme="light"] {
   --apple-orange: #FF9500;
   --apple-red: #FF3B30;
   --apple-purple: #AF52DE;
+  --apple-teal: #00C7BE;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
-  background: var(--bg-base);
+  background: var(--bg-main);
   color: var(--text-main);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
-  overflow-x: hidden;
 }
 
-/* Shell */
-.apple-shell { display: flex; min-height: 100vh; width: 100vw; }
-
-/* Desktop Sidebar */
-.apple-sidebar {
-  width: 250px;
-  background: var(--bg-sidebar);
-  backdrop-filter: var(--blur-ultra);
-  -webkit-backdrop-filter: var(--blur-ultra);
-  border-right: 0.5px solid var(--border-subtle);
-  display: flex;
-  flex-direction: column;
-  padding: 24px 16px;
-  position: fixed;
-  inset: 0 auto 0 0;
+/* 1. News Top Navigation Bar */
+.news-topbar {
+  position: sticky;
+  top: 0;
   z-index: 100;
+  background: var(--bg-header);
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
+  border-bottom: 0.5px solid var(--border-subtle);
 }
-.sidebar-brand { display: flex; align-items: center; gap: 12px; padding: 0 8px 24px; }
-.brand-logo-container {
-  width: 40px;
-  height: 40px;
-  border-radius: 11px;
+.news-topbar-inner {
+  max-width: 1380px;
+  margin: 0 auto;
+  padding: 12px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.brand-group { display: flex; align-items: center; gap: 12px; }
+.brand-logo-frame {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 4px 14px rgba(10, 132, 255, 0.3);
   background: var(--apple-blue);
+  box-shadow: 0 4px 12px rgba(10, 132, 255, 0.28);
   flex-shrink: 0;
 }
 .brand-logo-img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.brand-logo-fallback { width: 100%; height: 100%; display: none; place-items: center; color: white; }
-.brand-info { display: flex; flex-direction: column; }
-.brand-title { font-size: 13px; font-weight: 700; letter-spacing: 0.6px; }
-.brand-sub { font-size: 9px; color: var(--text-muted); letter-spacing: 0.5px; }
+.brand-logo-fallback { width: 100%; height: 100%; display: none; place-items: center; color: #fff; }
+.brand-text { display: flex; flex-direction: column; }
+.brand-name { font-size: 14px; font-weight: 750; letter-spacing: 0.6px; }
+.brand-tagline { font-size: 9px; color: var(--text-muted); letter-spacing: 0.5px; }
 
-.nav-section-label { font-size: 9px; font-weight: 750; color: var(--text-dim); letter-spacing: 0.8px; padding: 8px 12px 6px; }
-.sidebar-nav { display: flex; flex-direction: column; gap: 4px; flex: 1; }
-.nav-btn {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 14px;
-  border-radius: 12px;
-  border: 0;
-  background: transparent;
-  color: var(--text-muted);
-  font: inherit;
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  text-align: left;
-  transition: all 0.18s ease;
-}
-.nav-btn:hover { background: var(--border-subtle); color: var(--text-main); }
-.nav-btn.active { background: var(--apple-blue); color: #fff; font-weight: 600; }
-
-.sidebar-bottom { padding-top: 14px; border-top: 0.5px solid var(--border-subtle); }
-.apple-settings-trigger {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
-  border-radius: 12px;
-  border: 0;
-  background: transparent;
-  color: var(--text-muted);
-  cursor: pointer;
-  font: inherit;
-  font-size: 12px;
-}
-.apple-settings-trigger:hover { color: var(--text-main); }
-
-/* Main Workspace */
-.apple-main { margin-left: 250px; flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
-.apple-header {
-  height: 68px;
-  position: sticky;
-  top: 0;
-  z-index: 90;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 32px;
-  background: var(--bg-sidebar);
-  backdrop-filter: var(--blur-ultra);
-  -webkit-backdrop-filter: var(--blur-ultra);
-  border-bottom: 0.5px solid var(--border-subtle);
-}
-
-.header-left { display: flex; align-items: center; gap: 12px; }
-
-/* Mobile Logo Badge in Header */
-.mobile-logo-badge {
-  width: 36px;
-  height: 36px;
-  border-radius: 9px;
-  overflow: hidden;
-  background: var(--apple-blue);
-  box-shadow: 0 3px 10px rgba(10, 132, 255, 0.25);
-  display: none; /* Shown on mobile via media query */
-  flex-shrink: 0;
-}
-.mobile-logo-img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.mobile-logo-fallback { width: 100%; height: 100%; display: none; place-items: center; color: white; }
-
-.header-title-group { display: flex; flex-direction: column; }
-.header-eyebrow { font-size: 9px; font-weight: 700; color: var(--apple-blue); letter-spacing: 0.8px; }
-.header-title { font-size: 18px; font-weight: 700; letter-spacing: -0.4px; }
-.header-right { display: flex; align-items: center; gap: 10px; }
-
-/* Dual Clock Pill */
+.topbar-actions { display: flex; align-items: center; gap: 10px; }
 .apple-clock-pill {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   background: var(--bg-elevated);
   border: 0.5px solid var(--border-subtle);
   border-radius: 99px;
   padding: 6px 14px;
 }
-.clock-split { display: flex; gap: 8px; font: 11px var(--font-mono); }
-.clock-primary { font-weight: 700; color: var(--text-main); }
-.clock-secondary { color: var(--text-muted); }
-.pulsing-dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
-.pulsing-dot.green { background: var(--apple-green); box-shadow: 0 0 0 3px rgba(48, 209, 88, 0.25); }
+.clock-display { display: flex; gap: 8px; font: 11px var(--font-mono); }
+.clock-ist { font-weight: 700; color: var(--text-main); }
+.clock-utc { color: var(--text-muted); }
+.pulse-dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+.pulse-dot.green { background: var(--apple-green); box-shadow: 0 0 0 3px rgba(48, 209, 88, 0.25); }
 
-.apple-round-btn {
-  width: 34px;
-  height: 34px;
+.topbar-icon-btn {
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   border: 0.5px solid var(--border-subtle);
   background: var(--bg-elevated);
@@ -188,176 +112,24 @@ body {
   cursor: pointer;
   transition: transform 0.18s;
 }
-.apple-round-btn:hover { transform: scale(1.05); }
+.topbar-icon-btn:hover { transform: scale(1.05); }
 
-/* Viewport */
-.apple-viewport {
-  max-width: 1320px;
-  width: 100%;
-  margin: 0 auto;
-  padding: 28px 32px 50px;
-  flex: 1;
-}
-.space-view { display: none; }
-.space-view.active { display: block; animation: appleFadeIn 0.22s ease-out; }
-@keyframes appleFadeIn {
-  from { opacity: 0; transform: translateY(6px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* Apple Cards */
-.apple-card {
-  background: var(--bg-surface);
-  backdrop-filter: var(--blur-ultra);
-  -webkit-backdrop-filter: var(--blur-ultra);
-  border: 0.5px solid var(--border-subtle);
-  border-radius: var(--card-radius);
-  padding: 22px 24px;
-  margin-bottom: 20px;
-}
-.hero-card { background: linear-gradient(135deg, var(--bg-surface), var(--bg-elevated)); }
-.card-status-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-.apple-pill-status {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.6px;
-  color: var(--apple-green);
-}
-.telemetry-ping { font: 10px var(--font-mono); color: var(--text-dim); }
-.hero-title { font-size: 30px; font-weight: 750; letter-spacing: -0.8px; margin-bottom: 6px; }
-.hero-title span { color: var(--apple-blue); }
-.hero-desc { font-size: 13px; color: var(--text-muted); line-height: 1.5; max-width: 700px; }
-
-/* Metrics */
-.metrics-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px; }
-.metric-card {
-  background: var(--bg-surface);
-  border: 0.5px solid var(--border-subtle);
-  border-radius: 16px;
-  padding: 16px 18px;
-}
-.metric-label { font-size: 9px; font-weight: 700; letter-spacing: 0.8px; color: var(--text-dim); }
-.metric-value {
-  font: 700 24px var(--font-mono);
-  margin: 10px 0 4px;
-  letter-spacing: -0.5px;
-  color: var(--text-main);
-  min-height: 32px;
-  display: flex;
-  align-items: center;
-}
-.metric-sub { font-size: 10px; color: var(--text-muted); }
-
-.two-col-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
-.card-eyebrow { font-size: 9px; font-weight: 750; color: var(--apple-blue); letter-spacing: 0.8px; margin-bottom: 6px; }
-.card-heading { font-size: 18px; font-weight: 700; letter-spacing: -0.4px; margin-bottom: 6px; }
-.card-text { font-size: 12px; color: var(--text-muted); line-height: 1.5; margin-bottom: 14px; }
-
-.tag-cluster { display: flex; gap: 8px; flex-wrap: wrap; }
-.apple-tag {
-  font: 10px var(--font-mono);
-  padding: 4px 10px;
-  border-radius: 99px;
-  background: var(--bg-elevated);
-  border: 0.5px solid var(--border-subtle);
-  color: var(--text-muted);
-}
-
-/* Map & Watermark Clean Overrides */
-.card-header-split { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; }
-.apple-segmented {
-  display: inline-flex;
-  background: var(--border-subtle);
-  padding: 3px;
-  border-radius: 99px;
-  gap: 2px;
-}
-.apple-segmented .seg-btn {
-  border: 0;
-  background: transparent;
-  color: var(--text-muted);
-  font: inherit;
-  font-size: 11px;
-  font-weight: 500;
-  padding: 6px 14px;
-  border-radius: 99px;
-  cursor: pointer;
-  transition: all 0.18s;
-}
-.apple-segmented .seg-btn.active {
-  background: var(--bg-elevated);
-  color: var(--text-main);
-  font-weight: 600;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-}
-
-.apple-map-container {
-  height: 420px;
-  border-radius: 14px;
-  overflow: hidden;
-  background: #111;
-  border: 0.5px solid var(--border-subtle);
-}
-
-/* Complete removal of the Leaflet white watermark box */
-.leaflet-control-attribution {
-  background: transparent !important;
-  color: rgba(255, 255, 255, 0.25) !important;
-  font-size: 8px !important;
-  padding: 4px 8px !important;
-  box-shadow: none !important;
-}
-.leaflet-control-attribution a {
-  color: rgba(255, 255, 255, 0.3) !important;
-  text-decoration: none !important;
-}
-
-.map-stats-strip {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
-  margin-top: 14px;
-  font-size: 10px;
-  color: var(--text-muted);
-}
-.map-stats-strip b { font-family: var(--font-mono); color: var(--apple-blue); }
-
-/* Asteroids (NeoWs) Grid */
-.asteroid-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
-.asteroid-card {
-  padding: 16px 18px;
-  border-radius: 14px;
-  background: var(--bg-elevated);
-  border: 0.5px solid var(--border-subtle);
-}
-.asteroid-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-.asteroid-title { font-size: 15px; font-weight: 700; }
-.hazard-badge {
-  font: 700 9px var(--font-mono);
-  padding: 3px 8px;
-  border-radius: 99px;
-}
-.hazard-badge.red { background: rgba(255, 69, 58, 0.2); color: var(--apple-red); }
-.hazard-badge.green { background: rgba(48, 209, 88, 0.2); color: var(--apple-green); }
-
-.asteroid-numbers {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  margin-top: 10px;
-  padding-top: 10px;
+/* Category Pill Bar */
+.news-category-bar {
   border-top: 0.5px solid var(--border-subtle);
+  padding: 8px 20px;
 }
-.asteroid-numbers small { font-size: 8px; color: var(--text-dim); display: block; margin-bottom: 2px; }
-.asteroid-numbers b { font: 600 12px var(--font-mono); color: var(--apple-blue); }
-
-/* Area Intel Grid */
-.area-chip-strip { display: flex; gap: 8px; overflow-x: auto; margin-bottom: 18px; padding-bottom: 4px; }
-.area-chip {
-  padding: 7px 14px;
+.category-scroll {
+  max-width: 1380px;
+  margin: 0 auto;
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.category-scroll::-webkit-scrollbar { display: none; }
+.cat-pill {
+  padding: 6px 14px;
   border-radius: 99px;
   border: 0.5px solid var(--border-subtle);
   background: var(--bg-elevated);
@@ -367,25 +139,149 @@ body {
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
+  transition: all 0.18s;
 }
-.area-chip.active { background: var(--apple-blue); color: #fff; border-color: var(--apple-blue); }
+.cat-pill:hover { color: var(--text-main); }
+.cat-pill.active {
+  background: var(--apple-blue);
+  color: #fff;
+  border-color: var(--apple-blue);
+}
 
-.intel-metrics-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-.intel-metric-box {
+/* 2. Breaking News Telemetry Ticker */
+.breaking-ticker-bar {
+  background: var(--bg-card);
+  border-bottom: 0.5px solid var(--border-subtle);
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.ticker-badge {
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  background: var(--apple-blue);
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+.ticker-content { font-size: 11px; color: var(--text-main); flex: 1; }
+.ticker-time { font: 9px var(--font-mono); color: var(--text-dim); white-space: nowrap; }
+
+/* 3. News Main Container */
+.news-container {
+  max-width: 1380px;
+  margin: 0 auto;
+  padding: 24px 20px 60px;
+}
+
+/* Common News Cards */
+.news-card {
+  background: var(--bg-card);
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
+  border: 0.5px solid var(--border-subtle);
+  border-radius: 20px;
+  padding: 22px;
+}
+.card-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.badge {
+  font: 700 9px var(--font-mono);
+  letter-spacing: 0.6px;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+.badge.red { background: rgba(255, 69, 58, 0.2); color: var(--apple-red); }
+.badge.blue { background: rgba(10, 132, 255, 0.2); color: var(--apple-blue); }
+.badge.orange { background: rgba(255, 159, 10, 0.2); color: var(--apple-orange); }
+.badge.purple { background: rgba(191, 90, 242, 0.2); color: var(--apple-purple); }
+.badge.green { background: rgba(48, 209, 88, 0.2); color: var(--apple-green); }
+.badge.teal { background: rgba(100, 210, 255, 0.2); color: var(--apple-teal); }
+.meta-time { font: 10px var(--font-mono); color: var(--text-dim); }
+
+.card-heading { font-size: 18px; font-weight: 700; letter-spacing: -0.4px; margin-bottom: 6px; }
+.card-excerpt { font-size: 12px; color: var(--text-muted); line-height: 1.5; margin-bottom: 14px; }
+
+/* Hero Spotlight Card */
+.hero-spotlight {
+  margin-bottom: 24px;
+  background: linear-gradient(135deg, var(--bg-card), var(--bg-elevated));
+}
+.hero-title { font-size: 28px; font-weight: 750; letter-spacing: -0.8px; margin: 4px 0 8px; }
+.hero-summary { font-size: 13px; color: var(--text-muted); max-width: 800px; margin-bottom: 18px; }
+.hero-stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  padding-top: 14px;
+  border-top: 0.5px solid var(--border-subtle);
+}
+.stat-box small { font-size: 8px; font-weight: 750; color: var(--text-dim); letter-spacing: 0.8px; display: block; margin-bottom: 4px; }
+.stat-box strong { font: 700 16px var(--font-mono); color: var(--text-main); }
+
+/* News Feed Grid (2 Columns) */
+.news-feed-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+/* Map News Card & Watermark Override */
+.map-news-card { grid-column: span 2; }
+.news-map-frame {
+  height: 380px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #111;
+  border: 0.5px solid var(--border-subtle);
+}
+/* Leaflet clean watermark override */
+.leaflet-control-attribution {
+  background: transparent !important;
+  color: rgba(255, 255, 255, 0.25) !important;
+  font-size: 8px !important;
+  padding: 4px 8px !important;
+  box-shadow: none !important;
+}
+.leaflet-control-attribution a { color: rgba(255, 255, 255, 0.3) !important; text-decoration: none !important; }
+
+.map-stats-bar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-top: 12px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.map-stats-bar b { font-family: var(--font-mono); color: var(--apple-blue); }
+
+/* Asteroids (NeoWs) Feed */
+.asteroid-feed-list, .event-feed-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 340px;
+  overflow-y: auto;
+}
+.asteroid-item {
+  padding: 12px 14px;
+  border-radius: 12px;
   background: var(--bg-elevated);
   border: 0.5px solid var(--border-subtle);
-  border-radius: 14px;
-  padding: 14px 16px;
 }
-.intel-lbl { font-size: 8px; font-weight: 750; color: var(--text-dim); letter-spacing: 0.8px; display: block; }
-.intel-val { font: 700 20px var(--font-mono); color: var(--text-main); margin: 6px 0 2px; display: block; }
-.intel-sub { font-size: 9px; color: var(--text-muted); }
-.text-truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.asteroid-item-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.asteroid-name { font-size: 13px; font-weight: 700; }
+.hazard-tag { font: 700 8px var(--font-mono); padding: 2px 6px; border-radius: 4px; }
+.hazard-tag.red { background: rgba(255, 69, 58, 0.2); color: var(--apple-red); }
+.hazard-tag.green { background: rgba(48, 209, 88, 0.2); color: var(--apple-green); }
+.asteroid-item-numbers { display: flex; justify-content: space-between; font: 10px var(--font-mono); color: var(--text-muted); }
+.asteroid-item-numbers b { color: var(--apple-blue); }
 
-/* Event Feed */
-.event-feed-list { display: flex; flex-direction: column; gap: 10px; max-height: 380px; overflow-y: auto; }
+/* Event Feed Items (Solar & Earthquakes) */
 .event-item {
-  padding: 12px 14px;
+  padding: 11px 13px;
   border-radius: 12px;
   background: var(--bg-elevated);
   border: 0.5px solid var(--border-subtle);
@@ -395,55 +291,46 @@ body {
   text-decoration: none;
   color: inherit;
 }
-.event-badge { font: 700 11px var(--font-mono); padding: 4px 8px; border-radius: 6px; }
-.event-badge.red { background: rgba(255, 69, 58, 0.2); color: var(--apple-red); }
-.event-badge.orange { background: rgba(255, 159, 10, 0.2); color: var(--apple-orange); }
-.event-badge.green { background: rgba(48, 209, 88, 0.2); color: var(--apple-green); }
+.event-item small { font-size: 9px; color: var(--text-muted); display: block; margin-top: 2px; }
 
-/* Buttons & Inputs */
-.apple-btn-primary {
-  background: var(--apple-blue);
-  color: #fff;
-  border: 0;
-  border-radius: 8px;
-  padding: 7px 16px;
+/* Area Intel Grid */
+.city-pill-scroll { display: flex; gap: 8px; overflow-x: auto; margin-bottom: 14px; }
+.city-pill {
+  padding: 5px 12px;
+  border-radius: 99px;
+  border: 0.5px solid var(--border-subtle);
+  background: var(--bg-elevated);
+  color: var(--text-muted);
   font: inherit;
-  font-size: 12px;
+  font-size: 10px;
   font-weight: 600;
   cursor: pointer;
+  white-space: nowrap;
 }
-.apple-btn-secondary {
-  background: var(--border-subtle);
-  color: var(--text-main);
-  border: 0;
-  border-radius: 8px;
-  padding: 8px 14px;
-  font: inherit;
-  font-size: 11px;
-  font-weight: 600;
-  cursor: pointer;
-}
-.full-width { width: 100%; }
-
-.apple-search-box {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+.city-pill.active { background: var(--apple-blue); color: #fff; border-color: var(--apple-blue); }
+.intel-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.intel-item {
   background: var(--bg-elevated);
   border: 0.5px solid var(--border-subtle);
   border-radius: 12px;
-  padding: 6px 14px;
+  padding: 10px 12px;
+}
+.intel-item small { font-size: 8px; font-weight: 750; color: var(--text-dim); display: block; }
+.intel-item strong { font: 700 17px var(--font-mono); color: var(--text-main); margin-top: 4px; display: block; }
+
+/* APOD Card */
+.apod-card { grid-column: span 2; }
+.apod-frame {
+  height: 340px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #000;
+  display: grid;
+  place-items: center;
   margin-bottom: 14px;
 }
-.apple-search-box input {
-  flex: 1;
-  background: transparent;
-  border: 0;
-  color: var(--text-main);
-  font: inherit;
-  font-size: 13px;
-  outline: none;
-}
+.apod-frame img, .apod-frame iframe { width: 100%; height: 100%; object-fit: cover; border: 0; }
+.meta-credit { font: 10px var(--font-mono); color: var(--text-dim); }
 
 /* Cupertino Blade Spinner */
 .apple-spinner {
@@ -458,12 +345,13 @@ body {
 }
 .apple-spinner.large { width: 32px; height: 32px; }
 @keyframes appleSpin { 100% { transform: rotate(360deg); } }
+.loading-state { text-align: center; padding: 24px; color: var(--text-muted); font-size: 11px; }
 
 /* Modal Sheet */
 .apple-modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.55);
   backdrop-filter: blur(12px);
   z-index: 1000;
   display: flex;
@@ -476,9 +364,9 @@ body {
 .apple-modal-backdrop.open { opacity: 1; pointer-events: auto; }
 .apple-sheet {
   background: var(--bg-elevated);
-  backdrop-filter: var(--blur-ultra);
+  backdrop-filter: var(--blur);
   width: 90%;
-  max-width: 500px;
+  max-width: 480px;
   border-radius: 24px;
   border: 0.5px solid var(--border-subtle);
   padding: 16px 22px 24px;
@@ -487,12 +375,12 @@ body {
 }
 .apple-modal-backdrop.open .apple-sheet { transform: translateY(0); }
 .sheet-grabber { width: 36px; height: 5px; border-radius: 99px; background: var(--text-dim); margin: 0 auto 14px; }
-.sheet-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.sheet-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
 .sheet-title { font-size: 17px; font-weight: 700; }
 .sheet-done-btn { background: transparent; border: 0; color: var(--apple-blue); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
-.sheet-section { margin-bottom: 18px; }
-.section-label { font-size: 9px; font-weight: 750; color: var(--text-dim); letter-spacing: 0.8px; margin-bottom: 8px; }
-.sheet-item {
+.sheet-group { margin-bottom: 18px; }
+.group-title { font-size: 9px; font-weight: 750; color: var(--text-dim); letter-spacing: 0.8px; margin-bottom: 8px; }
+.sheet-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -500,9 +388,9 @@ body {
   border-bottom: 0.5px solid var(--border-subtle);
   font-size: 13px;
 }
-.sheet-item small { display: block; font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+.sheet-row small { display: block; font-size: 10px; color: var(--text-muted); margin-top: 2px; }
 .apple-select {
-  background: var(--bg-surface);
+  background: var(--bg-card);
   border: 0.5px solid var(--border-subtle);
   color: var(--text-main);
   padding: 6px 10px;
@@ -511,7 +399,29 @@ body {
   font-size: 11px;
 }
 
-/* Apple Switch */
+.apple-segmented {
+  display: inline-flex;
+  background: var(--border-subtle);
+  padding: 3px;
+  border-radius: 99px;
+  gap: 2px;
+}
+.apple-segmented .seg-btn {
+  border: 0;
+  background: transparent;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 11px;
+  padding: 5px 12px;
+  border-radius: 99px;
+  cursor: pointer;
+}
+.apple-segmented .seg-btn.active {
+  background: var(--bg-elevated);
+  color: var(--text-main);
+  font-weight: 600;
+}
+
 .apple-switch {
   appearance: none;
   width: 44px;
@@ -532,20 +442,33 @@ body {
   border-radius: 50%;
   top: 2px;
   left: 2px;
-  background: #ffffff;
+  background: #fff;
   transition: transform 0.2s;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 .apple-switch:checked::before { transform: translateX(20px); }
+
+.apple-btn-secondary {
+  background: var(--border-subtle);
+  color: var(--text-main);
+  border: 0;
+  border-radius: 8px;
+  padding: 9px 16px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 14px;
+}
+.full-width { width: 100%; }
 
 /* Toast */
 .apple-toast {
   position: fixed;
-  bottom: 30px;
+  bottom: 24px;
   left: 50%;
   transform: translate(-50%, 20px);
   background: var(--text-main);
-  color: var(--bg-base);
+  color: var(--bg-main);
   padding: 10px 18px;
   border-radius: 99px;
   font-size: 12px;
@@ -557,72 +480,20 @@ body {
 }
 .apple-toast.show { opacity: 1; transform: translate(-50%, 0); }
 
-/* Footer */
-.apple-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-top: 0.5px solid var(--border-subtle);
-  padding-top: 24px;
-  margin-top: 30px;
-  font-size: 10px;
-  color: var(--text-muted);
-  flex-wrap: wrap;
-  gap: 12px;
-}
-.footer-right { display: flex; gap: 14px; }
-.footer-right a { color: var(--apple-blue); text-decoration: none; }
-
-/* Mobile Bottom Dock */
-.mobile-dock { display: none; }
-
+/* Responsive Media Queries */
 @media (max-width: 860px) {
-  .apple-sidebar { display: none; }
-  .apple-main { margin-left: 0; padding-bottom: 74px; }
-  .metrics-grid { grid-template-columns: repeat(2, 1fr); }
-  .two-col-grid { grid-template-columns: 1fr; }
-  .asteroid-grid { grid-template-columns: 1fr; }
-  .intel-metrics-grid { grid-template-columns: repeat(2, 1fr); }
-  .apple-viewport { padding: 18px 16px 40px; }
-  .apple-header { padding: 0 16px; }
-
-  /* Activate mobile logo in top header */
-  .mobile-logo-badge { display: block; }
-
-  .mobile-dock {
-    display: flex;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 64px;
-    background: var(--bg-sidebar);
-    backdrop-filter: var(--blur-ultra);
-    -webkit-backdrop-filter: var(--blur-ultra);
-    border-top: 0.5px solid var(--border-subtle);
-    z-index: 100;
-    justify-content: space-around;
-    align-items: center;
-    padding-bottom: env(safe-area-inset-bottom);
-  }
-  .dock-btn {
-    border: 0;
-    background: transparent;
-    color: var(--text-muted);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 3px;
-    font: inherit;
-    font-size: 10px;
-    cursor: pointer;
-    flex: 1;
-  }
-  .dock-btn.active { color: var(--apple-blue); font-weight: 600; }
+  .news-feed-grid { grid-template-columns: 1fr; }
+  .map-news-card, .apod-card { grid-column: span 1; }
+  .hero-stats-row { grid-template-columns: repeat(2, 1fr); }
+  .intel-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media (max-width: 520px) {
-  .metrics-grid { grid-template-columns: 1fr; }
-  .intel-metrics-grid { grid-template-columns: 1fr; }
-  .clock-secondary { display: none; }
+  .brand-tagline { display: none; }
+  .clock-utc { display: none; }
+  .hero-stats-row { grid-template-columns: 1fr; }
+  .intel-grid { grid-template-columns: 1fr; }
+  .map-stats-bar { grid-template-columns: repeat(2, 1fr); }
+  .breaking-ticker-bar { flex-wrap: wrap; }
+  .ticker-time { display: none; }
 }
