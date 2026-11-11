@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <link rel="stylesheet" href="styles.css">
 
-  <!-- Firebase SDKs -->
+  <!-- Firebase App, Messaging & Firestore SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
@@ -74,7 +74,7 @@
           <span>Space Wiki</span>
         </a>
         <a class="nav-link" href="#settings" data-nav="settings">
-          <span class="nav-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
+          <span class="nav-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83-2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
           <span>Preferences &amp; Alerts</span>
         </a>
       </nav>
@@ -108,13 +108,13 @@
         </div>
 
         <div class="top-actions">
-          <!-- Dynamic PWA Install Button (Visible when uninstalled) -->
-          <button id="pwa-install-btn" class="install-pill-btn" style="display: none;" title="Install Space Hub to Home Screen">
+          <!-- Dynamic PWA Install Button -->
+          <button id="pwa-install-btn" class="install-pill-btn" style="display: none;" title="Install Space Hub App">
             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             <span>Install App</span>
           </button>
 
-          <!-- Live Dual IST & UTC Clocks -->
+          <!-- Dual IST & UTC Clocks -->
           <div class="utc-clock" title="Indian Standard Time & UTC">
             <span class="live-dot"></span>
             <div class="clock-duo">
@@ -123,7 +123,6 @@
             </div>
           </div>
 
-          <!-- Dynamic System Theme Picker -->
           <label class="theme-picker" title="System / Light / Dark Appearance">
             <span>🌓</span>
             <select id="theme-select" aria-label="Appearance">
@@ -139,7 +138,7 @@
 
       <div class="content-wrap">
 
-        <!-- 1. OVERVIEW -->
+        <!-- 1. OVERVIEW (Interactive Cards Navigate to Tabs) -->
         <section class="section-block active-view" id="overview">
           <div class="welcome-row">
             <div>
@@ -160,52 +159,80 @@
             <div class="ticker-time">100% VERIFIED</div>
           </div>
 
-          <!-- Metrics Grid -->
+          <!-- Interactive Metrics Grid -->
           <div class="metrics-grid">
-            <article class="metric-card">
+            <article class="metric-card clickable-card" data-goto="satellites" title="Click to view full Satellite Tracker & Map">
               <div class="metric-top"><span>ACTIVE SAT ALTITUDE</span><span class="metric-symbol blue">◎</span></div>
               <strong id="iss-alt"><div class="apple-spinner"></div></strong>
               <small id="active-sat-name-sub">International Space Station</small>
-              <div class="metric-bottom">WhereTheISS.at live API</div>
+              <div class="metric-bottom">WhereTheISS.at live API ↗</div>
             </article>
 
-            <article class="metric-card">
+            <article class="metric-card clickable-card" data-goto="satellites" title="Click to view orbital velocity on map">
               <div class="metric-top"><span>ORBITAL VELOCITY</span><span class="metric-symbol purple">⌁</span></div>
               <strong id="iss-velocity"><div class="apple-spinner"></div></strong>
               <small>kilometres per second</small>
-              <div class="metric-bottom">Orbital velocity</div>
+              <div class="metric-bottom">Relative to surface ↗</div>
             </article>
 
-            <article class="metric-card">
+            <article class="metric-card clickable-card" data-goto="launches" title="Click to view full Launch Manifest">
               <div class="metric-top"><span>NEXT LAUNCH T-MINUS</span><span class="metric-symbol orange">🚀</span></div>
               <strong id="hero-launch-timer"><div class="apple-spinner"></div></strong>
               <small id="hero-launch-name">Fetching upcoming missions…</small>
-              <div class="metric-bottom" id="hero-launch-provider">Launch Library 2</div>
+              <div class="metric-bottom" id="hero-launch-provider">Launch Library 2 ↗</div>
             </article>
 
-            <article class="metric-card">
+            <article class="metric-card clickable-card" data-goto="earth-monitor" title="Click to view USGS Earthquakes">
               <div class="metric-top"><span>GLOBAL EARTHQUAKES</span><span class="metric-symbol green">◈</span></div>
               <strong id="hero-quake-count"><div class="apple-spinner"></div></strong>
               <small>events past 24 hours</small>
-              <div class="metric-bottom">USGS Seismic Feed (M2.5+)</div>
+              <div class="metric-bottom">USGS Seismic Feed (M2.5+) ↗</div>
             </article>
+          </div>
+
+          <div class="two-col-grid">
+            <div class="apple-card clickable-card" data-goto="launches" title="Click to open Launch Manifest">
+              <div class="card-eyebrow">NEXT ROCKET COUNTDOWN</div>
+              <h3 class="card-heading" id="overview-launch-name">Querying flight manifest…</h3>
+              <p class="card-text" id="overview-launch-desc">Tracking upcoming spaceport countdowns across the globe.</p>
+              <div class="tag-cluster">
+                <span class="apple-tag" id="tag-provider">Provider: —</span>
+                <span class="apple-tag" id="tag-vehicle">Vehicle: —</span>
+              </div>
+            </div>
+
+            <div class="apple-card clickable-card" data-goto="astronomy" title="Click to view Astronomy Picture of the Day">
+              <div class="card-eyebrow">NASA ASTRONOMY TODAY</div>
+              <h3 class="card-heading" id="apod-preview-title">Astronomy Picture of the Day</h3>
+              <p class="card-text" id="apod-preview-desc">Fetching daily cosmic imagery…</p>
+              <button class="apple-btn-secondary" style="margin-top:8px;">View Full Astronomy Feed ↗</button>
+            </div>
           </div>
         </section>
 
-        <!-- 2. SATELLITES & MULTI-LAYER MAP (Multi-Satellite Presets + Full Map Overlays) -->
+        <!-- 2. SATELLITES & MULTI-LAYER MAP (Search Box, Presets, Popups & Adaptive HUD) -->
         <section class="section-block" id="satellites">
           <div class="section-title">
             <div>
               <div class="eyebrow">ORBITAL SITUATIONAL AWARENESS</div>
               <h2>Interactive Planetary Map &amp; Tracking</h2>
-              <p>Select any major satellite or toggle earthquakes and hazard overlays on a clean, watermark-free canvas.</p>
+              <p>Select any major satellite or search CelesTrak. Click any marker for detailed live telemetry overlays.</p>
             </div>
           </div>
 
           <article class="surface map-card">
-            <!-- Multi-Satellite Preset Quick Selectors -->
+            <!-- Satellite Search with Live Autocomplete -->
+            <div class="sat-search-container">
+              <div class="sat-search-input-box">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="search" id="sat-search-input" placeholder="Search any satellite by name (e.g., Starlink, Hubble, Tiangong, NOAA, GPS, Landsat)…" autocomplete="off">
+              </div>
+              <div id="sat-search-dropdown" class="autocomplete-dropdown" hidden></div>
+            </div>
+
+            <!-- Multi-Satellite Presets Toolbar -->
             <div class="sat-presets-bar">
-              <span class="sat-select-lbl">SATELLITE:</span>
+              <span class="sat-select-lbl">PRESETS:</span>
               <button class="sat-chip active" data-sat-id="25544" data-sat-name="ISS (ZARYA)">ISS (Zarya)</button>
               <button class="sat-chip" data-sat-id="48274" data-sat-name="CSS TIANHE (TIANGONG)">Tiangong (CSS)</button>
               <button class="sat-chip" data-sat-id="20580" data-sat-name="HUBBLE SPACE TELESCOPE">Hubble (HST)</button>
@@ -213,7 +240,7 @@
               <button class="sat-chip" data-sat-id="39084" data-sat-name="LANDSAT 8">Landsat 8</button>
             </div>
 
-            <!-- Map Layer Toggles -->
+            <!-- Layer Toggles -->
             <div class="map-toolbar-row">
               <div class="map-layer-chips">
                 <button class="layer-chip active" id="toggle-layer-iss">🛰️ Satellite Active</button>
@@ -223,11 +250,11 @@
               </div>
             </div>
 
-            <!-- Leaflet Map Container with HUD & Legend Overlays -->
+            <!-- Leaflet Map Container with Light/Dark Adaptive HUD & Legend -->
             <div class="map-viewport-wrapper">
               <div id="sat-map" class="map"></div>
 
-              <!-- Live HUD Telemetry Chip (Top Left Overlay) -->
+              <!-- Live HUD Telemetry Chip (Adaptive Theme) -->
               <div class="map-hud-chip" id="map-hud-overlay">
                 <span class="live-dot"></span>
                 <div>
@@ -295,13 +322,13 @@
           </div>
         </section>
 
-        <!-- 4. EARTH FROM 1,000,000 MILES (NASA DSCOVR EPIC) -->
+        <!-- 4. EARTH FROM 1,000,000 MILES (NASA DSCOVR EPIC + In-App Lightbox) -->
         <section class="section-block" id="epic-earth">
           <div class="section-title">
             <div>
               <div class="eyebrow">SUN-EARTH L1 LAGRANGE OBSERVATORY</div>
               <h2>Earth From 1,000,000 Miles Away (NASA DSCOVR EPIC)</h2>
-              <p>Daily true-color full disc portraits of our planet captured from 1 million miles away in deep space.</p>
+              <p>Daily true-color full disc portraits of our planet captured from 1 million miles away. Tap photo for in-app full view, download &amp; share.</p>
             </div>
           </div>
 
@@ -314,20 +341,20 @@
               <span class="small-chip blue">NASA DSCOVR EPIC</span>
             </div>
 
-            <div class="epic-viewport" id="epic-media-box">
+            <div class="epic-viewport clickable-image-box" id="epic-media-box" title="Tap to expand in full view with download and share">
               <div class="apple-spinner large"></div>
             </div>
 
             <div class="epic-stats-strip">
-              <div><small>OBSERVATION DATE</small><b id="epic-date">—</b></div>
-              <div><small>DISTANCE</small><b>~1,500,000 km (1M Miles)</b></div>
-              <div><small>ORBIT</small><b>Sun-Earth L1 Point</b></div>
-              <div><small>CENTER COORDS</small><b id="epic-centroid">—</b></div>
+              <div><small>OBSERVATION TIMESTAMP (UTC)</small><b id="epic-date">—</b></div>
+              <div><small>OBSERVATION TIMESTAMP (IST)</small><b id="epic-date-ist">—</b></div>
+              <div><small>DISTANCE FROM EARTH</small><b>~1,500,000 km (1M Miles)</b></div>
+              <div><small>CENTER COORDINATES</small><b id="epic-centroid">—</b></div>
             </div>
           </article>
         </section>
 
-        <!-- 5. MARS EXPLORATION & ROVER CAMERAS -->
+        <!-- 5. MARS EXPLORATION & ROVER CAMERAS (Automatic Dual-Rover Fallback) -->
         <section class="section-block" id="mars-exploration">
           <div class="section-title">
             <div>
@@ -378,8 +405,8 @@
           <article class="surface mars-gallery-card">
             <div class="card-heading">
               <div>
-                <h3>Latest Surface Photos from Mars</h3>
-                <p>Real-time raw camera frames streamed from Perseverance &amp; Curiosity cameras via NASA Open API.</p>
+                <h3 id="mars-gallery-title">Latest Surface Photos from Mars</h3>
+                <p id="mars-gallery-sub">Streaming raw camera frames from Perseverance/Curiosity rover sensors via NASA API.</p>
               </div>
               <span class="small-chip orange">NASA MARS ROVER API</span>
             </div>
@@ -389,13 +416,13 @@
           </article>
         </section>
 
-        <!-- 6. SPACE WEATHER (DONKI + NOAA) -->
+        <!-- 6. SPACE WEATHER (Uncongested Layout & 60s Auto-Polling) -->
         <section class="section-block" id="space-weather">
           <div class="section-title">
             <div>
               <div class="eyebrow">HELIOPHYSICS &amp; SOLAR SENSORS</div>
               <h2>Space Weather Watch (NASA &amp; NOAA SWPC)</h2>
-              <p>Real-time solar flares and geomagnetic storm indexes observed by solar monitoring satellites.</p>
+              <p>Real-time solar flares and geomagnetic storm indexes. Automatically synced every 60 seconds.</p>
             </div>
           </div>
 
@@ -405,7 +432,7 @@
                 <h3>Recent Solar Activity &amp; Flares</h3>
                 <p>NASA DONKI notifications &amp; NOAA Space Weather Prediction Center sensors.</p>
               </div>
-              <button id="refresh-weather" class="subtle-button">Refresh Sensors ↻</button>
+              <span class="small-chip green" id="weather-sync-badge">Auto-Synced 🟢</span>
             </div>
             <div id="weather-events" class="event-list-scroll">
               <div class="loading-state"><div class="apple-spinner"></div><p>Querying heliophysics sensors…</p></div>
@@ -413,17 +440,17 @@
           </article>
         </section>
 
-        <!-- 7. COSMOS & ASTEROIDS -->
+        <!-- 7. COSMOS & ASTEROIDS (APOD Exact Date-Link & NeoWs API Key Stream) -->
         <section class="section-block" id="astronomy">
           <div class="section-title">
             <div>
               <div class="eyebrow">COSMOS &amp; NEAR-EARTH OBJECTS</div>
-              <h2>Astronomy Picture &amp; Asteroids (NASA JPL Radar)</h2>
-              <p>Official NASA Astronomy Picture of the Day and verified live radar close approaches from NASA JPL CNEOS.</p>
+              <h2>Astronomy Picture &amp; Asteroid Radar (NASA JPL)</h2>
+              <p>NASA Astronomy Picture of the Day with exact date-matched archive source, and near-Earth radar tracking.</p>
             </div>
           </div>
 
-          <!-- APOD Showcase (Dual-Source Verified Fallback) -->
+          <!-- APOD Showcase (Link matches exact photo) -->
           <article class="surface apod-layout">
             <div id="apod-media" class="apod-media">
               <div class="apple-spinner large"></div>
@@ -435,22 +462,22 @@
               <p id="apod-explanation" class="apod-explanation"></p>
               <div class="apod-foot">
                 <span id="apod-copyright"></span>
-                <a id="apod-link" class="text-link" href="https://apod.nasa.gov/apod/astropix.html" target="_blank" rel="noopener">Official NASA APOD ↗</a>
+                <a id="apod-link" class="text-link" href="#" target="_blank" rel="noopener">Official NASA APOD Archive ↗</a>
               </div>
             </div>
           </article>
 
-          <!-- NASA JPL CNEOS Asteroid Radar -->
+          <!-- NASA NeoWs Asteroid Radar (1,000 Req/Hr with Personal Key) -->
           <article class="surface neo-panel">
             <div class="card-heading">
               <div>
-                <h3>NASA JPL Near-Earth Asteroid Radar (CNEOS CAD)</h3>
-                <p>Direct close approaches for today from NASA Jet Propulsion Laboratory.</p>
+                <h3>NASA Near-Earth Asteroid Radar (NeoWs)</h3>
+                <p>Verified close approaches for today from NASA Jet Propulsion Laboratory.</p>
               </div>
-              <span class="small-chip blue">NASA JPL CNEOS</span>
+              <span class="small-chip blue">NASA NeoWs</span>
             </div>
             <div id="neo-list" class="neo-list-scroll">
-              <div class="loading-state"><div class="apple-spinner"></div><p>Scanning NASA JPL radar…</p></div>
+              <div class="loading-state"><div class="apple-spinner"></div><p>Scanning NASA radar…</p></div>
             </div>
           </article>
         </section>
@@ -505,7 +532,6 @@
           </div>
 
           <article class="surface intel-panel">
-            <!-- Global Autocomplete Search Box -->
             <div class="intel-search-wrapper">
               <div class="intel-search-box">
                 <input id="intel-area-input" type="search" placeholder="Search any village, mandal, city, or district worldwide (e.g., Warangal, Dallas, Guntur, Tokyo)…" autocomplete="off">
@@ -524,7 +550,6 @@
               <button class="area-pill" data-lat="40.7128" data-lon="-74.0060" data-name="New York, USA">New York</button>
             </div>
 
-            <!-- Location Status Header -->
             <div class="intel-brief-box">
               <div class="intel-brief-head">
                 <div>
@@ -629,35 +654,40 @@
           </article>
         </section>
 
-        <!-- 11. PREFERENCES & ALERTS (Firebase Synced) -->
+        <!-- 11. PREFERENCES & ALERTS (With "Select All" Button & Granular Sync) -->
         <section class="section-block" id="settings">
           <div class="section-title">
             <div>
               <div class="eyebrow">FIREBASE NOTIFICATION ENGINE</div>
               <h2>Preferences &amp; Space Alerts</h2>
-              <p>Select which live alerts to receive on your device. Selections are synced directly to Firestore.</p>
+              <p>Select which alerts to receive on your device. Only alerts you turn ON will trigger notifications.</p>
             </div>
           </div>
 
           <article class="surface settings-card">
-            <h3>Real-Time Alerts &amp; Device Synchronization</h3>
-            <p class="muted">Check the alerts you want to receive on this device, then tap Save &amp; Link.</p>
+            <div class="alerts-header-row">
+              <div>
+                <h3>Real-Time Alerts Configuration</h3>
+                <p class="muted">Check individual alerts or use Select All to enable the full space notification suite.</p>
+              </div>
+              <button class="subtle-button" id="toggle-all-alerts-btn">Select All</button>
+            </div>
 
             <div class="toggle-list">
               <label class="toggle-row">
                 <div>
                   <b>ISS Overhead Pass Alert</b>
-                  <small>Notify when Space Station elevation is visible</small>
+                  <small>Notify when Space Station elevation is visible from your location</small>
                 </div>
-                <input type="checkbox" checked class="apple-toggle" id="toggle-iss">
+                <input type="checkbox" checked class="apple-toggle alert-checkbox" id="toggle-iss">
               </label>
 
               <label class="toggle-row">
                 <div>
                   <b>Severe Solar Storms (Kp 5+)</b>
-                  <small>Notify on solar storm alerts from NASA/NOAA</small>
+                  <small>Notify on major solar flares &amp; geomagnetic storms from NASA/NOAA</small>
                 </div>
-                <input type="checkbox" checked class="apple-toggle" id="toggle-solar">
+                <input type="checkbox" checked class="apple-toggle alert-checkbox" id="toggle-solar">
               </label>
 
               <label class="toggle-row">
@@ -665,7 +695,7 @@
                   <b>Rocket Launch Countdowns</b>
                   <small>Notify 1 hour prior to major orbital liftoffs</small>
                 </div>
-                <input type="checkbox" checked class="apple-toggle" id="toggle-launches">
+                <input type="checkbox" checked class="apple-toggle alert-checkbox" id="toggle-launches">
               </label>
 
               <label class="toggle-row">
@@ -673,7 +703,15 @@
                   <b>Major Earthquake Alerts (M 5.0+)</b>
                   <small>Notify on USGS rapid seismic detection</small>
                 </div>
-                <input type="checkbox" checked class="apple-toggle" id="toggle-quake">
+                <input type="checkbox" checked class="apple-toggle alert-checkbox" id="toggle-quake">
+              </label>
+
+              <label class="toggle-row">
+                <div>
+                  <b>Hazardous Asteroid Close Approaches</b>
+                  <small>Notify on verified NASA NeoWs radar flybys</small>
+                </div>
+                <input type="checkbox" checked class="apple-toggle alert-checkbox" id="toggle-asteroid">
               </label>
             </div>
 
@@ -729,6 +767,26 @@
       <span>Alerts</span>
     </a>
   </nav>
+
+  <!-- In-App Earth 1M Miles Lightbox Modal with Download & Share -->
+  <div class="epic-lightbox-backdrop" id="epic-lightbox" aria-hidden="true">
+    <div class="epic-lightbox-dialog" role="dialog" aria-label="Earth from 1 Million Miles">
+      <button class="lightbox-close-btn" id="close-lightbox-btn" aria-label="Close Lightbox">✕</button>
+      <div class="lightbox-img-wrap">
+        <img id="lightbox-img" src="" alt="Earth Full Disc Portrait">
+      </div>
+      <div class="lightbox-footer">
+        <div class="lightbox-meta">
+          <b id="lightbox-date-text">NASA DSCOVR EPIC Full-Disc Earth</b>
+          <span id="lightbox-time-text">Timestamp: —</span>
+        </div>
+        <div class="lightbox-actions">
+          <a id="lightbox-download-btn" class="apple-btn-secondary" href="#" download="NASA_DSCOVR_EPIC_Earth.jpg">⬇ Download JPG</a>
+          <button id="lightbox-share-btn" class="primary-button">↗ Share Photo</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
