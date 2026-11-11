@@ -253,8 +253,24 @@ button { font-family: inherit; }
 .metric-card small { font-size: 10px; color: var(--muted); }
 .metric-bottom { margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--line); font-size: 9px; color: var(--muted); }
 
-/* Map & Watermark Clean Inversion */
-.map { height: 420px; border-radius: 14px; overflow: hidden; background: #111; }
+/* Map Viewport & Overlay Controls */
+.map-toolbar-row { margin-bottom: 12px; }
+.map-layer-chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.layer-chip {
+  padding: 6px 14px;
+  border-radius: 99px;
+  border: 1px solid var(--line);
+  background: var(--surface-solid);
+  color: var(--muted);
+  font: inherit;
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.layer-chip.active { background: var(--blue); color: #fff; border-color: var(--blue); }
+
+.map-viewport-wrapper { position: relative; border-radius: 14px; overflow: hidden; }
+.map { height: 440px; background: #111; }
 /* Clean dark-mode inversion on OpenStreetMap standard tiles */
 html[data-theme="dark"] .leaflet-tile {
   filter: brightness(0.68) invert(1) contrast(2.8) hue-rotate(180deg) saturate(0.35);
@@ -263,6 +279,51 @@ html[data-theme="dark"] .leaflet-tile {
 .leaflet-control-attribution {
   display: none !important;
 }
+
+/* Map HUD & Legend Overlays */
+.map-hud-chip {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 500;
+  background: rgba(16, 17, 20, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--line);
+  padding: 8px 14px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  pointer-events: none;
+}
+.map-hud-chip b { font-size: 11px; display: block; color: var(--text); }
+.map-hud-chip span { font: 9px var(--mono); color: var(--blue); }
+
+.map-legend-overlay {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  z-index: 500;
+  background: rgba(16, 17, 20, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--line);
+  padding: 6px 12px;
+  border-radius: 10px;
+  display: flex;
+  gap: 12px;
+  font-size: 9px;
+  color: var(--muted);
+  pointer-events: none;
+}
+.map-legend-overlay div { display: flex; align-items: center; gap: 5px; }
+.legend-color-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.legend-color-dot.blue { background: #2997ff; }
+.legend-color-dot.red { background: #ff453a; }
+.legend-color-dot.orange { background: #ffb454; }
+.legend-color-dot.purple { background: #bf9cff; }
+
 .map-foot { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 12px; font-size: 10px; color: var(--muted); }
 .map-foot b { font-family: var(--mono); color: var(--blue); }
 
@@ -289,10 +350,40 @@ html[data-theme="dark"] .leaflet-tile {
 .countdown-eyebrow { font-size: 9px; font-weight: 750; letter-spacing: 1px; color: var(--orange); margin-bottom: 8px; }
 .countdown-digits { font: 700 24px var(--mono); margin-bottom: 8px; overflow-wrap: anywhere; }
 .countdown-foot { font-size: 10px; color: var(--muted); overflow-wrap: anywhere; }
+
+/* Rocket Launch Cards (Badges Wrap Gracefully) */
 .launches-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; min-width: 0; }
 .launch-item-card { padding: 16px; border-radius: 16px; border: 1px solid var(--line); background: var(--surface); display: flex; flex-direction: column; min-width: 0; }
-.launch-item-card h4 { font-size: 14px; margin: 8px 0 6px; overflow-wrap: anywhere; }
+.launch-item-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+.launch-provider-badge {
+  font: 700 9px var(--mono);
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: var(--blue-soft);
+  color: var(--blue);
+  white-space: normal;
+  line-height: 1.3;
+  overflow-wrap: break-word;
+  max-width: 100%;
+}
+.launch-status-badge {
+  font: 700 9px var(--mono);
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: var(--green-soft);
+  color: var(--green);
+  white-space: nowrap;
+}
+.launch-item-card h4 { font-size: 14px; margin: 4px 0 6px; overflow-wrap: anywhere; }
 .launch-item-card p { font-size: 10px; color: var(--muted); line-height: 1.5; flex: 1; overflow-wrap: anywhere; }
+
+/* Mars Exploration Grid */
+.mars-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.mars-card { min-width: 0; }
+.mars-stats-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; padding: 12px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); margin: 12px 0; }
+.mars-stat small { font-size: 8px; color: var(--dim); display: block; margin-bottom: 2px; }
+.mars-stat b { font: 600 11px var(--mono); color: var(--orange); }
+.mars-summary { font-size: 11px; color: var(--muted); line-height: 1.6; }
 
 /* Space Weather (DONKI) - Compact scrollable list */
 .event-list-scroll { display: flex; flex-direction: column; gap: 10px; max-height: 380px; overflow-y: auto; }
@@ -319,6 +410,7 @@ html[data-theme="dark"] .leaflet-tile {
 .apod-foot { display: flex; justify-content: space-between; align-items: center; margin-top: 14px; font-size: 10px; }
 
 /* Earthquakes (USGS) Feed */
+.dual-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
 .earthquake-feed { display: flex; flex-direction: column; gap: 9px; max-height: 480px; overflow-y: auto; }
 .quake-row { padding: 12px 14px; border-radius: 12px; background: var(--surface-solid); border: 1px solid var(--line); display: flex; align-items: center; gap: 12px; min-width: 0; }
 .mag-box { width: 38px; height: 38px; border-radius: 10px; display: grid; place-items: center; font: 700 12px var(--mono); flex-shrink: 0; }
@@ -523,6 +615,8 @@ html[data-theme="dark"] .leaflet-tile {
   .metrics-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .launches-grid { grid-template-columns: 1fr; }
   .launch-spotlight-card { grid-template-columns: 1fr; }
+  .mars-grid { grid-template-columns: 1fr; }
+  .dual-grid { grid-template-columns: 1fr; }
   .neo-list-scroll { grid-template-columns: 1fr; }
   .apod-layout { grid-template-columns: 1fr; }
   .intel-metrics-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -561,6 +655,7 @@ html[data-theme="dark"] .leaflet-tile {
   .metrics-grid { grid-template-columns: 1fr; }
   .intel-metrics-grid { grid-template-columns: 1fr; }
   .spotlight-meta-grid { grid-template-columns: 1fr; }
+  .mars-stats-row { grid-template-columns: 1fr; }
   #utc-clock { display: none; }
   .footer { flex-direction: column; gap: 8px; align-items: flex-start; }
 }
