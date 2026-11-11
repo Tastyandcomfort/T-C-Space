@@ -119,7 +119,7 @@ function initMap() {
 
   issTrackLine = L.polyline([], { color: '#2997ff', weight: 2, dashArray: '5, 8', opacity: 0.7 }).addTo(satMap);
 
-  // Multi-Satellite Presets Toolbar (Includes ISRO Chandrayaan-3, NavIC & International)
+  // Multi-Satellite Presets Toolbar
   document.querySelectorAll('.sat-chip').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.sat-chip').forEach(b => b.classList.remove('active'));
@@ -235,7 +235,7 @@ function initSatelliteSearch() {
   });
 }
 
-// 5. Live Satellite Telemetry Stream (WhereTheISS & CelesTrak)
+// 5. Live Satellite Telemetry Stream
 let lastSatData = null;
 
 async function fetchLiveSatelliteTelemetry() {
@@ -509,7 +509,7 @@ async function fetchMarsPhotos() {
   const container = document.getElementById('mars-photos-container');
   if (!container) return;
 
-  // Step 1: Try NASA Mars Rover Photos endpoint (Curiosity)
+  // Step 1: Try NASA Mars Rover Photos endpoint
   try {
     const res = await fetch(`https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/latest_photos?api_key=${NASA_API_KEY}`);
     if (res.ok) {
@@ -530,7 +530,7 @@ async function fetchMarsPhotos() {
     }
   } catch (_) {}
 
-  // Step 2: Resilient Fallback to NASA's Official Image Library
+  // Step 2: Resilient Fallback to NASA's Official Image & Video Library (Always online)
   try {
     const res = await fetch('https://images-api.nasa.gov/search?q=perseverance%20mars%20surface%20sol&media_type=image');
     if (!res.ok) throw new Error();
@@ -909,83 +909,69 @@ function initAreaSearch() {
   });
 }
 
-// 15. NASA APOD (Calculated Strictly on US Eastern Time with Automatic 1-Day Fallback)
+// 15. NASA APOD (Direct science.nasa.gov endpoint matching today's picture)
 async function fetchApod() {
   const media = document.getElementById('apod-media');
   try {
-    // Calculate current date in US Eastern Time where NASA APOD is published
-    const usDateStr = new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
-    
-    let res = await fetch(`https://api.nasa.gov/planetary/apod?api_key=${NASA_API_KEY}&date=${usDateStr}`);
-    
-    // If today's image is not yet released on NASA's server (returns 404), step back 1 day
-    if (!res.ok) {
-      const yesterday = new Date(Date.now() - 86400000).toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
-      res = await fetch(`https://api.nasa.gov/planetary/apod?api_key=${NASA_API_KEY}&date=${yesterday}`);
+    // 1. Query NASA Science official APOD endpoint directly
+    let res = await fetch('https://science.nasa.gov/wp-json/wp/v2/apod-basic?per_page=1');
+    let entry = null;
+
+    if (res.ok) {
+      const data = await res.json();
+      entry = Array.isArray(data) ? data[0] : data;
     }
 
-    if (!res.ok) throw new Error();
-    const d = await res.json();
+    // Fallback to api.nasa.gov with your personal key if science.nasa.gov fails
+    if (!entry) {
+      res = await fetch(`https://api.nasa.gov/planetary/apod?api_key=${NASA_API_KEY}`);
+      if (res.ok) {
+        entry = await res.json();
+      }
+    }
 
-    document.getElementById('apod-title').textContent = d.title;
-    document.getElementById('apod-explanation').textContent = d.explanation;
-    document.getElementById('apod-date').textContent = d.date;
-    document.getElementById('apod-copyright').textContent = d.copyright ? '© ' + d.copyright : 'NASA Observatory Public Stream';
+    if (!entry) throw new Error("No APOD payload");
+
+    // Extract fields (handle both string & object titles)
+    const title = typeof entry.title === 'object' ? (entry.title.rendered || 'Astronomy Picture of the Day') : (entry.title || 'Astronomy Picture of the Day');
+    let explanation = typeof entry.explanation === 'object' ? (entry.explanation.rendered || '') : (entry.explanation || '');
+    explanation = explanation.replace(/^Explanation:\s*/i, '').replace(/<[^>]*>/g, '').trim();
+
+    const date = entry.date || new Date().toISOString().slice(0, 10);
+    const credit = entry.credit || entry.copyright || 'NASA, ESA, and Hubble Heritage';
+    
+    // In the new API: hdurl is the actual image; url is the article page
+    const actualImageSrc = entry.hdurl || entry.image || entry.url;
+    const officialArticleUrl = entry.url && entry.url.includes('science.nasa.gov') ? entry.url : 'https://science.nasa.gov/apod/';
+
+    // Update DOM text
+    document.getElementById('apod-title').textContent = title;
+    document.getElementById('apod-explanation').textContent = explanation;
+    document.getElementById('apod-date').textContent = date;
+    document.getElementById('apod-copyright').textContent = 'Credit: ' + credit;
 
     const prevTitle = document.getElementById('apod-preview-title');
     const prevDesc = document.getElementById('apod-preview-desc');
-    if (prevTitle) prevTitle.textContent = d.title;
-    if (prevDesc) prevDesc.textContent = (d.explanation || '').slice(0, 110) + '...';
+    if (prevTitle) prevTitle.textContent = title;
+    if (prevDesc) prevDesc.textContent = explanation.slice(0, 110) + '...';
 
-    // GUARANTEED EXACT MATCH: Generates the date-stamped archive URL (apYYMMDD.html)
-    if (d.date) {
-      const parts = d.date.split('-');
-      if (parts.length === 3) {
-        const yy = parts[0].slice(2);
-        const mm = parts[1];
-        const dd = parts[2];
-        const exactArchiveUrl = `https://apod.nasa.gov/apod/ap${yy}${mm}${dd}.html`;
-        const link = document.getElementById('apod-link');
-        if (link) {
-          link.href = exactArchiveUrl;
-          link.textContent = `Official NASA APOD (${d.date}) ↗`;
-        }
-      }
+    // Update source link to point directly to NASA Science APOD
+    const link = document.getElementById('apod-link');
+    if (link) {
+      link.href = officialArticleUrl;
+      link.textContent = `Official NASA Science APOD (${date}) ↗`;
     }
 
-    if (media) {
-      if (d.media_type === 'image') {
-        media.innerHTML = `<img src="${d.url}" alt="${d.title}">`;
+    // Render image
+    if (media && actualImageSrc) {
+      if (entry.media_type === 'video' || actualImageSrc.includes('youtube') || actualImageSrc.includes('vimeo')) {
+        media.innerHTML = `<iframe src="${actualImageSrc}" frameborder="0" allowfullscreen style="width:100%;height:100%;border-radius:14px;"></iframe>`;
       } else {
-        media.innerHTML = `<iframe src="${d.url}" frameborder="0" allowfullscreen></iframe>`;
+        media.innerHTML = `<img src="${actualImageSrc}" alt="${title}" style="width:100%;height:100%;object-fit:cover;border-radius:14px;" loading="lazy">`;
       }
     }
-  } catch (_) {
-    // Official NASA Science WordPress Fallback
-    try {
-      const fbRes = await fetch('https://science.nasa.gov/wp-json/wp/v2/apod-basic?per_page=1');
-      if (fbRes.ok) {
-        const arr = await fbRes.json();
-        if (arr.length > 0) {
-          const item = arr[0];
-          document.getElementById('apod-title').textContent = item.title?.rendered || 'Astronomy Picture of the Day';
-          document.getElementById('apod-explanation').textContent = (item.content?.rendered || '').replace(/<[^>]*>/g, '').slice(0, 320) + '...';
-          document.getElementById('apod-date').textContent = item.date?.slice(0, 10) || 'NASA Observatory';
-          const imgUrl = item.featured_image || item.image;
-          if (imgUrl && media) {
-            media.innerHTML = `<img src="${imgUrl}" alt="NASA Astronomy">`;
-            return;
-          }
-        }
-      }
-    } catch (_) {}
-
-    document.getElementById('apod-title').textContent = 'Webb Deep Field (Cosmic Infrared Archive)';
-    document.getElementById('apod-explanation').textContent = 'NASA James Webb Space Telescope deep-space observatory infrared capture of galaxy cluster SMACS 0723, showing thousands of galaxies.';
-    document.getElementById('apod-date').textContent = 'NASA STScI Archive';
-    if (media) {
-      media.innerHTML = `<img src="https://images-assets.nasa.gov/image/PIA25324/PIA25324~orig.jpg" alt="Cosmos">`;
-    }
+  } catch (err) {
+    console.warn("APOD fetch error:", err);
   }
 }
 
@@ -1142,6 +1128,7 @@ function initAlertPreferences() {
           }
         }
 
+        // Writes explicit boolean flags to Firestore document
         await db.collection('space_fcm_tokens').doc(token).set({
           token: token,
           alertIss: Boolean(isIss),
@@ -1165,12 +1152,10 @@ function initAlertPreferences() {
 
   // Interactive "Test Alert" Button with Automatic Permission Prompt & Click Routing
   document.getElementById('test-alert-btn')?.addEventListener('click', async () => {
-    // 1. Trigger permission prompt if not decided
     if ('Notification' in window && Notification.permission === 'default') {
       await Notification.requestPermission();
     }
 
-    // 2. Alert user if permission is blocked in browser settings
     if ('Notification' in window && Notification.permission === 'denied') {
       showToast('⚠️ Notifications blocked. Tap lock icon in browser bar to allow.');
       return;
@@ -1183,7 +1168,6 @@ function initAlertPreferences() {
       const isQuake = document.getElementById('toggle-quake').checked;
       const isAsteroid = document.getElementById('toggle-asteroid').checked;
 
-      // Select dynamic alert based on user's active checkboxes
       let title = 'T&C Space Alert 🚀';
       let body = 'All live telemetry sensors operational.';
       let url = './#overview';
@@ -1210,7 +1194,6 @@ function initAlertPreferences() {
         url = './#satellites';
       }
 
-      // Trigger via Service Worker for authentic mobile/desktop push test
       if (swRegistration) {
         swRegistration.showNotification(title, {
           body: body,
