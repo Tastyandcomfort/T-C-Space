@@ -13,7 +13,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const messaging = firebase.messaging();
 
-// Background Push Notification Catcher
+// Catches background push messages and wakes up mobile devices
 messaging.onBackgroundMessage((payload) => {
   const title = payload.notification?.title || payload.data?.title || 'T&C Space Alert 🚀';
   const options = {
