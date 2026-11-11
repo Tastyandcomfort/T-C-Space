@@ -6,9 +6,7 @@
   <meta name="theme-color" content="#101114" id="theme-color-meta">
   <title>T&amp;C Space Hub — Mission Control</title>
   
-  <!-- PWA Manifest link -->
   <link rel="manifest" href="manifest.webmanifest">
-  
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <link rel="stylesheet" href="styles.css">
 
@@ -70,14 +68,18 @@
           <span>Space Wiki</span>
         </a>
         <a class="nav-link" href="#settings" data-nav="settings">
-          <span class="nav-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
+          <span class="nav-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83-2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
           <span>Preferences &amp; Alerts</span>
+        </a>
+        <a class="nav-link" href="#about" data-nav="about">
+          <span class="nav-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></span>
+          <span>About Space Hub</span>
         </a>
       </nav>
 
       <div class="sidebar-bottom">
         <div class="connection-indicator">
-          <i></i>
+          <span class="live-dot pulse-dot"></span>
           <span>NASA, ISRO &amp; ESA</span>
           <b>LIVE</b>
         </div>
@@ -104,6 +106,12 @@
         </div>
 
         <div class="top-actions">
+          <!-- Real-Time Network Speed & Status Pill -->
+          <div class="network-status-pill" id="network-status-pill" title="Real-Time Network Speed &amp; Telemetry Status">
+            <span class="status-dot pulse-dot"></span>
+            <span id="net-text">Checking…</span>
+          </div>
+
           <!-- Dynamic PWA Install Button -->
           <button id="pwa-install-btn" class="install-pill-btn" style="display: none;" title="Install Space Hub App">
             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -111,8 +119,8 @@
           </button>
 
           <!-- Dual IST & UTC Clocks -->
-          <div class="utc-clock" title="Indian Standard Time & UTC">
-            <span class="live-dot"></span>
+          <div class="utc-clock" title="Indian Standard Time &amp; UTC">
+            <span class="live-dot pulse-dot"></span>
             <div class="clock-duo">
               <span id="ist-clock">--:--:-- IST</span>
               <span id="utc-clock">--:--:-- UTC</span>
@@ -134,30 +142,30 @@
 
       <div class="content-wrap">
 
-        <!-- 1. OVERVIEW (Interactive Cards Navigate to Target Tabs) -->
+        <!-- 1. OVERVIEW -->
         <section class="section-block active-view" id="overview">
           <div class="welcome-row">
             <div>
-              <div class="eyebrow"><span class="live-dot"></span> T&amp;C SPACE INTELLIGENCE</div>
+              <div class="eyebrow"><span class="live-dot pulse-dot"></span> T&amp;C SPACE INTELLIGENCE</div>
               <h1>Mission control<span>.</span></h1>
               <p>Authentic real-time space awareness streamed directly from NASA, ISRO, USGS, WhereTheISS, and Open-Meteo.</p>
             </div>
             <div class="welcome-meta">
-              <span class="status-pill"><i></i> SYSTEMS OPERATIONAL</span>
+              <span class="status-pill"><i class="pulse-dot"></i> SYSTEMS OPERATIONAL</span>
               <small id="last-updated">Connecting to sensor network…</small>
             </div>
           </div>
 
           <!-- Live Sensors Cyclical Ticker -->
           <div class="ticker-row">
-            <div class="ticker-label"><span class="live-dot"></span> LIVE SENSORS</div>
+            <div class="ticker-label"><span class="live-dot pulse-dot"></span> LIVE SENSORS</div>
             <div id="ticker" class="ticker-content">Syncing real-time telemetry from international observatories…</div>
             <div class="ticker-time">100% VERIFIED</div>
           </div>
 
           <!-- Interactive Metrics Grid with Color Accents -->
           <div class="metrics-grid">
-            <article class="metric-card card-accent-blue clickable-card" data-goto="satellites" title="Click to view full Satellite Tracker & Map">
+            <article class="metric-card card-accent-blue clickable-card" data-goto="satellites" title="Click to view full Satellite Tracker &amp; Map">
               <div class="metric-top"><span>ACTIVE SAT ALTITUDE</span><span class="metric-symbol blue">◎</span></div>
               <strong id="iss-alt"><div class="apple-spinner"></div></strong>
               <small id="active-sat-name-sub">International Space Station</small>
@@ -207,13 +215,13 @@
           </div>
         </section>
 
-        <!-- 2. SATELLITES & MULTI-LAYER MAP (Instant Satellite Centering & Autocomplete) -->
+        <!-- 2. SATELLITES & MULTI-LAYER MAP -->
         <section class="section-block" id="satellites">
           <div class="section-title">
             <div>
               <div class="eyebrow">ORBITAL SITUATIONAL AWARENESS</div>
               <h2>Interactive Planetary Map &amp; Tracking</h2>
-              <p>Click any satellite preset to instantly center on its live position. Click any marker for telemetry popups.</p>
+              <p>Track the international space fleet including ISRO's Chandrayaan-3 and NavIC. Click any marker for telemetry popups.</p>
             </div>
           </div>
 
@@ -254,7 +262,7 @@
 
               <!-- Live HUD Telemetry Chip (Theme-Adaptive) -->
               <div class="map-hud-chip" id="map-hud-overlay">
-                <span class="live-dot"></span>
+                <span class="live-dot pulse-dot"></span>
                 <div>
                   <b id="hud-sat-name">ISS (ZARYA)</b>
                   <span id="hud-sat-telemetry">Calculating telemetry…</span>
@@ -294,7 +302,7 @@
             <div class="spotlight-left">
               <div class="spotlight-tags">
                 <span class="mission-badge">NEXT GLOBAL LAUNCH</span>
-                <span class="status-pill" id="spotlight-status"><i></i> SCHEDULED</span>
+                <span class="status-pill" id="spotlight-status"><i class="pulse-dot"></i> SCHEDULED</span>
               </div>
               <h3 id="spotlight-name">Querying flight manifest…</h3>
               <p id="spotlight-desc">Tracking upcoming spaceport countdowns across the globe.</p>
@@ -320,7 +328,7 @@
           </div>
         </section>
 
-        <!-- 4. COMBINED TAB: EARTH & MARS (With Working Direct Blob Download & Share) -->
+        <!-- 4. COMBINED TAB A: EARTH & MARS -->
         <section class="section-block" id="interplanetary">
           <div class="section-title">
             <div>
@@ -330,7 +338,7 @@
             </div>
           </div>
 
-          <!-- Sub-Section A: Earth From 1,000,000 Miles Away (DSCOVR EPIC) -->
+          <!-- Earth From 1,000,000 Miles Away (DSCOVR EPIC) -->
           <article class="surface epic-card">
             <div class="card-heading">
               <div>
@@ -340,7 +348,7 @@
               <span class="small-chip blue">NASA DSCOVR EPIC</span>
             </div>
 
-            <div class="epic-viewport clickable-image-box" id="epic-media-box" title="Tap photo to open full view, download & share">
+            <div class="epic-viewport clickable-image-box" id="epic-media-box" title="Tap photo to open full view, download &amp; share">
               <div class="apple-spinner large"></div>
             </div>
 
@@ -352,7 +360,7 @@
             </div>
           </article>
 
-          <!-- Sub-Section B: Mars Surface Status & Rover Photos -->
+          <!-- Mars Surface Status & Rover Photos -->
           <article class="surface mars-showcase-card" style="margin-top: 24px;">
             <div class="card-heading">
               <div>
@@ -360,7 +368,7 @@
                 <h2>Mars Exploration &amp; Rover Cameras</h2>
                 <p>Surface Sol telemetry and active camera frames from NASA's Perseverance and Curiosity rovers.</p>
               </div>
-              <span class="status-pill"><i></i> ACTIVE MISSIONS</span>
+              <span class="status-pill"><i class="pulse-dot"></i> ACTIVE MISSIONS</span>
             </div>
 
             <div class="mars-grid">
@@ -394,7 +402,7 @@
           </article>
         </section>
 
-        <!-- 5. SPACE WEATHER (4-Tile Heliophysics Dashboard & 60s Auto-Poll) -->
+        <!-- 5. SPACE WEATHER -->
         <section class="section-block" id="space-weather">
           <div class="section-title">
             <div>
@@ -442,7 +450,7 @@
           </article>
         </section>
 
-        <!-- 6. COMBINED TAB: COSMOS & HAZARDS (APOD + Asteroids + Earthquakes + EONET) -->
+        <!-- 6. COMBINED TAB B: COSMOS & HAZARDS -->
         <section class="section-block" id="cosmos-hazards">
           <div class="section-title">
             <div>
@@ -452,9 +460,9 @@
             </div>
           </div>
 
-          <!-- Sub-Section A: APOD (Tap photo to open lightbox with download & share) -->
+          <!-- APOD Showcase -->
           <article class="surface apod-layout">
-            <div id="apod-media" class="apod-media clickable-image-box" title="Tap photo to open full view, direct download & share">
+            <div id="apod-media" class="apod-media clickable-image-box" title="Tap photo to open full view, direct download &amp; share">
               <div class="apple-spinner large"></div>
             </div>
             <div class="apod-copy">
@@ -469,7 +477,7 @@
             </div>
           </article>
 
-          <!-- Sub-Section B: NASA NeoWs Asteroid Radar with Direct JPL Verification Link -->
+          <!-- NASA NeoWs Asteroid Radar -->
           <article class="surface neo-panel">
             <div class="card-heading">
               <div>
@@ -483,7 +491,7 @@
             </div>
           </article>
 
-          <!-- Sub-Section C: Earth Hazards & Earthquakes (USGS & EONET) -->
+          <!-- Earth Hazards & Earthquakes (USGS & EONET) -->
           <div class="dual-grid" style="margin-top: 20px;">
             <article class="surface earth-card">
               <div class="card-heading">
@@ -552,7 +560,7 @@
               </div>
             </div>
 
-            <!-- Human-Understandable Metric Cards with Badges -->
+            <!-- Metric Cards with Badges -->
             <div class="intel-metrics-grid">
               <div class="intel-metric-card">
                 <div class="metric-top"><span>AIR QUALITY (US AQI)</span><span class="metric-symbol green">🌬️</span></div>
@@ -646,7 +654,7 @@
           </article>
         </section>
 
-        <!-- 9. PREFERENCES & ALERTS (With User Location Selector for Overhead Passes) -->
+        <!-- 9. PREFERENCES & ALERTS -->
         <section class="section-block" id="settings">
           <div class="section-title">
             <div>
@@ -728,10 +736,7 @@
             </div>
 
             <div class="setting-actions" style="display:flex;flex-direction:column;gap:10px;">
-              <!-- Save to Firebase Button -->
               <button id="save-firebase-btn" class="primary-button full-width">Save &amp; Link Device with Firebase 🚀</button>
-              
-              <!-- Interactive Test Alert Button -->
               <button id="test-alert-btn" class="apple-btn-secondary full-width" style="justify-content:center;padding:12px;">
                 🔔 Test Space Alert (Rich Notification with Photos)
               </button>
@@ -739,26 +744,119 @@
           </article>
         </section>
 
-      </div>
+        <!-- 10. ABOUT SPACE HUB (Apple-Style Workspace Space Replacing Footer) -->
+        <section class="section-block" id="about">
+          <div class="section-title">
+            <div>
+              <div class="eyebrow">MISSION MANIFEST &amp; ECOSYSTEM</div>
+              <h2>About T&amp;C Space Hub</h2>
+              <p>Explore our open science philosophy, verified public telemetry endpoints, the T&amp;C ecosystem, and developer details.</p>
+            </div>
+          </div>
 
-      <!-- Minimal Classic Apple Footer -->
-      <footer class="footer">
-        <div class="footer-left">
-          <div class="footer-dot green"></div>
-          <b>T&amp;C SPACE HUB</b>
-          <span>· Real-time Space Intelligence · Curiosity has no borders.</span>
-        </div>
-        <div class="footer-right">
-          <a href="https://tastyandcomfort.github.io/T-C/" target="_blank" rel="noopener">T&amp;C Stall</a>
-          <a href="https://tastyandcomfort.github.io/news/" target="_blank" rel="noopener">T&amp;C News</a>
-          <a href="https://api.nasa.gov/" target="_blank" rel="noopener">NASA APIs</a>
-          <a href="https://earthquake.usgs.gov/" target="_blank" rel="noopener">USGS</a>
-        </div>
-      </footer>
+          <div class="about-grid">
+            <article class="surface about-card">
+              <div class="card-heading">
+                <div>
+                  <div class="eyebrow">PLATFORM PHILOSOPHY</div>
+                  <h3>Real-Time Space Intelligence</h3>
+                </div>
+                <span class="status-pill"><i class="pulse-dot"></i> 100% REAL DATA</span>
+              </div>
+              <p class="about-text">
+                T&amp;C Space Hub is built on the principle of <b>zero mathematical simulation and zero fake telemetry</b>. Every metric, coordinate, countdown, and photo is streamed directly from official space agencies and public scientific observatories.
+              </p>
+              <div class="about-highlights">
+                <div><small>SATELLITES</small><b>Live Keplerian &amp; Doppler Sensors</b></div>
+                <div><small>ASTRONOMY</small><b>Direct NASA Science Observatory</b></div>
+                <div><small>PLANETARY</small><b>USGS Seismic Network + NOAA SWPC</b></div>
+              </div>
+            </article>
+
+            <article class="surface about-card">
+              <div class="card-heading">
+                <div>
+                  <div class="eyebrow">ENGINEERING &amp; DESIGN</div>
+                  <h3>Built &amp; Developed By</h3>
+                </div>
+                <span class="small-chip blue">FOUNDER</span>
+              </div>
+              <div class="developer-profile">
+                <div class="developer-avatar">MM</div>
+                <div>
+                  <h4>Murali Manohar</h4>
+                  <small>Architect &amp; Lead Developer · Tasty &amp; Comfort Network</small>
+                </div>
+              </div>
+              <p class="about-text" style="margin-top:12px;">
+                Engineered with pure web standards, Apple Human Interface Guidelines, fluid hardware-accelerated CSS, Leaflet GIS, and Firebase Cloud Messaging for cross-platform performance.
+              </p>
+            </article>
+
+            <article class="surface about-card about-span-two">
+              <div class="card-heading">
+                <div>
+                  <div class="eyebrow">THE T&amp;C NETWORK</div>
+                  <h3>Explore the T&amp;C Ecosystem</h3>
+                  <p>Discover our other independent platforms and public web services.</p>
+                </div>
+              </div>
+              <div class="ecosystem-cards-row">
+                <a class="ecosystem-card-item" href="https://tastyandcomfort.github.io/T-C/" target="_blank" rel="noopener">
+                  <span class="eco-icon blue">T&amp;C</span>
+                  <div>
+                    <b>T&amp;C Stall</b>
+                    <small>Official Storefront &amp; Main Portal</small>
+                  </div>
+                  <span class="eco-arrow">↗</span>
+                </a>
+                <a class="ecosystem-card-item" href="https://tastyandcomfort.github.io/news/" target="_blank" rel="noopener">
+                  <span class="eco-icon orange">N</span>
+                  <div>
+                    <b>T&amp;C News Hub</b>
+                    <small>Real-time Global News &amp; Updates</small>
+                  </div>
+                  <span class="eco-arrow">↗</span>
+                </a>
+                <a class="ecosystem-card-item" href="https://tastyandcomfort.github.io/farmer/" target="_blank" rel="noopener">
+                  <span class="eco-icon green">🌾</span>
+                  <div>
+                    <b>T&amp;C Farmer</b>
+                    <small>Agricultural Intelligence &amp; Crop Support</small>
+                  </div>
+                  <span class="eco-arrow">↗</span>
+                </a>
+              </div>
+            </article>
+
+            <article class="surface about-card about-span-two">
+              <div class="card-heading">
+                <div>
+                  <div class="eyebrow">TRANSPARENCY</div>
+                  <h3>Verified Data Sources &amp; Public Endpoints</h3>
+                  <p>Public scientific APIs powering live telemetry in this dashboard.</p>
+                </div>
+              </div>
+              <div class="sources-pill-grid">
+                <a class="source-link-chip" href="https://api.nasa.gov/" target="_blank" rel="noopener">NASA Open APIs ↗</a>
+                <a class="source-link-chip" href="https://science.nasa.gov/apod/" target="_blank" rel="noopener">NASA Science APOD ↗</a>
+                <a class="source-link-chip" href="https://epic.gsfc.nasa.gov/" target="_blank" rel="noopener">NASA DSCOVR EPIC ↗</a>
+                <a class="source-link-chip" href="https://wheretheiss.at/" target="_blank" rel="noopener">WhereTheISS.at ↗</a>
+                <a class="source-link-chip" href="https://earthquake.usgs.gov/" target="_blank" rel="noopener">USGS Earthquake Hazards ↗</a>
+                <a class="source-link-chip" href="https://www.swpc.noaa.gov/" target="_blank" rel="noopener">NOAA Space Weather ↗</a>
+                <a class="source-link-chip" href="https://lldev.thespacedevs.com/" target="_blank" rel="noopener">Launch Library 2 (ISRO/SpaceX) ↗</a>
+                <a class="source-link-chip" href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo Air Quality &amp; Sensors ↗</a>
+                <a class="source-link-chip" href="https://en.wikipedia.org/api/rest_v1/" target="_blank" rel="noopener">Wikimedia Foundation REST API ↗</a>
+              </div>
+            </article>
+          </div>
+        </section>
+
+      </div>
     </main>
   </div>
 
-  <!-- Mobile Bottom Frosted Navigation Dock -->
+  <!-- Mobile Bottom Frosted Navigation Dock (No Footer Clutter) -->
   <nav class="mobile-dock" aria-label="Mobile Navigation">
     <a class="dock-link active" href="#overview" data-nav="overview">
       <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
@@ -784,9 +882,13 @@
       <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83-2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
       <span>Alerts</span>
     </a>
+    <a class="dock-link" href="#about" data-nav="about">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+      <span>About</span>
+    </a>
   </nav>
 
-  <!-- Universal In-App Apple Media Lightbox (Earth, Mars & APOD with Working Direct Blob Download & Share) -->
+  <!-- Universal In-App Apple Media Lightbox -->
   <div class="epic-lightbox-backdrop" id="universal-media-lightbox" aria-hidden="true">
     <div class="epic-lightbox-dialog" role="dialog" aria-label="Media Preview">
       <button class="lightbox-close-btn" id="close-universal-lightbox-btn" aria-label="Close Lightbox">✕</button>
