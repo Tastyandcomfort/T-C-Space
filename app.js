@@ -24,7 +24,72 @@ function initClocks() {
   setInterval(tick, 1000);
 }
 
-// 2. Navigation Router with Leaflet Map Auto-Resize
+// 2. Real-Time Network Monitor (Speed Tiers & Site-Wide Pulsing Dot Synchronization)
+function initNetworkMonitor() {
+  const textEl = document.getElementById('net-text');
+
+  async function updateNetworkStatus() {
+    if (!navigator.onLine) {
+      document.documentElement.setAttribute('data-network', 'offline');
+      if (textEl) textEl.textContent = 'Offline';
+      showToast('⚠️ Network connection lost. Telemetry paused.');
+      return;
+    }
+
+    const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+
+    if (conn && conn.downlink !== undefined) {
+      const mbps = conn.downlink;
+      if (mbps < 1.0) {
+        document.documentElement.setAttribute('data-network', 'slow');
+        if (textEl) textEl.textContent = 'Slow · <1 Mbps';
+      } else if (mbps <= 2.5) {
+        document.documentElement.setAttribute('data-network', 'normal');
+        if (textEl) textEl.textContent = `Normal · ~${mbps.toFixed(1)} Mbps`;
+      } else {
+        document.documentElement.setAttribute('data-network', 'fast');
+        if (textEl) textEl.textContent = `Fast · ${mbps.toFixed(1)} Mbps`;
+      }
+      return;
+    }
+
+    // High-precision non-blocking fallback for Safari/iOS
+    try {
+      const t0 = performance.now();
+      await fetch('https://api.wheretheiss.at/v1/satellites/25544', { method: 'HEAD', cache: 'no-store' });
+      const rtt = performance.now() - t0;
+
+      if (rtt > 1200) {
+        document.documentElement.setAttribute('data-network', 'slow');
+        if (textEl) textEl.textContent = 'Slow · <1 Mbps';
+      } else if (rtt > 500) {
+        document.documentElement.setAttribute('data-network', 'normal');
+        if (textEl) textEl.textContent = 'Normal · ~1 Mbps';
+      } else {
+        document.documentElement.setAttribute('data-network', 'fast');
+        if (textEl) textEl.textContent = 'Fast · ≥1 Mbps';
+      }
+    } catch (_) {
+      document.documentElement.setAttribute('data-network', 'offline');
+      if (textEl) textEl.textContent = 'Offline';
+    }
+  }
+
+  window.addEventListener('online', () => {
+    updateNetworkStatus();
+    showToast('🟢 Telemetry connection restored.');
+  });
+  window.addEventListener('offline', updateNetworkStatus);
+
+  if (navigator.connection) {
+    navigator.connection.addEventListener('change', updateNetworkStatus);
+  }
+
+  updateNetworkStatus();
+  setInterval(updateNetworkStatus, 30000);
+}
+
+// 3. Navigation Router with Leaflet Map Auto-Resize
 function initNavigation() {
   const navLinks = document.querySelectorAll('.nav-link, .dock-link');
   const sections = document.querySelectorAll('.section-block');
@@ -71,7 +136,7 @@ function initNavigation() {
   showSection(initialHash);
 }
 
-// 3. Interactive Overview Cards (Clicking Navigates to Target Section)
+// 4. Interactive Overview Cards (Clicking Navigates to Target Section)
 function initOverviewClickableCards() {
   document.querySelectorAll('.clickable-card[data-goto]').forEach(card => {
     card.addEventListener('click', () => {
@@ -81,12 +146,12 @@ function initOverviewClickableCards() {
   });
 }
 
-// 4. Multi-Layer Leaflet Map with Authentic Keplerian Orbital Database
+// 5. Multi-Layer Leaflet Map with Authentic Keplerian Orbital Database
 let satMap = null;
 let issMarker = null;
 let issTrackLine = null;
 const issTrackPoints = [];
-let currentSatelliteId = 25544; // Default: ISS (Zarya)
+let currentSatelliteId = 25544;
 let currentSatelliteName = "ISS (ZARYA)";
 
 let quakeLayerGroup = null;
@@ -235,7 +300,7 @@ function initSatelliteSearch() {
   });
 }
 
-// 5. Live Satellite Telemetry Stream & Proximity Detection
+// 6. Live Satellite Telemetry Stream & Proximity Detection
 let lastSatData = null;
 
 async function fetchLiveSatelliteTelemetry(shouldCenterMap = false) {
@@ -307,7 +372,6 @@ async function fetchLiveSatelliteTelemetry(shouldCenterMap = false) {
       issTrackLine.setLatLngs(issTrackPoints);
     }
 
-    // Check for overhead satellite pass over user's designated location
     checkSatelliteOverheadPass(lat, lon, currentSatelliteName, vel);
 
     const ping = document.getElementById('last-updated');
@@ -315,7 +379,7 @@ async function fetchLiveSatelliteTelemetry(shouldCenterMap = false) {
   } catch (_) {}
 }
 
-// 6. Real-Time Proximity & Overhead Pass Alert Engine
+// 7. Real-Time Proximity & Overhead Pass Alert Engine
 let lastPassAlertTime = 0;
 
 function checkSatelliteOverheadPass(satLat, satLon, satName, satVel) {
@@ -326,7 +390,6 @@ function checkSatelliteOverheadPass(satLat, satLon, satName, satVel) {
   const userLon = parseFloat(localStorage.getItem('user_target_lon') || "78.4867");
   const locationName = localStorage.getItem('user_target_city') || "Hyderabad, India";
 
-  // Calculate Haversine distance in km
   const R = 6371;
   const dLat = (satLat - userLat) * Math.PI / 180;
   const dLon = (satLon - userLon) * Math.PI / 180;
@@ -336,10 +399,8 @@ function checkSatelliteOverheadPass(satLat, satLon, satName, satVel) {
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
   const distanceKm = R * c;
 
-  // Visual horizon for Low Earth Orbit is ~1500 km
   if (distanceKm <= 1500) {
     const now = Date.now();
-    // 45-minute cooldown per satellite pass to prevent spamming
     if (now - lastPassAlertTime > 45 * 60 * 1000) {
       lastPassAlertTime = now;
       dispatchRichNotification({
@@ -352,7 +413,7 @@ function checkSatelliteOverheadPass(satLat, satLon, satName, satVel) {
   }
 }
 
-// 7. Independent Live Sensors Ticker Engine
+// 8. Live Sensors Ticker Engine
 let tickerCycleIndex = 0;
 let lastNextLaunchText = 'Streaming upcoming flights…';
 let lastEarthquakeText = 'USGS seismic sensors active.';
@@ -379,7 +440,7 @@ function startLiveTickerEngine() {
   setInterval(updateTicker, 4500);
 }
 
-// 8. Verified Launch Manifest with Ticking Countdown Timer
+// 9. Verified Launch Manifest with Ticking Countdown Timer
 let countdownInterval = null;
 
 async function fetchLaunches() {
@@ -462,7 +523,7 @@ async function fetchLaunches() {
   }
 }
 
-// 9. Universal Lightbox with Guaranteed Binary Download via wsrv.nl & Native Share
+// 10. Universal Lightbox with Guaranteed Binary Download via wsrv.nl & Native Share
 let activeLightboxMedia = {
   url: "",
   title: "NASA Space Telemetry",
@@ -495,20 +556,17 @@ function initUniversalLightbox() {
     if (e.target === modal) modal.classList.remove('open');
   });
 
-  // Direct Binary Download Engine (Guaranteed Save to Device Downloads Folder)
   downloadBtn?.addEventListener('click', async () => {
     if (!activeLightboxMedia.url) return;
     
     showToast('Downloading high-res image…');
     let blob = null;
 
-    // 1. Direct CORS fetch
     try {
       const res = await fetch(activeLightboxMedia.url);
       if (res.ok) blob = await res.blob();
     } catch (_) {}
 
-    // 2. wsrv.nl dedicated image binary proxy (Universal CORS enabled, converts to clean file)
     if (!blob) {
       try {
         const proxyUrl = `https://wsrv.nl/?url=${encodeURIComponent(activeLightboxMedia.url)}&output=jpg`;
@@ -517,7 +575,6 @@ function initUniversalLightbox() {
       } catch (_) {}
     }
 
-    // 3. AllOrigins raw binary stream
     if (!blob) {
       try {
         const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(activeLightboxMedia.url)}`;
@@ -545,7 +602,6 @@ function initUniversalLightbox() {
     }
   });
 
-  // Native Web Share
   shareBtn?.addEventListener('click', async () => {
     if (navigator.share) {
       try {
@@ -562,7 +618,7 @@ function initUniversalLightbox() {
   });
 }
 
-// 10. Earth From 1,000,000 Miles Away (NASA DSCOVR EPIC)
+// 11. Earth From 1,000,000 Miles Away (NASA DSCOVR EPIC)
 async function fetchEpicEarth() {
   const box = document.getElementById('epic-media-box');
   try {
@@ -572,7 +628,7 @@ async function fetchEpicEarth() {
 
     if (data.length > 0) {
       const item = data[0];
-      const dateParts = item.date.split(' ')[0].split('-'); // [YYYY, MM, DD]
+      const dateParts = item.date.split(' ')[0].split('-');
       const imgUrl = `https://epic.gsfc.nasa.gov/archive/natural/${dateParts[0]}/${dateParts[1]}/${dateParts[2]}/jpg/${item.image}.jpg`;
 
       const dateUtc = new Date(item.date + ' UTC');
@@ -603,7 +659,7 @@ async function fetchEpicEarth() {
   }
 }
 
-// 11. Mars Exploration: Curiosity Live + Official NASA Image Library (Clean Event Listeners)
+// 12. Mars Exploration: Curiosity Live + Official NASA Image Library
 async function fetchMarsPhotos() {
   const container = document.getElementById('mars-photos-container');
   if (!container) return;
@@ -623,7 +679,6 @@ async function fetchMarsPhotos() {
     });
   }
 
-  // Step 1: Curiosity Live Feed
   try {
     const res = await fetch(`https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/latest_photos?api_key=${NASA_API_KEY}`);
     if (res.ok) {
@@ -647,7 +702,6 @@ async function fetchMarsPhotos() {
     }
   } catch (_) {}
 
-  // Step 2: Fallback to NASA Image Library
   try {
     const res = await fetch('https://images-api.nasa.gov/search?q=perseverance%20mars%20surface%20sol&media_type=image');
     if (!res.ok) throw new Error();
@@ -674,7 +728,7 @@ async function fetchMarsPhotos() {
   }
 }
 
-// 12. Space Weather (DONKI with Personal Key & 60s Auto-Poll)
+// 13. Space Weather (DONKI with Personal Key & 60s Auto-Poll)
 async function fetchSpaceWeather() {
   const list = document.getElementById('weather-events');
   try {
@@ -734,7 +788,7 @@ async function fetchSpaceWeather() {
   }
 }
 
-// 13. NASA NeoWs Asteroids with Direct JPL Verification Link
+// 14. NASA NeoWs Asteroids with Direct JPL Verification Link
 async function fetchAsteroids() {
   const container = document.getElementById('neo-list');
   try {
@@ -778,7 +832,7 @@ async function fetchAsteroids() {
   }
 }
 
-// 14. USGS Earthquakes Plotted as Circles on Map with Info Popups
+// 15. USGS Earthquakes Plotted as Circles on Map with Info Popups
 async function fetchEarthquakes() {
   const list = document.getElementById('earthquake-list');
   try {
@@ -845,7 +899,7 @@ async function fetchEarthquakes() {
   }
 }
 
-// 15. NASA EONET Hazards Plotted on Map
+// 16. NASA EONET Hazards Plotted on Map
 async function fetchEonetHazards() {
   const list = document.getElementById('hazard-list');
   try {
@@ -896,7 +950,7 @@ async function fetchEonetHazards() {
   } catch (_) {}
 }
 
-// 16. Worldwide Area Search with Autocomplete & Plain-English Ratings
+// 17. Worldwide Area Search with Autocomplete & Plain-English Ratings
 async function fetchAreaIntel(lat, lon, locationName) {
   try {
     const res = await fetch(`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=us_aqi,pm2_5,pm10,nitrogen_dioxide,direct_normal_irradiance`);
@@ -1023,7 +1077,7 @@ function initAreaSearch() {
   });
 }
 
-// 17. NASA APOD (Calculated on US Eastern Time with In-App Lightbox)
+// 18. NASA APOD (Direct science.nasa.gov Endpoint with In-App Lightbox)
 async function fetchApod() {
   const media = document.getElementById('apod-media');
   try {
@@ -1083,7 +1137,7 @@ async function fetchApod() {
   }
 }
 
-// 18. Wikipedia Explorer with Autocomplete & Presets
+// 19. Wikipedia Explorer with Autocomplete & Presets
 async function searchWiki(query) {
   try {
     const enc = encodeURIComponent(query.trim().replace(/ /g, '_'));
@@ -1152,7 +1206,7 @@ function initWikiSearch() {
   });
 }
 
-// 19. Rich Dispatcher for Web & Mobile Push (Model 1 & 3: T&C Space · [Category] [Emoji])
+// 20. Rich Notification Dispatcher (Model 1 & 3: T&C Space · [Category] [Emoji])
 function dispatchRichNotification({ title, body, url, image }) {
   if ('Notification' in window && Notification.permission === 'granted') {
     if (swRegistration) {
@@ -1160,7 +1214,7 @@ function dispatchRichNotification({ title, body, url, image }) {
         body: body,
         icon: 'assets/space-hub-icon-192.png?v=1',
         badge: 'assets/space-hub-icon-192.png?v=1',
-        image: image || null, // Rich full-bleed photo in push notification!
+        image: image || null,
         vibrate: [200, 100, 200],
         requireInteraction: true,
         data: { url: url || './#overview' }
@@ -1175,7 +1229,7 @@ function dispatchRichNotification({ title, body, url, image }) {
   }
 }
 
-// 20. Firebase, User Pass Location & Interactive Test Alert
+// 21. Firebase Initialization, User Pass Location & Interactive Test Alert
 const firebaseConfig = {
   apiKey: "AIzaSyAOn8eFL_CMGuYVeEa9hfpdkHRxZpjacqU",
   authDomain: "news-61e62.firebaseapp.com",
@@ -1217,7 +1271,6 @@ function initAlertPreferences() {
   if (savedQuake !== null) document.getElementById('toggle-quake').checked = (savedQuake === 'true');
   if (savedAsteroid !== null) document.getElementById('toggle-asteroid').checked = (savedAsteroid === 'true');
 
-  // Location selector setup
   const metroSelect = document.getElementById('metro-location-select');
   const locStatus = document.getElementById('current-location-status');
   const savedCity = localStorage.getItem('user_target_city');
@@ -1235,7 +1288,6 @@ function initAlertPreferences() {
     showToast(`Tracking passes for ${parts[2]}`);
   });
 
-  // GPS button
   document.getElementById('use-gps-btn')?.addEventListener('click', () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -1253,7 +1305,6 @@ function initAlertPreferences() {
     }
   });
 
-  // "Select All / Deselect All" Button
   let allSelected = true;
   document.getElementById('toggle-all-alerts-btn')?.addEventListener('click', () => {
     allSelected = !allSelected;
@@ -1262,7 +1313,6 @@ function initAlertPreferences() {
     showToast(allSelected ? 'All alerts enabled' : 'All alerts disabled');
   });
 
-  // Save to Firebase Button
   document.getElementById('save-firebase-btn')?.addEventListener('click', async () => {
     const isIss = document.getElementById('toggle-iss').checked;
     const isSolar = document.getElementById('toggle-solar').checked;
@@ -1317,7 +1367,6 @@ function initAlertPreferences() {
     }
   });
 
-  // Interactive Test Alert Button with Title Models 1 & 3 + Rich Photo Previews
   document.getElementById('test-alert-btn')?.addEventListener('click', async () => {
     if ('Notification' in window && Notification.permission === 'default') {
       await Notification.requestPermission();
@@ -1371,7 +1420,7 @@ function initAlertPreferences() {
   });
 }
 
-// 21. Automatic System Theme Detection
+// 22. Automatic System Theme Detection
 function initTheme() {
   const themeSelect = document.getElementById('theme-select');
   const saved = localStorage.getItem('app_theme') || 'system';
@@ -1401,7 +1450,7 @@ function initTheme() {
   apply(saved);
 }
 
-// 22. Dynamic PWA 1-Tap Install Button
+// 23. Dynamic PWA 1-Tap Install Button
 let deferredInstallPrompt = null;
 
 function initPwaInstall() {
@@ -1446,6 +1495,7 @@ function showToast(text) {
 // Bootstrap
 document.addEventListener('DOMContentLoaded', () => {
   initTheme();
+  initNetworkMonitor();
   initPwaInstall();
   initClocks();
   initNavigation();
