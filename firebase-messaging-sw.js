@@ -1,47 +1,27 @@
-<!-- Firebase SDKs -->
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging-compat.js"></script>
+importScripts('https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging-compat.js');
 
-<script>
-  const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT_ID.appspot.com",
-    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-    appId: "YOUR_APP_ID"
+const firebaseConfig = {
+  apiKey: "AIzaSyAOn8eFL_CMGuYVeEa9hfpdkHRxZpjacqU",
+  authDomain: "news-61e62.firebaseapp.com",
+  projectId: "news-61e62",
+  storageBucket: "news-61e62.firebasestorage.app",
+  messagingSenderId: "1054060055660",
+  appId: "1:1054060055660:web:e192c256c82facb9af1c49"
+};
+
+firebase.initializeApp(firebaseConfig);
+const messaging = firebase.messaging();
+
+// Background Push Notification Catcher
+messaging.onBackgroundMessage((payload) => {
+  const title = payload.notification?.title || payload.data?.title || 'T&C Space Alert 🚀';
+  const options = {
+    body: payload.notification?.body || payload.data?.body || 'New live orbital event detected.',
+    icon: 'assets/space-hub-icon-192.png?v=1',
+    badge: 'assets/space-hub-icon-192.png?v=1',
+    image: payload.notification?.image || payload.data?.image || null,
+    vibrate: [200, 100, 200]
   };
-
-  firebase.initializeApp(firebaseConfig);
-  const messaging = firebase.messaging();
-
-  async function enableSpaceNotifications() {
-    try {
-      const permission = await Notification.requestPermission();
-      if (permission === 'granted') {
-        const swRegistration = await navigator.serviceWorker.ready;
-        
-        // Get unique FCM device token
-        const token = await messaging.getToken({
-          vapidKey: "YOUR_PUBLIC_VAPID_KEY",
-          serviceWorkerRegistration: swRegistration
-        });
-
-        if (token) {
-          console.log("FCM Device Token:", token);
-          // Send this token to your backend/Firestore collection so the cron-job can send alerts to it
-          await saveTokenToDatabase(token);
-          alert("Space Alerts Enabled! You will receive APOD photos, asteroid radar, and storm alerts.");
-        }
-      }
-    } catch (err) {
-      console.error("Notification permission failed:", err);
-    }
-  }
-
-  // Hook this to your "🔔 Test Space Alert Notification" button or settings toggle
-  const testAlertBtn = document.getElementById('test-alert-btn');
-  if (testAlertBtn) {
-    testAlertBtn.addEventListener('click', enableSpaceNotifications);
-  }
-</script>
+  self.registration.showNotification(title, options);
+});
