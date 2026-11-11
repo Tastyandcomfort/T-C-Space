@@ -13,16 +13,19 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const messaging = firebase.messaging();
 
-// Mobile Background Push Handler (High Priority & Vibration)
+// Rich Mobile Background Notification Handler (Title Model 1 & 3 with Rich Image Preview)
 messaging.onBackgroundMessage((payload) => {
-  const title = payload.notification?.title || payload.data?.title || 'T&C Space Alert 🚀';
+  const category = payload.data?.category || 'Space Alert';
+  const emoji = payload.data?.emoji || '🚀';
+  const title = payload.notification?.title || payload.data?.title || `T&C Space · ${category} ${emoji}`;
   const targetUrl = payload.data?.url || payload.data?.click_action || './#overview';
+  const imageUrl = payload.notification?.image || payload.data?.image || null;
 
   const options = {
-    body: payload.notification?.body || payload.data?.body || 'New live space telemetry update available.',
+    body: payload.notification?.body || payload.data?.body || 'New live telemetry update available.',
     icon: 'assets/space-hub-icon-192.png?v=1',
     badge: 'assets/space-hub-icon-192.png?v=1',
-    image: payload.notification?.image || payload.data?.image || null,
+    image: imageUrl, // Full-bleed notification photo preview
     vibrate: [200, 100, 200],
     requireInteraction: true,
     data: { url: targetUrl }
@@ -31,7 +34,7 @@ messaging.onBackgroundMessage((payload) => {
   self.registration.showNotification(title, options);
 });
 
-// Click-to-Open Navigation: Brings user directly to the alert's specific section
+// Click-to-Open Navigation: Opens and navigates directly to the alert's specific section
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   const targetUrl = event.notification.data?.url || './#overview';
