@@ -504,42 +504,59 @@ function initEpicLightbox() {
   });
 }
 
-// 9. Mars Exploration: Perseverance with Automatic Curiosity Rover Fallback
+// 9. Mars Exploration: Curiosity Live + Official NASA Image Library Fallback
 async function fetchMarsPhotos() {
   const container = document.getElementById('mars-photos-container');
+  if (!container) return;
+
+  // Step 1: Try NASA Mars Rover Photos endpoint (Curiosity is most active)
   try {
-    // Queries Curiosity live stream directly (always reliable and active)
-    let res = await fetch(`https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/latest_photos?api_key=${NASA_API_KEY}`);
-    let data = res.ok ? await res.json() : null;
-    let photos = data?.latest_photos || [];
-    let roverName = "Curiosity";
+    const res = await fetch(`https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/latest_photos?api_key=${NASA_API_KEY}`);
+    if (res.ok) {
+      const data = await res.json();
+      const photos = data.latest_photos || [];
+      if (photos.length > 0) {
+        document.getElementById('curiosity-sol').textContent = 'Sol ' + photos[0].sol;
+        document.getElementById('mars-gallery-title').textContent = 'Latest Surface Photos (Curiosity Rover)';
 
-    if (photos.length === 0) {
-      res = await fetch(`https://api.nasa.gov/mars-photos/api/v1/rovers/perseverance/latest_photos?api_key=${NASA_API_KEY}`);
-      data = res.ok ? await res.json() : null;
-      photos = data?.latest_photos || [];
-      roverName = "Perseverance";
-    }
-
-    if (photos.length > 0) {
-      document.getElementById('curiosity-sol').textContent = 'Sol ' + photos[0].sol;
-      document.getElementById('mars-gallery-title').textContent = `Latest Surface Photos (${roverName} Rover)`;
-
-      if (container) {
         container.innerHTML = photos.slice(0, 4).map(p => `
           <div class="mars-photo-item">
             <img src="${p.img_src.replace('http://', 'https://')}" alt="Mars surface photo" loading="lazy">
-            <span class="mars-photo-tag">${p.camera.full_name} · Sol ${p.sol}</span>
+            <span class="mars-photo-tag">${p.camera.full_name || 'Navcam'} · Sol ${p.sol}</span>
           </div>
         `).join('');
+        return;
       }
+    }
+  } catch (_) {}
+
+  // Step 2: Resilient Fallback to NASA's Official Image & Video Library (Always online)
+  try {
+    const res = await fetch('https://images-api.nasa.gov/search?q=perseverance%20mars%20surface%20sol&media_type=image');
+    if (!res.ok) throw new Error();
+    const data = await res.json();
+    const items = data.collection?.items || [];
+
+    if (items.length > 0) {
+      document.getElementById('mars-gallery-title').textContent = 'Martian Surface Captures (NASA Mars 2020)';
+
+      container.innerHTML = items.slice(0, 4).map(item => {
+        const imgUrl = item.links?.[0]?.href || '';
+        const title = item.data?.[0]?.title || 'Mars Surface';
+        const date = item.data?.[0]?.date_created?.slice(0, 10) || 'Recent';
+
+        return `
+          <div class="mars-photo-item">
+            <img src="${imgUrl}" alt="${title}" loading="lazy">
+            <span class="mars-photo-tag">${title.slice(0, 24)} · ${date}</span>
+          </div>
+        `;
+      }).join('');
     } else {
       throw new Error();
     }
   } catch (_) {
-    if (container) {
-      container.innerHTML = '<p class="muted">NASA Deep Space Network syncing Mars rover data…</p>';
-    }
+    container.innerHTML = '<p class="muted">NASA Deep Space Network syncing Mars rover imagery…</p>';
   }
 }
 
@@ -910,7 +927,7 @@ async function fetchApod() {
     if (prevTitle) prevTitle.textContent = d.title;
     if (prevDesc) prevDesc.textContent = (d.explanation || '').slice(0, 110) + '...';
 
-    // Generates the exact date-stamped archive URL (e.g. ap261111.html)
+    // Generates the exact date-stamped archive URL (apYYMMDD.html)
     if (d.date) {
       const parts = d.date.split('-');
       if (parts.length === 3) {
@@ -919,7 +936,10 @@ async function fetchApod() {
         const dd = parts[2];
         const archiveUrl = `https://apod.nasa.gov/apod/ap${yy}${mm}${dd}.html`;
         const link = document.getElementById('apod-link');
-        if (link) link.href = archiveUrl;
+        if (link) {
+          link.href = archiveUrl;
+          link.textContent = `Official NASA APOD (${d.date}) ↗`;
+        }
       }
     }
 
@@ -931,6 +951,7 @@ async function fetchApod() {
       }
     }
   } catch (_) {
+    // Official NASA Science WordPress Fallback
     try {
       const fbRes = await fetch('https://science.nasa.gov/wp-json/wp/v2/apod-basic?per_page=1');
       if (fbRes.ok) {
