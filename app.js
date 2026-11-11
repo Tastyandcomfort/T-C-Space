@@ -1,71 +1,65 @@
-// --- T&C Space Hub: 100% Real-Time Engine (IST & Apple HIG) ---
+// --- T&C Space Hub: 100% Real-Time News Model Engine ---
 
-// 1. Dual Clock (IST & UTC Live Sync)
+// 1. Dual IST & UTC Live Clocks
 function initClocks() {
-  const istEl = document.getElementById('ist-clock');
-  const utcEl = document.getElementById('utc-clock');
+  const istEl = document.getElementById('clock-ist');
+  const utcEl = document.getElementById('clock-utc');
 
   function tick() {
     const now = new Date();
 
     // Indian Standard Time (UTC+5:30)
-    const istString = now.toLocaleTimeString('en-US', {
+    const ist = now.toLocaleTimeString('en-US', {
       timeZone: 'Asia/Kolkata',
       hour12: false
     }) + ' IST';
 
     // UTC
-    const utcString = now.toUTCString().split(' ')[4] + ' UTC';
+    const utc = now.toUTCString().split(' ')[4] + ' UTC';
 
-    if (istEl) istEl.textContent = istString;
-    if (utcEl) utcEl.textContent = utcString;
+    if (istEl) istEl.textContent = ist;
+    if (utcEl) utcEl.textContent = utc;
   }
   tick();
   setInterval(tick, 1000);
 }
 
-// 2. Navigation Routing
-function navigateToSpace(spaceId) {
-  const views = document.querySelectorAll('.space-view');
-  const buttons = document.querySelectorAll('.nav-btn, .dock-btn');
-  const title = document.getElementById('page-title');
+// 2. News Category Filter
+function initCategoryFilter() {
+  const pills = document.querySelectorAll('.cat-pill');
+  const cards = document.querySelectorAll('.news-card');
 
-  const titles = {
-    'overview': 'Mission Control',
-    'satellites': 'Orbital Tracking',
-    'launches': 'Rockets & Flights',
-    'asteroids': 'Asteroid Radar (NeoWs)',
-    'planetary': 'Space Weather',
-    'earth-intel': 'Area Intel Brief',
-    'cosmos': 'Cosmos & Wiki'
-  };
+  pills.forEach(pill => {
+    pill.addEventListener('click', () => {
+      pills.forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
 
-  views.forEach(v => {
-    v.classList.remove('active');
-    if (v.id === `view-${spaceId}`) v.classList.add('active');
+      const selected = pill.getAttribute('data-cat');
+      cards.forEach(card => {
+        const sec = card.getAttribute('data-section');
+        if (selected === 'all' || sec === selected) {
+          card.style.display = 'block';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+
+      if (selected === 'tracking' && satMap) {
+        setTimeout(() => satMap.invalidateSize(), 200);
+      }
+    });
   });
-
-  buttons.forEach(b => {
-    b.classList.toggle('active', b.getAttribute('data-space') === spaceId);
-  });
-
-  if (title && titles[spaceId]) title.textContent = titles[spaceId];
-  window.location.hash = spaceId;
-
-  if (spaceId === 'satellites' && satMap) {
-    setTimeout(() => satMap.invalidateSize(), 200);
-  }
 }
 
-// 3. Real-Time Leaflet Satellite Map (Watermark-free dark styling)
+// 3. Watermark-Free Leaflet Satellite Map
 let satMap = null;
 let issMarker = null;
 
 function initMap() {
-  const container = document.getElementById('sat-leaflet-map');
+  const container = document.getElementById('news-sat-map');
   if (!container || typeof L === 'undefined') return;
 
-  satMap = L.map('sat-leaflet-map', { zoomControl: false }).setView([20, 78], 2);
+  satMap = L.map('news-sat-map', { zoomControl: false }).setView([20, 78], 2);
   L.control.zoom({ position: 'bottomright' }).addTo(satMap);
 
   L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
@@ -82,40 +76,35 @@ function initMap() {
   issMarker = L.marker([0, 0], { icon: satIcon }).addTo(satMap);
 }
 
-// 4. Live WhereTheISS API Telemetry (Direct stream)
+// 4. Live WhereTheISS API Telemetry (Direct Stream)
 async function fetchLiveIss() {
   try {
     const res = await fetch('https://api.wheretheiss.at/v1/satellites/25544');
     if (!res.ok) return;
     const d = await res.json();
 
-    const alt = d.altitude.toFixed(1) + ' km';
-    const vel = (d.velocity / 3600).toFixed(2) + ' km/s';
     const lat = d.latitude.toFixed(2) + '°';
     const lon = d.longitude.toFixed(2) + '°';
-
-    const altVal = document.getElementById('iss-alt-val');
-    const velVal = document.getElementById('iss-vel-val');
-    if (altVal) altVal.textContent = alt;
-    if (velVal) velVal.textContent = vel;
+    const alt = d.altitude.toFixed(1) + ' km';
+    const vel = (d.velocity / 3600).toFixed(2) + ' km/s';
 
     document.getElementById('map-lat').textContent = lat;
     document.getElementById('map-lon').textContent = lon;
     document.getElementById('map-alt').textContent = alt;
-    document.getElementById('map-spd').textContent = vel;
+    document.getElementById('map-vel').textContent = vel;
 
     if (issMarker && satMap) {
       issMarker.setLatLng([d.latitude, d.longitude]);
     }
 
-    const ping = document.getElementById('last-ping');
+    const ping = document.getElementById('iss-ping-time');
     if (ping) ping.textContent = 'Live ping: ' + new Date().toLocaleTimeString('en-US', { timeZone: 'Asia/Kolkata' }) + ' IST';
   } catch (_) {}
 }
 
-// 5. NASA JPL NeoWs Asteroid Radar (Real-time live feed)
+// 5. NASA JPL NeoWs Asteroids (Near-Earth Objects)
 async function fetchAsteroids() {
-  const container = document.getElementById('asteroids-container');
+  const container = document.getElementById('asteroid-list');
   try {
     const today = new Date().toISOString().slice(0, 10);
     const res = await fetch(`https://api.nasa.gov/neo/rest/v1/feed?start_date=${today}&end_date=${today}&api_key=DEMO_KEY`);
@@ -125,103 +114,70 @@ async function fetchAsteroids() {
 
     if (container) {
       if (neos.length === 0) {
-        container.innerHTML = '<p class="card-text">No immediate asteroid approaches recorded for today.</p>';
+        container.innerHTML = '<p class="card-excerpt">No close approaches recorded for today in NASA JPL radar.</p>';
         return;
       }
-      container.innerHTML = neos.slice(0, 8).map(ast => {
+      container.innerHTML = neos.slice(0, 6).map(ast => {
         const isHazard = ast.is_potentially_hazardous_asteroid;
         const ca = ast.close_approach_data[0] || {};
         const missKm = ca.miss_distance ? (parseFloat(ca.miss_distance.kilometers) / 1000000).toFixed(2) + 'M km' : '—';
         const velKmS = ca.relative_velocity ? parseFloat(ca.relative_velocity.kilometers_per_second).toFixed(1) + ' km/s' : '—';
-        const diamMin = ast.estimated_diameter?.meters?.estimated_diameter_min?.toFixed(0) || '—';
-        const diamMax = ast.estimated_diameter?.meters?.estimated_diameter_max?.toFixed(0) || '—';
+        const diam = ast.estimated_diameter?.meters?.estimated_diameter_max?.toFixed(0) || '—';
 
         return `
-          <div class="asteroid-card">
-            <div class="asteroid-top">
-              <span class="asteroid-title">${ast.name}</span>
-              <span class="hazard-badge ${isHazard ? 'red' : 'green'}">${isHazard ? 'HAZARDOUS' : 'SAFE FLYBY'}</span>
+          <div class="asteroid-item">
+            <div class="asteroid-item-top">
+              <span class="asteroid-name">${ast.name}</span>
+              <span class="hazard-tag ${isHazard ? 'red' : 'green'}">${isHazard ? 'HAZARDOUS' : 'SAFE FLYBY'}</span>
             </div>
-            <div class="asteroid-numbers">
-              <div><small>MISS DISTANCE</small><b>${missKm}</b></div>
-              <div><small>VELOCITY</small><b>${velKmS}</b></div>
-              <div><small>EST. DIAMETER</small><b>${diamMin}–${diamMax} m</b></div>
-              <div><small>APPROACH TIME</small><b>${ca.close_approach_date_full ? ca.close_approach_date_full.slice(11, 16) + ' UTC' : 'Today'}</b></div>
+            <div class="asteroid-item-numbers">
+              <span>Miss: <b>${missKm}</b></span>
+              <span>Speed: <b>${velKmS}</b></span>
+              <span>Diameter: <b>~${diam} m</b></span>
             </div>
           </div>
         `;
       }).join('');
     }
   } catch (_) {
-    if (container) container.innerHTML = '<p class="card-text">NASA NeoWs radar synchronizing…</p>';
+    if (container) container.innerHTML = '<p class="card-excerpt">NASA NeoWs radar updating…</p>';
   }
 }
 
-// 6. Area-Wise Intelligence Brief (Open-Meteo Real-time ground sensors)
-async function fetchAreaIntel(lat, lon, cityName) {
-  try {
-    const res = await fetch(`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=us_aqi,pm2_5,pm10,nitrogen_dioxide,direct_normal_irradiance`);
-    if (!res.ok) return;
-    const data = await res.json();
-    const cur = data.current || {};
-
-    document.getElementById('intel-city').textContent = cityName;
-    document.getElementById('intel-coords').textContent = `${lat}° N, ${lon}° E`;
-    document.getElementById('intel-aqi').textContent = cur.us_aqi ?? 'Normal';
-    document.getElementById('intel-pm25').textContent = cur.pm2_5 ?? '—';
-    document.getElementById('intel-pm10').textContent = cur.pm10 ?? '—';
-    document.getElementById('intel-no2').textContent = cur.nitrogen_dioxide ?? '—';
-    document.getElementById('intel-solar').textContent = (cur.direct_normal_irradiance ?? 0) + ' W/m²';
-  } catch (_) {}
-}
-
-// 7. Launch Manifest (TheSpaceDevs LL2)
+// 6. Launch Manifest (TheSpaceDevs LL2)
 async function fetchLaunches() {
-  const container = document.getElementById('launches-container');
   try {
-    const res = await fetch('https://lldev.thespacedevs.com/2.2.0/launch/upcoming/?limit=6');
+    const res = await fetch('https://lldev.thespacedevs.com/2.2.0/launch/upcoming/?limit=4');
     if (!res.ok) throw new Error();
     const data = await res.json();
-    const launches = data.results || [];
+    const top = data.results?.[0];
 
-    if (launches.length > 0) {
-      const top = launches[0];
-      document.getElementById('next-launch-name').textContent = top.name;
-      document.getElementById('next-launch-desc').textContent = top.mission?.description || 'Orbital mission deployment.';
-      document.getElementById('tag-provider').textContent = 'Provider: ' + (top.launch_service_provider?.name || 'Commercial');
-      document.getElementById('tag-vehicle').textContent = 'Vehicle: ' + (top.rocket?.configuration?.name || 'Rocket');
+    if (top) {
+      document.getElementById('hero-launch-name').textContent = top.name;
+      document.getElementById('hero-launch-desc').textContent = top.mission?.description || 'Orbital mission deployment.';
+      document.getElementById('hero-vehicle').textContent = top.rocket?.configuration?.name || 'Rocket';
+      document.getElementById('hero-provider').textContent = top.launch_service_provider?.name || 'Commercial';
+      document.getElementById('hero-pad').textContent = top.pad?.location?.name || 'Spaceport';
 
       const diff = new Date(top.net) - new Date();
       const hrs = Math.max(0, Math.floor(diff / 3600000));
       const mins = Math.max(0, Math.floor((diff % 3600000) / 60000));
-      document.getElementById('launch-countdown-val').textContent = `T-${hrs}h ${mins}m`;
-      document.getElementById('launch-sub').textContent = top.name;
-    }
+      document.getElementById('hero-tminus').textContent = `T-${hrs}h ${mins}m`;
+      document.getElementById('hero-target-time').textContent = 'Window: ' + new Date(top.net).toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }) + ' IST';
 
-    if (container) {
-      container.innerHTML = launches.map(l => `
-        <div class="apple-card">
-          <div class="card-status-bar">
-            <span class="apple-tag">${l.launch_service_provider?.name || 'Agency'}</span>
-            <span class="apple-pill-status">${l.status?.name || 'Scheduled'}</span>
-          </div>
-          <h3 class="card-heading">${l.name}</h3>
-          <p class="card-text">${l.mission?.description ? l.mission.description.slice(0, 140) + '...' : 'Launch manifest entry.'}</p>
-          <div class="tag-cluster">
-            <span class="apple-tag">Rocket: ${l.rocket?.configuration?.name || 'Rocket'}</span>
-            <span class="apple-tag">Window: ${new Date(l.net).toLocaleString('en-US', { timeZone: 'Asia/Kolkata' })} IST</span>
-          </div>
-        </div>
-      `).join('');
+      const ticker = document.getElementById('live-ticker-text');
+      if (ticker) {
+        ticker.textContent = `🚀 NEXT LAUNCH: ${top.name} (${top.launch_service_provider?.name || 'Commercial'}) in T-${hrs}h ${mins}m`;
+      }
     }
   } catch (_) {
-    if (container) container.innerHTML = '<p class="card-text">Launch manifest currently offline.</p>';
+    document.getElementById('hero-launch-name').textContent = 'Launch manifest synchronizing…';
   }
 }
 
-// 8. NASA DONKI Space Weather
+// 7. NASA DONKI Space Weather
 async function fetchSpaceWeather() {
-  const list = document.getElementById('solar-events-list');
+  const list = document.getElementById('solar-list');
   try {
     const today = new Date().toISOString().slice(0, 10);
     const prev = new Date(Date.now() - 7 * 86400000).toISOString().slice(0, 10);
@@ -231,38 +187,37 @@ async function fetchSpaceWeather() {
 
     if (list) {
       if (flares.length === 0) {
-        list.innerHTML = '<p class="card-text">No high-energy flares detected in past 7 days. Solar activity normal.</p>';
+        list.innerHTML = '<p class="card-excerpt">No major solar flares recorded in the past 7 days. Solar activity quiet.</p>';
         return;
       }
-      list.innerHTML = flares.slice(0, 8).map(f => `
+      list.innerHTML = flares.slice(0, 6).map(f => `
         <div class="event-item">
           <div>
             <b>Solar Flare Class ${f.classType || 'Flare'}</b>
             <small>Peak: ${f.peakTime ? f.peakTime.replace('T', ' ').replace('Z', ' UTC') : 'Recorded'}</small>
           </div>
-          <span class="event-badge orange">${f.classType || 'Flare'}</span>
+          <span class="badge orange">${f.classType || 'Flare'}</span>
         </div>
       `).join('');
     }
   } catch (_) {
-    if (list) list.innerHTML = '<p class="card-text">DONKI telemetry updating…</p>';
+    if (list) list.innerHTML = '<p class="card-excerpt">DONKI feed updating…</p>';
   }
 }
 
-// 9. USGS Earthquakes
+// 8. USGS Earthquakes
 async function fetchEarthquakes() {
-  const list = document.getElementById('quake-events-list');
-  const countVal = document.getElementById('quake-count-val');
+  const list = document.getElementById('quake-list');
   try {
     const res = await fetch('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_day.geojson');
     if (!res.ok) throw new Error();
     const data = await res.json();
     const quakes = data.features || [];
 
-    if (countVal) countVal.textContent = quakes.length;
+    document.getElementById('quake-count-tag').textContent = `${quakes.length} Events (24h)`;
 
     if (list) {
-      list.innerHTML = quakes.slice(0, 10).map(q => {
+      list.innerHTML = quakes.slice(0, 6).map(q => {
         const mag = q.properties.mag.toFixed(1);
         const color = q.properties.mag >= 5.0 ? 'red' : (q.properties.mag >= 4.0 ? 'orange' : 'green');
         return `
@@ -271,14 +226,31 @@ async function fetchEarthquakes() {
               <b>${q.properties.place}</b>
               <small>${new Date(q.properties.time).toLocaleString('en-US', { timeZone: 'Asia/Kolkata' })} IST</small>
             </div>
-            <span class="event-badge ${color}">M${mag}</span>
+            <span class="badge ${color}">M${mag}</span>
           </a>
         `;
       }).join('');
     }
   } catch (_) {
-    if (list) list.innerHTML = '<p class="card-text">USGS network synchronizing…</p>';
+    if (list) list.innerHTML = '<p class="card-excerpt">USGS seismic sensors synchronizing…</p>';
   }
+}
+
+// 9. Area-Wise Intelligence Brief (Open-Meteo)
+async function fetchAreaIntel(lat, lon, cityName) {
+  try {
+    const res = await fetch(`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=us_aqi,pm2_5,pm10,nitrogen_dioxide,direct_normal_irradiance`);
+    if (!res.ok) return;
+    const data = await res.json();
+    const cur = data.current || {};
+
+    document.getElementById('intel-city').textContent = cityName;
+    document.getElementById('intel-aqi').textContent = cur.us_aqi ?? 'Good';
+    document.getElementById('intel-pm25').textContent = (cur.pm2_5 ?? '—') + ' μg/m³';
+    document.getElementById('intel-pm10').textContent = (cur.pm10 ?? '—') + ' μg/m³';
+    document.getElementById('intel-no2').textContent = (cur.nitrogen_dioxide ?? '—') + ' μg/m³';
+    document.getElementById('intel-solar').textContent = (cur.direct_normal_irradiance ?? 0) + ' W/m²';
+  } catch (_) {}
 }
 
 // 10. NASA APOD
@@ -288,52 +260,23 @@ async function fetchApod() {
     if (!res.ok) return;
     const d = await res.json();
 
-    document.getElementById('apod-preview-title').textContent = d.title;
-    document.getElementById('apod-preview-desc').textContent = (d.explanation || '').slice(0, 120) + '...';
+    document.getElementById('apod-title').textContent = d.title;
+    document.getElementById('apod-explanation').textContent = d.explanation;
+    document.getElementById('apod-date-tag').textContent = d.date;
+    document.getElementById('apod-credit').textContent = d.copyright ? '© ' + d.copyright : 'NASA Observatory Public Stream';
 
-    const fullTitle = document.getElementById('apod-full-title');
-    const media = document.getElementById('apod-media-container');
-    const exp = document.getElementById('apod-explanation');
-    const meta = document.getElementById('apod-meta');
-
-    if (fullTitle) fullTitle.textContent = d.title;
-    if (exp) exp.textContent = d.explanation;
-    if (meta) meta.textContent = `${d.date} · ${d.copyright ? '© ' + d.copyright : 'NASA Observatory Public Stream'}`;
-
+    const media = document.getElementById('apod-media');
     if (media) {
       if (d.media_type === 'image') {
-        media.innerHTML = `<img src="${d.url}" alt="${d.title}" style="width:100%;height:100%;object-fit:cover;border-radius:14px;">`;
+        media.innerHTML = `<img src="${d.url}" alt="${d.title}">`;
       } else {
-        media.innerHTML = `<iframe src="${d.url}" frameborder="0" allowfullscreen style="width:100%;height:100%;border-radius:14px;"></iframe>`;
+        media.innerHTML = `<iframe src="${d.url}" frameborder="0" allowfullscreen></iframe>`;
       }
     }
   } catch (_) {}
 }
 
-// 11. Wikimedia Encyclopedia API
-async function searchWiki(query) {
-  const container = document.getElementById('wiki-output-container');
-  if (!container) return;
-  container.innerHTML = '<div class="apple-spinner"></div>';
-  try {
-    const enc = encodeURIComponent(query.trim().replace(/ /g, '_'));
-    const res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${enc}`);
-    if (!res.ok) throw new Error();
-    const data = await res.json();
-
-    container.innerHTML = `
-      <div style="margin-top:14px;border-top:0.5px solid var(--border-subtle);padding-top:14px;">
-        <h4 style="font-size:16px;font-weight:700;margin-bottom:6px;">${data.title}</h4>
-        <p style="font-size:12px;line-height:1.6;color:var(--text-muted);margin-bottom:12px;">${data.extract}</p>
-        <a class="apple-btn-secondary" href="${data.content_urls?.desktop?.page || '#'}" target="_blank" rel="noopener">Open Wikimedia Article ↗</a>
-      </div>
-    `;
-  } catch (_) {
-    container.innerHTML = '<p class="card-text" style="margin-top:10px;">No exact article record found. Search another spacecraft or mission.</p>';
-  }
-}
-
-// 12. Toast Notifications
+// 11. Toast Notifications
 function showToast(text) {
   const toast = document.getElementById('toast-message');
   if (!toast) return;
@@ -345,43 +288,28 @@ function showToast(text) {
 // --- App Bootstrap ---
 document.addEventListener('DOMContentLoaded', () => {
   initClocks();
+  initCategoryFilter();
   initMap();
 
-  // Navigation
-  document.querySelectorAll('[data-space]').forEach(btn => {
-    btn.addEventListener('click', () => navigateToSpace(btn.getAttribute('data-space')));
-  });
-
-  const hash = window.location.hash.replace('#', '') || 'overview';
-  navigateToSpace(hash);
-
-  // Area Intel Chips
-  document.querySelectorAll('.area-chip').forEach(chip => {
-    chip.addEventListener('click', () => {
-      document.querySelectorAll('.area-chip').forEach(c => c.classList.remove('active'));
-      chip.classList.add('active');
-      fetchAreaIntel(chip.getAttribute('data-lat'), chip.getAttribute('data-lon'), chip.getAttribute('data-name'));
+  // City chips click
+  document.querySelectorAll('.city-pill').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.city-pill').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      fetchAreaIntel(btn.getAttribute('data-lat'), btn.getAttribute('data-lon'), btn.getAttribute('data-city'));
     });
   });
 
-  // Settings Modal (Handles both desktop sidebar button and mobile top header button)
+  // Settings Modal
   const modal = document.getElementById('settings-modal');
-  const openButtons = [
-    document.getElementById('open-settings-sidebar-btn'),
-    document.getElementById('open-settings-header-btn')
-  ];
-
-  openButtons.forEach(btn => {
-    btn?.addEventListener('click', () => modal.classList.add('open'));
-  });
-
+  document.getElementById('open-settings-btn')?.addEventListener('click', () => modal.classList.add('open'));
   document.getElementById('close-settings-btn')?.addEventListener('click', () => modal.classList.remove('open'));
   modal?.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('open'); });
 
   // Theme switcher
-  document.querySelectorAll('#theme-switcher .seg-btn').forEach(btn => {
+  document.querySelectorAll('#theme-segmented .seg-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-      document.querySelectorAll('#theme-switcher .seg-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('#theme-segmented .seg-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       const val = btn.getAttribute('data-theme');
       if (val === 'system') {
@@ -395,8 +323,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Test space notification
   document.getElementById('trigger-test-alert')?.addEventListener('click', async () => {
-    const kpThreshold = document.getElementById('pref-solar-kp')?.value || '5';
-    const quakeThreshold = document.getElementById('pref-quake-mag')?.value || '5.0';
+    const kp = document.getElementById('pref-solar-kp')?.value || '5';
+    const quake = document.getElementById('pref-quake-mag')?.value || '5.0';
 
     if ('Notification' in window && Notification.permission !== 'granted') {
       await Notification.requestPermission();
@@ -404,28 +332,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if ('Notification' in window && Notification.permission === 'granted') {
       new Notification('T&C Space Alert 🚀', {
-        body: `Active thresholds: Solar Storm Kp ${kpThreshold}+ | Earthquakes M ${quakeThreshold}+. All telemetry streams nominal.`,
+        body: `Active thresholds: Solar Storm Kp ${kp}+ | Earthquakes M ${quake}+. Telemetry nominal.`,
         icon: 'assets/space-hub-icon-192.png?v=1'
       });
     }
-    showToast(`Threshold saved: Kp ${kpThreshold}+ | M ${quakeThreshold}+`);
-  });
-
-  // Wikipedia search trigger
-  document.getElementById('wiki-search-btn')?.addEventListener('click', () => {
-    const q = document.getElementById('wiki-query-input')?.value;
-    if (q) searchWiki(q);
+    showToast(`Threshold saved: Kp ${kp}+ | M ${quake}+`);
   });
 
   // Refresh feeds
-  document.getElementById('refresh-all-btn')?.addEventListener('click', () => {
+  document.getElementById('refresh-btn')?.addEventListener('click', () => {
     fetchLiveIss();
     fetchLaunches();
     fetchAsteroids();
     fetchSpaceWeather();
     fetchEarthquakes();
     fetchApod();
-    showToast('All planetary sensors refreshed.');
+    showToast('All real-time sensors refreshed.');
   });
 
   // Initial Fetches
@@ -436,7 +358,6 @@ document.addEventListener('DOMContentLoaded', () => {
   fetchEarthquakes();
   fetchApod();
   fetchAreaIntel('17.3850', '78.4867', 'Hyderabad, India');
-  searchWiki('Chandrayaan-3');
 
   // Fast 3-second live ISS telemetry poll
   setInterval(fetchLiveIss, 3000);
