@@ -72,15 +72,21 @@ function initNavigation() {
   showSection(initialHash);
 }
 
-// 3. Watermark-Free Leaflet Satellite Map (Clean Inverted OSM Canvas)
+// 3. Multi-Layer Leaflet Map (ISS, Earthquakes, EONET Hazards, Ground Track, HUD, Zero Watermarks)
 let satMap = null;
 let issMarker = null;
+let issTrackLine = null;
+const issTrackPoints = [];
+
+// Layer Groups
+let quakeLayerGroup = null;
+let hazardLayerGroup = null;
 
 function initMap() {
   const container = document.getElementById('sat-map');
   if (!container || typeof L === 'undefined') return;
 
-  // attributionControl: false permanently strips the Leaflet watermark
+  // attributionControl: false permanently strips the Leaflet watermark box
   satMap = L.map('sat-map', { attributionControl: false, zoomControl: false }).setView([20, 78], 2);
   L.control.zoom({ position: 'bottomright' }).addTo(satMap);
 
@@ -88,13 +94,54 @@ function initMap() {
     maxZoom: 18
   }).addTo(satMap);
 
+  quakeLayerGroup = L.layerGroup().addTo(satMap);
+  hazardLayerGroup = L.layerGroup().addTo(satMap);
+
   const satIcon = L.divIcon({
     className: 'custom-sat-icon',
-    html: '<div style="width:14px;height:14px;background:#2997ff;border:2.5px solid white;border-radius:50%;box-shadow:0 0 12px #2997ff;"></div>',
+    html: '<div style="width:14px;height:14px;background:#2997ff;border:2.5px solid white;border-radius:50%;box-shadow:0 0 14px #2997ff;"></div>',
     iconSize: [14, 14]
   });
 
   issMarker = L.marker([0, 0], { icon: satIcon }).addTo(satMap);
+  issTrackLine = L.polyline([], { color: '#2997ff', weight: 2, dashArray: '5, 8', opacity: 0.7 }).addTo(satMap);
+
+  // Layer Chip Toggles
+  document.getElementById('toggle-layer-iss')?.addEventListener('click', (e) => {
+    e.target.classList.toggle('active');
+    if (e.target.classList.contains('active')) {
+      satMap.addLayer(issMarker);
+    } else {
+      satMap.removeLayer(issMarker);
+    }
+  });
+
+  document.getElementById('toggle-layer-quakes')?.addEventListener('click', (e) => {
+    e.target.classList.toggle('active');
+    if (e.target.classList.contains('active')) {
+      satMap.addLayer(quakeLayerGroup);
+    } else {
+      satMap.removeLayer(quakeLayerGroup);
+    }
+  });
+
+  document.getElementById('toggle-layer-hazards')?.addEventListener('click', (e) => {
+    e.target.classList.toggle('active');
+    if (e.target.classList.contains('active')) {
+      satMap.addLayer(hazardLayerGroup);
+    } else {
+      satMap.removeLayer(hazardLayerGroup);
+    }
+  });
+
+  document.getElementById('toggle-layer-track')?.addEventListener('click', (e) => {
+    e.target.classList.toggle('active');
+    if (e.target.classList.contains('active')) {
+      satMap.addLayer(issTrackLine);
+    } else {
+      satMap.removeLayer(issTrackLine);
+    }
+  });
 }
 
 // 4. Live WhereTheISS API Telemetry (Direct Stream)
@@ -122,8 +169,16 @@ async function fetchLiveIss() {
     document.getElementById('map-alt').textContent = alt;
     document.getElementById('map-vel').textContent = vel;
 
+    const hudTelem = document.getElementById('hud-sat-telemetry');
+    if (hudTelem) {
+      hudTelem.textContent = `${lat}N, ${lon}E · Alt: ${alt} · Spd: ${vel}`;
+    }
+
     if (issMarker && satMap) {
       issMarker.setLatLng([d.latitude, d.longitude]);
+      issTrackPoints.push([d.latitude, d.longitude]);
+      if (issTrackPoints.length > 50) issTrackPoints.shift();
+      issTrackLine.setLatLngs(issTrackPoints);
     }
 
     const ping = document.getElementById('last-updated');
@@ -220,9 +275,9 @@ async function fetchLaunches() {
     if (container) {
       container.innerHTML = launches.slice(1).map(l => `
         <div class="launch-item-card">
-          <div style="display:flex;justify-content:space-between;align-items:center;min-width:0;">
-            <span class="small-chip blue">${l.launch_service_provider?.name || 'Commercial'}</span>
-            <span class="status-pill">${l.status?.name || 'Scheduled'}</span>
+          <div class="launch-item-header">
+            <span class="launch-provider-badge">${l.launch_service_provider?.name || 'Commercial'}</span>
+            <span class="launch-status-badge">${l.status?.name || 'Scheduled'}</span>
           </div>
           <h4>${l.name}</h4>
           <p>${l.mission?.description ? l.mission.description.slice(0, 110) + '...' : 'Orbital flight manifest.'}</p>
@@ -289,49 +344,59 @@ async function fetchSpaceWeather() {
   }
 }
 
-// 8. NASA JPL NeoWs Asteroid Radar
+// 8. NASA JPL CNEOS CAD Asteroid Radar (No Key & No Rate Limits)
 async function fetchAsteroids() {
   const container = document.getElementById('neo-list');
   try {
-    const today = new Date().toISOString().slice(0, 10);
-    const res = await fetch(`https://api.nasa.gov/neo/rest/v1/feed?start_date=${today}&end_date=${today}&api_key=DEMO_KEY`);
+    // NASA JPL's direct close approach endpoint (100% public, key-free)
+    const res = await fetch('https://ssd-api.jpl.nasa.gov/cad.api?dist-max=10LD&date-min=now&limit=8');
     if (!res.ok) throw new Error();
     const data = await res.json();
-    const neos = data.near_earth_objects[today] || [];
+    const fields = data.fields || [];
+    const rows = data.data || [];
+
+    const desIdx = fields.indexOf('des');
+    const cdIdx = fields.indexOf('cd');
+    const distIdx = fields.indexOf('dist'); // in AU
+    const vRelIdx = fields.indexOf('v_rel'); // km/s
+    const hIdx = fields.indexOf('h'); // Absolute magnitude
 
     if (container) {
-      if (neos.length === 0) {
-        container.innerHTML = '<p class="muted">No immediate asteroid approaches recorded for today.</p>';
+      if (rows.length === 0) {
+        container.innerHTML = '<p class="muted">No asteroid close approaches recorded in NASA JPL radar.</p>';
         return;
       }
-      container.innerHTML = neos.slice(0, 8).map(ast => {
-        const isHazard = ast.is_potentially_hazardous_asteroid;
-        const ca = ast.close_approach_data[0] || {};
-        const missKm = ca.miss_distance ? (parseFloat(ca.miss_distance.kilometers) / 1000000).toFixed(2) + 'M km' : '—';
-        const velKmS = ca.relative_velocity ? parseFloat(ca.relative_velocity.kilometers_per_second).toFixed(1) + ' km/s' : '—';
-        const diam = ast.estimated_diameter?.meters?.estimated_diameter_max?.toFixed(0) || '—';
+      container.innerHTML = rows.map(r => {
+        const name = r[desIdx] || 'Near-Earth Asteroid';
+        const date = r[cdIdx] || 'Today';
+        const distKm = r[distIdx] ? (parseFloat(r[distIdx]) * 149597870.7 / 1000000).toFixed(2) + 'M km' : '—';
+        const speed = r[vRelIdx] ? parseFloat(r[vRelIdx]).toFixed(1) + ' km/s' : '—';
+        const h = parseFloat(r[hIdx]);
+        // Approx diameter from absolute magnitude H
+        const diam = !isNaN(h) ? Math.round(1329 / Math.sqrt(0.14) * Math.pow(10, -0.2 * h)) + 'm' : '—';
+        const isHazard = !isNaN(h) && h < 22; // Hazardous threshold approximation
 
         return `
           <div class="neo-item">
             <div class="neo-item-top">
-              <b>${ast.name}</b>
-              <span class="hazard-pill ${isHazard ? 'red' : 'green'}">${isHazard ? 'HAZARDOUS' : 'SAFE FLYBY'}</span>
+              <b>${name}</b>
+              <span class="hazard-pill ${isHazard ? 'red' : 'green'}">${isHazard ? 'POTENTIAL HAZARD' : 'SAFE FLYBY'}</span>
             </div>
             <div class="neo-item-stats">
-              <span>Miss: <b>${missKm}</b></span>
-              <span>Speed: <b>${velKmS}</b></span>
-              <span>Size: <b>~${diam}m</b></span>
+              <span>Miss: <b>${distKm}</b></span>
+              <span>Speed: <b>${speed}</b></span>
+              <span>Est. Size: <b>${diam}</b></span>
             </div>
           </div>
         `;
       }).join('');
     }
   } catch (_) {
-    if (container) container.innerHTML = '<p class="muted">NASA NeoWs radar synchronizing…</p>';
+    if (container) container.innerHTML = '<p class="muted">NASA JPL asteroid radar synchronizing…</p>';
   }
 }
 
-// 9. USGS Earthquakes
+// 9. USGS Earthquakes Plotted on Live Leaflet Map & List
 async function fetchEarthquakes() {
   const list = document.getElementById('earthquake-list');
   try {
@@ -346,6 +411,29 @@ async function fetchEarthquakes() {
 
     if (quakes.length > 0) {
       lastEarthquakeText = `M${quakes[0].properties.mag.toFixed(1)} · ${quakes[0].properties.place}`;
+    }
+
+    // Plot on Leaflet map as circle markers
+    if (quakeLayerGroup) {
+      quakeLayerGroup.clearLayers();
+      quakes.slice(0, 30).forEach(q => {
+        const coords = q.geometry.coordinates;
+        const mag = q.properties.mag;
+        const color = mag >= 5.0 ? '#ff453a' : (mag >= 4.0 ? '#ffb454' : '#ffd60a');
+        const radius = Math.max(4, mag * 2.2);
+
+        const circle = L.circleMarker([coords[1], coords[0]], {
+          radius: radius,
+          fillColor: color,
+          color: color,
+          weight: 1,
+          opacity: 0.9,
+          fillOpacity: 0.5
+        });
+
+        circle.bindPopup(`<b>USGS M${mag.toFixed(1)}</b><br>${q.properties.place}<br>Depth: ${coords[2]} km`);
+        quakeLayerGroup.addLayer(circle);
+      });
     }
 
     if (list) {
@@ -368,7 +456,52 @@ async function fetchEarthquakes() {
   }
 }
 
-// 10. Worldwide Area Search with Autocomplete & Human-Understandable Ratings
+// 10. NASA EONET Active Hazards Plotted on Map
+async function fetchEonetHazards() {
+  const list = document.getElementById('hazard-list');
+  try {
+    const res = await fetch('https://eonet.gsfc.nasa.gov/api/v3/events?status=open&limit=15');
+    if (!res.ok) return;
+    const data = await res.json();
+    const events = data.events || [];
+
+    const badge = document.getElementById('hazard-count');
+    if (badge) badge.textContent = `${events.length} ACTIVE`;
+
+    if (hazardLayerGroup) {
+      hazardLayerGroup.clearLayers();
+      events.forEach(ev => {
+        const geo = ev.geometry?.[0];
+        if (geo && geo.coordinates) {
+          const coords = geo.coordinates;
+          const circle = L.circleMarker([coords[1], coords[0]], {
+            radius: 5,
+            fillColor: '#bf9cff',
+            color: '#bf9cff',
+            weight: 1,
+            fillOpacity: 0.6
+          });
+          circle.bindPopup(`<b>${ev.title}</b><br>Category: ${ev.categories?.[0]?.title || 'Natural Event'}`);
+          hazardLayerGroup.addLayer(circle);
+        }
+      });
+    }
+
+    if (list) {
+      list.innerHTML = events.slice(0, 8).map(ev => `
+        <div class="quake-row">
+          <div class="mag-box purple">🌋</div>
+          <div>
+            <b>${ev.title}</b>
+            <small>${ev.categories?.[0]?.title || 'Hazard'}</small>
+          </div>
+        </div>
+      `).join('');
+    }
+  } catch (_) {}
+}
+
+// 11. Worldwide Area Search with Autocomplete & Human-Understandable Ratings
 async function fetchAreaIntel(lat, lon, locationName) {
   try {
     const res = await fetch(`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=us_aqi,pm2_5,pm10,nitrogen_dioxide,direct_normal_irradiance`);
@@ -479,7 +612,6 @@ function initAreaSearch() {
         }).join('');
         dropdown.hidden = false;
 
-        // Pointerdown listener for instant touch registration on phones
         dropdown.querySelectorAll('.dropdown-item').forEach(btn => {
           const selectItem = () => {
             const lat = btn.getAttribute('data-lat');
@@ -502,7 +634,7 @@ function initAreaSearch() {
   });
 }
 
-// 11. NASA APOD (Dual-Source Fail-Safe: No App Logo Fallback)
+// 12. NASA APOD (Dual-Source Verified Fallback: Never Shows App Logo)
 async function fetchApod() {
   const media = document.getElementById('apod-media');
   try {
@@ -523,9 +655,9 @@ async function fetchApod() {
       }
     }
   } catch (_) {
-    // Official NASA Science WordPress Fallback (From your original project)
+    // Official NASA Science WordPress Fallback (Pulls today's real APOD post)
     try {
-      const fbRes = await fetch('https://science.nasa.gov/wp-json/wp/v2/apod-basic');
+      const fbRes = await fetch('https://science.nasa.gov/wp-json/wp/v2/apod-basic?per_page=1');
       if (fbRes.ok) {
         const arr = await fbRes.json();
         if (arr.length > 0) {
@@ -542,17 +674,17 @@ async function fetchApod() {
       }
     } catch (_) {}
 
-    // Public STScI Hubble Deep Field Cosmic Archive
-    document.getElementById('apod-title').textContent = 'Carina Nebula (Cosmic Cliffs)';
-    document.getElementById('apod-explanation').textContent = 'Observed by the James Webb Space Telescope: This landscape of "mountains" and "valleys" is the edge of a gigantic, gaseous cavity within NGC 3324, captured in infrared light.';
+    // NASA STScI Webb Deep Field Cosmic Archive
+    document.getElementById('apod-title').textContent = 'Webb Deep Field (Cosmic Infrared Archive)';
+    document.getElementById('apod-explanation').textContent = 'NASA James Webb Space Telescope deep-space observatory infrared capture of galaxy cluster SMACS 0723, showing thousands of galaxies.';
     document.getElementById('apod-date').textContent = 'NASA STScI Archive';
     if (media) {
-      media.innerHTML = `<img src="https://images-assets.nasa.gov/image/PIA25324/PIA25324~orig.jpg" alt="Carina Nebula">`;
+      media.innerHTML = `<img src="https://images-assets.nasa.gov/image/PIA25324/PIA25324~orig.jpg" alt="Cosmos">`;
     }
   }
 }
 
-// 12. Wikipedia Explorer with Autocomplete & Presets
+// 13. Wikipedia Explorer with Autocomplete & Presets
 async function searchWiki(query) {
   try {
     const enc = encodeURIComponent(query.trim().replace(/ /g, '_'));
@@ -621,7 +753,7 @@ function initWikiSearch() {
   });
 }
 
-// 13. Firebase Initialization & Real Boolean Field Synchronization
+// 14. Firebase Initialization & Real Boolean Field Synchronization
 const firebaseConfig = {
   apiKey: "AIzaSyAOn8eFL_CMGuYVeEa9hfpdkHRxZpjacqU",
   authDomain: "news-61e62.firebaseapp.com",
@@ -759,13 +891,14 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   themeSelect?.addEventListener('change', e => applyTheme(e.target.value));
 
-  // Refresh
+  // Refresh All
   document.getElementById('refresh-all')?.addEventListener('click', () => {
     fetchLiveIss();
     fetchLaunches();
     fetchSpaceWeather();
     fetchAsteroids();
     fetchEarthquakes();
+    fetchEonetHazards();
     fetchApod();
     showToast('All real-time sensors refreshed.');
   });
@@ -777,6 +910,7 @@ document.addEventListener('DOMContentLoaded', () => {
   fetchSpaceWeather();
   fetchAsteroids();
   fetchEarthquakes();
+  fetchEonetHazards();
   fetchApod();
   fetchAreaIntel('17.3850', '78.4867', 'Hyderabad, Telangana, India');
   searchWiki('Chandrayaan-3');
