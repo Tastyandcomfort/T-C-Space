@@ -2,6 +2,15 @@
 
 const NASA_API_KEY = "fLRTKjpmtJGRWqzFKG8NrtmwbbkwBnPnWKNzn8Gd";
 
+// Verified NASA & Space Contextual Photography for Notification Banners (No Logo Duplication)
+const NOTIFICATION_HERO_PHOTOS = {
+  satellite: 'https://images-assets.nasa.gov/image/iss064e007861/iss064e007861~medium.jpg', // High-res ISS orbiting above Earth
+  launch: 'https://images-assets.nasa.gov/image/KSC-20221116-PH-KLS01_0003/KSC-20221116-PH-KLS01_0003~medium.jpg', // Rocket liftoff
+  solar: 'https://images-assets.nasa.gov/image/GSFC_20171208_Archive_e001435/GSFC_20171208_Archive_e001435~medium.jpg', // Solar flare disk
+  quake: 'https://images-assets.nasa.gov/image/iss065e094294/iss065e094294~medium.jpg', // Earth horizon
+  asteroid: 'https://images-assets.nasa.gov/image/PIA24430/PIA24430~medium.jpg' // Asteroid surface
+};
+
 // 1. Dual Clock (Live IST & UTC Synchronization)
 function initClocks() {
   const istEl = document.getElementById('ist-clock');
@@ -53,7 +62,6 @@ function initNetworkMonitor() {
       return;
     }
 
-    // High-precision non-blocking fallback for Safari/iOS
     try {
       const t0 = performance.now();
       await fetch('https://api.wheretheiss.at/v1/satellites/25544', { method: 'HEAD', cache: 'no-store' });
@@ -407,7 +415,7 @@ function checkSatelliteOverheadPass(satLat, satLon, satName, satVel) {
         title: 'T&C Space · Orbital Pass 🛰️',
         body: `${satName} is passing directly over ${locationName}! Proximity: ${Math.round(distanceKm)} km · Speed: ${satVel.toFixed(2)} km/s.`,
         url: './#satellites',
-        image: 'assets/space-hub-icon-512.png?v=1'
+        image: NOTIFICATION_HERO_PHOTOS.satellite // Real astronaut ISS photo
       });
     }
   }
@@ -523,7 +531,7 @@ async function fetchLaunches() {
   }
 }
 
-// 10. Universal Lightbox with Guaranteed Binary Download via wsrv.nl & Native Share
+// 10. Universal Lightbox with Real Binary Download & Native Share
 let activeLightboxMedia = {
   url: "",
   title: "NASA Space Telemetry",
@@ -1206,15 +1214,15 @@ function initWikiSearch() {
   });
 }
 
-// 20. Rich Notification Dispatcher (Model 1 & 3: T&C Space · [Category] [Emoji])
+// 20. Rich Notification Dispatcher (Real Space Photos Banner - Never Logo)
 function dispatchRichNotification({ title, body, url, image }) {
   if ('Notification' in window && Notification.permission === 'granted') {
     if (swRegistration) {
       swRegistration.showNotification(title, {
         body: body,
-        icon: 'assets/space-hub-icon-192.png?v=1',
+        icon: 'assets/space-hub-icon-192.png?v=1', // Logo strictly in avatar icon
         badge: 'assets/space-hub-icon-192.png?v=1',
-        image: image || null,
+        image: image || NOTIFICATION_HERO_PHOTOS.satellite, // Real space photography hero banner
         vibrate: [200, 100, 200],
         requireInteraction: true,
         data: { url: url || './#overview' }
@@ -1223,7 +1231,7 @@ function dispatchRichNotification({ title, body, url, image }) {
       new Notification(title, {
         body: body,
         icon: 'assets/space-hub-icon-192.png?v=1',
-        image: image || null
+        image: image || NOTIFICATION_HERO_PHOTOS.satellite
       });
     }
   }
@@ -1387,31 +1395,34 @@ function initAlertPreferences() {
       let title = 'T&C Space 🚀';
       let body = 'All live telemetry systems operational.';
       let url = './#overview';
-      let photo = 'assets/space-hub-icon-512.png?v=1';
+      let photo = NOTIFICATION_HERO_PHOTOS.satellite;
 
       if (isLaunch) {
         title = 'T&C Space · Liftoff Countdown 🚀';
         body = 'Next rocket countdown in final window. Tap to inspect spaceport manifest.';
         url = './#launches';
-        photo = 'https://images-assets.nasa.gov/image/PIA25324/PIA25324~orig.jpg';
+        photo = NOTIFICATION_HERO_PHOTOS.launch;
       } else if (isIss) {
         const loc = localStorage.getItem('user_target_city') || 'Hyderabad';
         title = 'T&C Space · Orbital Pass 🛰️';
         body = `ISS (Zarya) approaching regional horizon over ${loc}! Speed: 7.66 km/s. Visible in clear skies.`;
         url = './#satellites';
-        photo = activeLightboxMedia.url || 'assets/space-hub-icon-512.png?v=1';
+        photo = NOTIFICATION_HERO_PHOTOS.satellite;
       } else if (isSolar) {
         title = 'T&C Space · Solar Weather ☀️';
         body = 'Geomagnetic solar flux observation active. Tap to view heliophysics data.';
         url = './#space-weather';
+        photo = NOTIFICATION_HERO_PHOTOS.solar;
       } else if (isQuake) {
         title = 'T&C Space · Seismic Alert 🌍';
         body = 'Recent global earthquake detected. Tap to inspect seismic radar.';
         url = './#cosmos-hazards';
+        photo = NOTIFICATION_HERO_PHOTOS.quake;
       } else if (isAsteroid) {
         title = 'T&C Space · Asteroid Radar ☄️';
         body = 'Near-Earth asteroid close approach confirmed. Tap to review trajectory.';
         url = './#cosmos-hazards';
+        photo = NOTIFICATION_HERO_PHOTOS.asteroid;
       }
 
       dispatchRichNotification({ title, body, url, image: photo });
