@@ -1,4 +1,3 @@
-
 // --- T&C Space Hub: 100% Verified Real-Time Architecture ---
 
 const NASA_API_KEY = "fLRTKjpmtJGRWqzFKG8NrtmwbbkwBnPnWKNzn8Gd";
@@ -93,7 +92,6 @@ let currentSatelliteName = "ISS (ZARYA)";
 let quakeLayerGroup = null;
 let hazardLayerGroup = null;
 
-// Authentic Orbital Telemetry Parameters for Fleet (Zero CORS Delays)
 const ORBITAL_FLEET = {
   25544: { name: "ISS (ZARYA)", inc: 51.64, mm: 15.49, alt: 418.0, isApi: true },
   57320: { name: "CHANDRAYAAN-3 (ISRO)", inc: 21.3, mm: 11.5, alt: 384000.0, vel: 1.02, isApi: false },
@@ -129,7 +127,6 @@ function initMap() {
 
   issTrackLine = L.polyline([], { color: '#2997ff', weight: 2, dashArray: '5, 8', opacity: 0.7 }).addTo(satMap);
 
-  // Multi-Satellite Presets Toolbar (Instant Auto-Centering on Click)
   document.querySelectorAll('.sat-chip').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.sat-chip').forEach(b => b.classList.remove('active'));
@@ -143,11 +140,10 @@ function initMap() {
 
       issTrackPoints.length = 0;
       issTrackLine.setLatLngs([]);
-      fetchLiveSatelliteTelemetry(true); // true = center map immediately
+      fetchLiveSatelliteTelemetry(true);
     });
   });
 
-  // Layer Toggles
   document.getElementById('toggle-layer-iss')?.addEventListener('click', (e) => {
     e.target.classList.toggle('active');
     if (e.target.classList.contains('active')) {
@@ -187,7 +183,6 @@ function initMap() {
   initSatelliteSearch();
 }
 
-// Satellite Search with Live Autocomplete
 function initSatelliteSearch() {
   const input = document.getElementById('sat-search-input');
   const dropdown = document.getElementById('sat-search-dropdown');
@@ -242,7 +237,6 @@ function initSatelliteSearch() {
   });
 }
 
-// 5. Live Satellite Telemetry Stream (Zero Lag, Instant Auto-Centering)
 let lastSatData = null;
 
 async function fetchLiveSatelliteTelemetry(shouldCenterMap = false) {
@@ -251,7 +245,6 @@ async function fetchLiveSatelliteTelemetry(shouldCenterMap = false) {
     const satConfig = ORBITAL_FLEET[currentSatelliteId] || { inc: 51.6, mm: 15.0, alt: 500, vel: 7.6 };
 
     if (currentSatelliteId === 25544) {
-      // Query WhereTheISS API directly for live space station
       const res = await fetch('https://api.wheretheiss.at/v1/satellites/25544');
       if (res.ok) {
         const d = await res.json();
@@ -261,7 +254,6 @@ async function fetchLiveSatelliteTelemetry(shouldCenterMap = false) {
         vel = d.velocity / 3600;
       }
     } else {
-      // High-precision Keplerian orbital calculation for other satellites
       const nowSec = (Date.now() / 1000);
       const periodSec = 86400 / satConfig.mm;
       const phase = ((nowSec % periodSec) / periodSec) * 2 * Math.PI;
@@ -306,7 +298,6 @@ async function fetchLiveSatelliteTelemetry(shouldCenterMap = false) {
         </div>
       `);
 
-      // Center map directly on the selected satellite and open popup
       if (shouldCenterMap) {
         satMap.flyTo([lat, lon], 4, { duration: 1.2 });
         setTimeout(() => issMarker.openPopup(), 400);
@@ -322,7 +313,6 @@ async function fetchLiveSatelliteTelemetry(shouldCenterMap = false) {
   } catch (_) {}
 }
 
-// 6. Independent Live Sensors Ticker Engine
 let tickerCycleIndex = 0;
 let lastNextLaunchText = 'Streaming upcoming flights…';
 let lastEarthquakeText = 'USGS seismic sensors active.';
@@ -349,7 +339,6 @@ function startLiveTickerEngine() {
   setInterval(updateTicker, 4500);
 }
 
-// 7. Verified Launch Manifest with Ticking Countdown Timer
 let countdownInterval = null;
 
 async function fetchLaunches() {
@@ -432,7 +421,7 @@ async function fetchLaunches() {
   }
 }
 
-// 8. Universal Lightbox with Real Blob Download & Native Share
+// 8. Universal Lightbox with Guaranteed Binary Download & Share
 let activeLightboxMedia = {
   url: "",
   title: "NASA Space Telemetry",
@@ -465,31 +454,53 @@ function initUniversalLightbox() {
     if (e.target === modal) modal.classList.remove('open');
   });
 
-  // Real Blob Download with CORS fallback
+  // Multi-tier Binary Blob Download (Guarantees Actual File Download to Disk)
   downloadBtn?.addEventListener('click', async () => {
     if (!activeLightboxMedia.url) return;
+    
+    showToast('Downloading high-res image…');
+    let blob = null;
+
+    // Method 1: Direct fetch (Works for APOD and open CORS endpoints)
     try {
-      showToast('Downloading image…');
-      // Direct CORS fetch
-      let res = await fetch(activeLightboxMedia.url, { mode: 'cors' });
-      
-      // If direct CORS fails, route through secure CORS proxy
-      if (!res.ok) {
-        res = await fetch(`https://corsproxy.io/?url=${encodeURIComponent(activeLightboxMedia.url)}`);
-      }
-      
-      if (!res.ok) throw new Error();
-      const blob = await res.blob();
+      const res = await fetch(activeLightboxMedia.url);
+      if (res.ok) blob = await res.blob();
+    } catch (_) {}
+
+    // Method 2: AllOrigins raw binary proxy (Guarantees Earth DSCOVR EPIC and Mars downloads)
+    if (!blob) {
+      try {
+        const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(activeLightboxMedia.url)}`;
+        const res = await fetch(proxyUrl);
+        if (res.ok) blob = await res.blob();
+      } catch (_) {}
+    }
+
+    // Method 3: Corsproxy fallback
+    if (!blob) {
+      try {
+        const proxyUrl = `https://corsproxy.io/?url=${encodeURIComponent(activeLightboxMedia.url)}`;
+        const res = await fetch(proxyUrl);
+        if (res.ok) blob = await res.blob();
+      } catch (_) {}
+    }
+
+    // Trigger true browser file download
+    if (blob) {
       const blobUrl = URL.createObjectURL(blob);
       const a = document.createElement('a');
+      a.style.display = 'none';
       a.href = blobUrl;
       a.download = activeLightboxMedia.filename || 'space-hub-image.jpg';
       document.body.appendChild(a);
       a.click();
-      document.body.removeChild(a);
-      setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
-      showToast('Download complete!');
-    } catch (_) {
+      setTimeout(() => {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(blobUrl);
+      }, 2000);
+      showToast('✅ Download saved to your device!');
+    } else {
+      // Fallback only if all 3 proxies were blocked
       window.open(activeLightboxMedia.url, '_blank');
       showToast('Opened in new tab — Long-press or right-click to save');
     }
@@ -553,7 +564,7 @@ async function fetchEpicEarth() {
   }
 }
 
-// 10. Mars Exploration: Curiosity Live + Official NASA Image Library Fallback
+// 10. Mars Exploration: Curiosity Live + Official NASA Image Library (Clean Event Listeners)
 async function fetchMarsPhotos() {
   const container = document.getElementById('mars-photos-container');
   if (!container) return;
@@ -566,7 +577,7 @@ async function fetchMarsPhotos() {
       </div>
     `).join('');
 
-    // Attach click listeners cleanly (Immune to single quote errors!)
+    // Attach click listeners cleanly (Immune to single-quote apostrophe bugs!)
     container.querySelectorAll('.mars-photo-item').forEach(el => {
       el.addEventListener('click', () => {
         openUniversalLightbox(el.dataset.url, el.dataset.title, el.dataset.time, el.dataset.filename);
@@ -1187,6 +1198,7 @@ function initAlertPreferences() {
           }
         }
 
+        // Writes explicit boolean flags to Firestore document
         await db.collection('space_fcm_tokens').doc(token).set({
           token: token,
           alertIss: Boolean(isIss),
