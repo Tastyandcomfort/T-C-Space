@@ -70,7 +70,7 @@
           <span>Space Wiki</span>
         </a>
         <a class="nav-link" href="#settings" data-nav="settings">
-          <span class="nav-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
+          <span class="nav-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83-2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
           <span>Preferences &amp; Alerts</span>
         </a>
       </nav>
@@ -134,7 +134,7 @@
 
       <div class="content-wrap">
 
-        <!-- 1. OVERVIEW (Interactive Cards Navigate to Target Tabs) -->
+        <!-- 1. OVERVIEW -->
         <section class="section-block active-view" id="overview">
           <div class="welcome-row">
             <div>
@@ -155,7 +155,7 @@
             <div class="ticker-time">100% VERIFIED</div>
           </div>
 
-          <!-- Metrics Grid with Accent Borders -->
+          <!-- Interactive Metrics Grid with Color Accents -->
           <div class="metrics-grid">
             <article class="metric-card card-accent-blue clickable-card" data-goto="satellites" title="Click to view full Satellite Tracker & Map">
               <div class="metric-top"><span>ACTIVE SAT ALTITUDE</span><span class="metric-symbol blue">◎</span></div>
@@ -207,13 +207,13 @@
           </div>
         </section>
 
-        <!-- 2. SATELLITES & MULTI-LAYER MAP (ISRO Fleet, Search, Presets, Popups, Adaptive HUD) -->
+        <!-- 2. SATELLITES & MULTI-LAYER MAP (Instant Satellite Centering & Autocomplete) -->
         <section class="section-block" id="satellites">
           <div class="section-title">
             <div>
               <div class="eyebrow">ORBITAL SITUATIONAL AWARENESS</div>
               <h2>Interactive Planetary Map &amp; Tracking</h2>
-              <p>Track the international space fleet including ISRO's Chandrayaan-3 and NavIC. Click any marker for telemetry popups.</p>
+              <p>Click any satellite preset to instantly center on its live position. Click any marker for telemetry popups.</p>
             </div>
           </div>
 
@@ -227,7 +227,7 @@
               <div id="sat-search-dropdown" class="autocomplete-dropdown" hidden></div>
             </div>
 
-            <!-- Multi-Satellite Presets Toolbar (Includes ISRO & International) -->
+            <!-- Multi-Satellite Presets Toolbar -->
             <div class="sat-presets-bar">
               <span class="sat-select-lbl">FLEET PRESETS:</span>
               <button class="sat-chip active" data-sat-id="25544" data-sat-name="ISS (ZARYA)">ISS (Zarya)</button>
@@ -320,13 +320,13 @@
           </div>
         </section>
 
-        <!-- 4. COMBINED TAB A: INTERPLANETARY EXPLORATION (Earth 1M Miles + Mars Exploration) -->
+        <!-- 4. COMBINED TAB: EARTH & MARS (With In-App Lightbox, Download & Share for Both) -->
         <section class="section-block" id="interplanetary">
           <div class="section-title">
             <div>
               <div class="eyebrow">INTERPLANETARY OBSERVATIONS</div>
               <h2>Interplanetary Exploration: Earth &amp; Mars</h2>
-              <p>Sunlit Earth viewed from 1 million miles away and raw surface telemetry streamed from Martian rovers.</p>
+              <p>Sunlit Earth viewed from 1 million miles away and raw surface telemetry from Martian rovers. Tap any photo for full lightbox, download &amp; share.</p>
             </div>
           </div>
 
@@ -335,12 +335,12 @@
             <div class="card-heading">
               <div>
                 <h3 id="epic-title">Daily Portrait of Planet Earth (DSCOVR EPIC)</h3>
-                <p id="epic-caption">Streaming NASA EPIC telescope capture from the Sun-Earth L1 Lagrange point 1 million miles away. Tap photo to open in-app lightbox with download &amp; share.</p>
+                <p id="epic-caption">Streaming NASA EPIC telescope capture from the Sun-Earth L1 point 1 million miles away. Tap photo to open in-app lightbox with download &amp; share.</p>
               </div>
               <span class="small-chip blue">NASA DSCOVR EPIC</span>
             </div>
 
-            <div class="epic-viewport clickable-image-box" id="epic-media-box" title="Tap to expand in full view with download and share">
+            <div class="epic-viewport clickable-image-box" id="epic-media-box" title="Tap photo to open full view, download & share">
               <div class="apple-spinner large"></div>
             </div>
 
@@ -387,7 +387,7 @@
               </div>
             </div>
 
-            <h4 style="margin: 18px 0 10px; font-size: 14px;" id="mars-gallery-title">Latest Raw Photos from Mars</h4>
+            <h4 style="margin: 18px 0 10px; font-size: 14px;" id="mars-gallery-title">Latest Raw Photos from Mars (Tap photo to view, download &amp; share)</h4>
             <div class="mars-photos-grid" id="mars-photos-container">
               <div class="loading-state"><div class="apple-spinner"></div><p>Streaming Martian camera frames…</p></div>
             </div>
@@ -442,19 +442,19 @@
           </article>
         </section>
 
-        <!-- 6. COMBINED TAB B: COSMOS & PLANETARY HAZARDS (APOD + Asteroids + Earthquakes + EONET) -->
+        <!-- 6. COMBINED TAB: COSMOS & HAZARDS (APOD + Asteroids + Earthquakes + EONET) -->
         <section class="section-block" id="cosmos-hazards">
           <div class="section-title">
             <div>
               <div class="eyebrow">COSMIC DISCOVERY &amp; PLANETARY DEFENSE</div>
               <h2>Cosmos, Asteroid Radar &amp; Earth Hazards</h2>
-              <p>Daily astronomical discoveries, verified near-Earth asteroid approaches, and live seismic network logs.</p>
+              <p>Daily astronomical discoveries (tap photo for full lightbox), verified near-Earth asteroid approaches, and live seismic network logs.</p>
             </div>
           </div>
 
-          <!-- Sub-Section A: APOD (Timezone Accurate & Exact Date Archive Link) -->
+          <!-- Sub-Section A: APOD (Tap photo to open lightbox with download & share) -->
           <article class="surface apod-layout">
-            <div id="apod-media" class="apod-media">
+            <div id="apod-media" class="apod-media clickable-image-box" title="Tap photo to open full view, download & share">
               <div class="apple-spinner large"></div>
             </div>
             <div class="apod-copy">
@@ -464,7 +464,7 @@
               <p id="apod-explanation" class="apod-explanation"></p>
               <div class="apod-foot">
                 <span id="apod-copyright"></span>
-                <a id="apod-link" class="text-link" href="https://apod.nasa.gov/apod/astropix.html" target="_blank" rel="noopener">Official NASA APOD Archive ↗</a>
+                <a id="apod-link" class="text-link" href="https://science.nasa.gov/apod/" target="_blank" rel="noopener">Official NASA Science APOD ↗</a>
               </div>
             </div>
           </article>
@@ -646,7 +646,7 @@
           </article>
         </section>
 
-        <!-- 9. PREFERENCES & ALERTS (With "Select All" & Interactive "Test Alert" Button) -->
+        <!-- 9. PREFERENCES & ALERTS (With Select All & Interactive Test Alert Button) -->
         <section class="section-block" id="settings">
           <div class="section-title">
             <div>
@@ -761,26 +761,26 @@
       <span>Cosmos</span>
     </a>
     <a class="dock-link" href="#settings" data-nav="settings">
-      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83-2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
       <span>Alerts</span>
     </a>
   </nav>
 
-  <!-- In-App Earth 1M Miles Lightbox Modal with Download & Share -->
-  <div class="epic-lightbox-backdrop" id="epic-lightbox" aria-hidden="true">
-    <div class="epic-lightbox-dialog" role="dialog" aria-label="Earth from 1 Million Miles">
-      <button class="lightbox-close-btn" id="close-lightbox-btn" aria-label="Close Lightbox">✕</button>
+  <!-- Universal In-App Apple Media Lightbox (Earth, Mars & APOD with Working Blob Download & Share) -->
+  <div class="epic-lightbox-backdrop" id="universal-media-lightbox" aria-hidden="true">
+    <div class="epic-lightbox-dialog" role="dialog" aria-label="Media Preview">
+      <button class="lightbox-close-btn" id="close-universal-lightbox-btn" aria-label="Close Lightbox">✕</button>
       <div class="lightbox-img-wrap">
-        <img id="lightbox-img" src="" alt="Earth Full Disc Portrait">
+        <img id="universal-lightbox-img" src="" alt="Full Space Media Preview">
       </div>
       <div class="lightbox-footer">
         <div class="lightbox-meta">
-          <b id="lightbox-date-text">NASA DSCOVR EPIC Full-Disc Earth</b>
-          <span id="lightbox-time-text">Timestamp: —</span>
+          <b id="universal-lightbox-title">Space Telemetry Capture</b>
+          <span id="universal-lightbox-time">Timestamp: —</span>
         </div>
         <div class="lightbox-actions">
-          <a id="lightbox-download-btn" class="apple-btn-secondary" href="#" download="NASA_DSCOVR_EPIC_Earth.jpg">⬇ Download JPG</a>
-          <button id="lightbox-share-btn" class="primary-button">↗ Share Photo</button>
+          <button id="universal-download-btn" class="apple-btn-secondary">⬇ Download High-Res</button>
+          <button id="universal-share-btn" class="primary-button">↗ Share Photo</button>
         </div>
       </div>
     </div>
