@@ -100,8 +100,8 @@
         </div>
 
         <div class="top-actions">
-          <!-- Live Dual IST & UTC Clocks -->
-          <div class="utc-clock" title="Indian Standard Time & Universal Coordinated Time">
+          <!-- Dual IST & UTC Clocks -->
+          <div class="utc-clock" title="Indian Standard Time & UTC">
             <span class="live-dot"></span>
             <div class="clock-duo">
               <span id="ist-clock">--:--:-- IST</span>
@@ -138,7 +138,7 @@
             </div>
           </div>
 
-          <!-- Ticker -->
+          <!-- Live Sensors Cyclical Ticker -->
           <div class="ticker-row">
             <div class="ticker-label"><span class="live-dot"></span> LIVE SENSORS</div>
             <div id="ticker" class="ticker-content">Syncing real-time telemetry from international observatories…</div>
@@ -218,7 +218,7 @@
             </div>
           </div>
 
-          <!-- Spotlight Card with Ticking Countdown -->
+          <!-- Spotlight Card with Ticking Countdown (No Page Overflow) -->
           <article class="surface launch-spotlight-card">
             <div class="spotlight-left">
               <div class="spotlight-tags">
@@ -254,8 +254,8 @@
           <div class="section-title">
             <div>
               <div class="eyebrow">HELIOPHYSICS &amp; SOLAR SENSORS</div>
-              <h2>Space Weather Watch (NASA DONKI)</h2>
-              <p>Solar flares and geomagnetic activity observed by NASA heliophysics satellites.</p>
+              <h2>Space Weather Watch (NASA &amp; NOAA SWPC)</h2>
+              <p>Real-time solar flares and geomagnetic storm indexes observed by solar monitoring satellites.</p>
             </div>
           </div>
 
@@ -263,12 +263,12 @@
             <div class="card-heading">
               <div>
                 <h3>Recent Solar Activity &amp; Flares</h3>
-                <p>NASA Space Weather Database Of Notifications, Knowledge, Information.</p>
+                <p>NASA DONKI notifications &amp; NOAA Space Weather Prediction Center sensors.</p>
               </div>
-              <button id="refresh-weather" class="subtle-button">Refresh DONKI ↻</button>
+              <button id="refresh-weather" class="subtle-button">Refresh Sensors ↻</button>
             </div>
             <div id="weather-events" class="event-list-scroll">
-              <div class="loading-state"><div class="apple-spinner"></div><p>Contacting NASA DONKI sensors…</p></div>
+              <div class="loading-state"><div class="apple-spinner"></div><p>Querying heliophysics sensors…</p></div>
             </div>
           </article>
         </section>
@@ -283,7 +283,7 @@
             </div>
           </div>
 
-          <!-- APOD Showcase -->
+          <!-- APOD Showcase (Fail-Safe: No App Logo Fallback) -->
           <article class="surface apod-layout">
             <div id="apod-media" class="apod-media">
               <div class="apple-spinner large"></div>
@@ -345,7 +345,7 @@
             <div>
               <div class="eyebrow">ENVIRONMENTAL SENSOR REANALYSIS</div>
               <h2>Area-Wise Intelligence Brief</h2>
-              <p>Type any village, city, mandal, district, or state worldwide for instant atmospheric, air quality, and solar radiation readings.</p>
+              <p>Search any village, mandal, city, district, or state worldwide for instant atmospheric, air quality, and solar radiation levels.</p>
             </div>
           </div>
 
@@ -353,7 +353,7 @@
             <!-- Global Autocomplete Search Box -->
             <div class="intel-search-wrapper">
               <div class="intel-search-box">
-                <input id="intel-area-input" type="search" placeholder="Type any village, mandal, city, district or state worldwide (e.g., Warangal, Dallas, Guntur, Tokyo)…" autocomplete="off">
+                <input id="intel-area-input" type="search" placeholder="Search any village, mandal, city, or district worldwide (e.g., Warangal, Dallas, Guntur, Tokyo)…" autocomplete="off">
                 <button id="intel-search-btn" class="primary-button" type="button">Analyze <span>↗</span></button>
               </div>
               <div id="intel-suggestions" class="autocomplete-dropdown" hidden></div>
@@ -380,7 +380,7 @@
               </div>
             </div>
 
-            <!-- 5 Human-Understandable Metric Cards with Badges -->
+            <!-- Human-Understandable Metric Cards with Badges -->
             <div class="intel-metrics-grid">
               <div class="intel-metric-card">
                 <div class="metric-top"><span>AIR QUALITY (US AQI)</span><span class="metric-symbol green">🌬️</span></div>
@@ -474,75 +474,58 @@
           </article>
         </section>
 
-        <!-- 9. PREFERENCES & ALERTS -->
+        <!-- 9. PREFERENCES & ALERTS (Cleaned: No Duplicate Appearance Box) -->
         <section class="section-block" id="settings">
           <div class="section-title">
             <div>
-              <div class="eyebrow">CONFIGURATION &amp; NOTIFICATION ENGINE</div>
+              <div class="eyebrow">FIREBASE NOTIFICATION ENGINE</div>
               <h2>Preferences &amp; Space Alerts</h2>
-              <p>Customize live telemetry appearance, time format, and granular device notification thresholds linked to Firebase.</p>
+              <p>Select which live alerts to receive on your device. Selections are synced directly to Firestore.</p>
             </div>
           </div>
 
-          <div class="settings-grid">
-            <article class="surface settings-card">
-              <h3>Display &amp; Appearance</h3>
-              <div class="setting-item">
+          <article class="surface settings-card">
+            <h3>Real-Time Alerts &amp; Device Synchronization</h3>
+            <p class="muted">Check the alerts you want to receive on this device, then tap Save &amp; Link.</p>
+
+            <div class="toggle-list">
+              <label class="toggle-row">
                 <div>
-                  <b>Appearance Theme</b>
-                  <small>Light, Dark, or System Match</small>
+                  <b>ISS Overhead Pass Alert</b>
+                  <small>Notify when Space Station elevation is visible</small>
                 </div>
-                <select id="setting-theme" class="setting-select">
-                  <option value="system">Match System</option>
-                  <option value="light">Light Theme</option>
-                  <option value="dark" selected>Dark Theme</option>
-                </select>
-              </div>
-            </article>
+                <input type="checkbox" checked class="apple-toggle" id="toggle-iss">
+              </label>
 
-            <article class="surface settings-card">
-              <h3>Real-Time Alerts &amp; Firebase Notification Engine</h3>
-              <p class="muted">You will receive alerts on this device only for the events you select below.</p>
+              <label class="toggle-row">
+                <div>
+                  <b>Severe Solar Storms (Kp 5+)</b>
+                  <small>Notify on solar storm alerts from NASA/NOAA</small>
+                </div>
+                <input type="checkbox" checked class="apple-toggle" id="toggle-solar">
+              </label>
 
-              <div class="toggle-list">
-                <label class="toggle-row">
-                  <div>
-                    <b>ISS Overhead Pass Alert</b>
-                    <small>Notify when Space Station elevation is visible</small>
-                  </div>
-                  <input type="checkbox" checked class="apple-toggle" id="toggle-iss">
-                </label>
+              <label class="toggle-row">
+                <div>
+                  <b>Rocket Launch Countdowns</b>
+                  <small>Notify 1 hour prior to major orbital liftoffs</small>
+                </div>
+                <input type="checkbox" checked class="apple-toggle" id="toggle-launches">
+              </label>
 
-                <label class="toggle-row">
-                  <div>
-                    <b>Severe Solar Storms (Kp 5+)</b>
-                    <small>Notify on NASA DONKI geomagnetic storm alerts</small>
-                  </div>
-                  <input type="checkbox" checked class="apple-toggle" id="toggle-solar">
-                </label>
+              <label class="toggle-row">
+                <div>
+                  <b>Major Earthquake Alerts (M 5.0+)</b>
+                  <small>Notify on USGS rapid seismic detection</small>
+                </div>
+                <input type="checkbox" checked class="apple-toggle" id="toggle-quake">
+              </label>
+            </div>
 
-                <label class="toggle-row">
-                  <div>
-                    <b>Rocket Launch Countdowns</b>
-                    <small>Notify 1 hour prior to major orbital liftoffs</small>
-                  </div>
-                  <input type="checkbox" checked class="apple-toggle" id="toggle-launches">
-                </label>
-
-                <label class="toggle-row">
-                  <div>
-                    <b>Major Earthquake Alerts (M 5.0+)</b>
-                    <small>Notify on USGS rapid seismic detection</small>
-                  </div>
-                  <input type="checkbox" checked class="apple-toggle" id="toggle-quake">
-                </label>
-              </div>
-
-              <div class="setting-actions">
-                <button id="save-firebase-btn" class="primary-button full-width">Save &amp; Link Device with Firebase 🚀</button>
-              </div>
-            </article>
-          </div>
+            <div class="setting-actions">
+              <button id="save-firebase-btn" class="primary-button full-width">Save &amp; Link Device with Firebase 🚀</button>
+            </div>
+          </article>
         </section>
 
       </div>
