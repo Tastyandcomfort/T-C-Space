@@ -59,7 +59,6 @@ function initNavigation() {
       label.textContent = targetId.charAt(0).toUpperCase() + targetId.slice(1).replace('-', ' ');
     }
 
-    // Auto-resize Leaflet map to fix gray tiles when navigating to #satellites
     if (targetId === 'satellites' && satMap) {
       setTimeout(() => satMap.invalidateSize(), 200);
     }
@@ -84,7 +83,7 @@ function initOverviewClickableCards() {
   });
 }
 
-// 4. Multi-Layer Leaflet Map (ISS, Quakes, Hazards, Track, Popups & Inverted OSM)
+// 4. Multi-Layer Leaflet Map (ISS, ISRO, Quakes, Hazards, Track, Popups & Inverted OSM)
 let satMap = null;
 let issMarker = null;
 let issTrackLine = null;
@@ -120,7 +119,7 @@ function initMap() {
 
   issTrackLine = L.polyline([], { color: '#2997ff', weight: 2, dashArray: '5, 8', opacity: 0.7 }).addTo(satMap);
 
-  // Multi-Satellite Presets
+  // Multi-Satellite Presets Toolbar (Includes ISRO Chandrayaan-3, NavIC & International)
   document.querySelectorAll('.sat-chip').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.sat-chip').forEach(b => b.classList.remove('active'));
@@ -186,14 +185,15 @@ function initSatelliteSearch() {
 
   const popularSats = [
     { id: 25544, name: "ISS (ZARYA)" },
+    { id: 57320, name: "CHANDRAYAAN-3 (ISRO)" },
+    { id: 43286, name: "NAVIC-1I (ISRO)" },
     { id: 48274, name: "CSS TIANHE (TIANGONG)" },
     { id: 20580, name: "HUBBLE SPACE TELESCOPE" },
     { id: 43013, name: "NOAA 20" },
     { id: 39084, name: "LANDSAT 8" },
     { id: 25994, name: "TERRA (EOS AM-1)" },
     { id: 27424, name: "AQUA (EOS PM-1)" },
-    { id: 44713, name: "STARLINK-1007" },
-    { id: 44714, name: "STARLINK-1008" }
+    { id: 44713, name: "STARLINK-1007" }
   ];
 
   input.addEventListener('input', () => {
@@ -235,7 +235,7 @@ function initSatelliteSearch() {
   });
 }
 
-// 5. Live Satellite Telemetry Stream
+// 5. Live Satellite Telemetry Stream (WhereTheISS & CelesTrak)
 let lastSatData = null;
 
 async function fetchLiveSatelliteTelemetry() {
@@ -509,7 +509,7 @@ async function fetchMarsPhotos() {
   const container = document.getElementById('mars-photos-container');
   if (!container) return;
 
-  // Step 1: Try NASA Mars Rover Photos endpoint (Curiosity is most active)
+  // Step 1: Try NASA Mars Rover Photos endpoint (Curiosity)
   try {
     const res = await fetch(`https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/latest_photos?api_key=${NASA_API_KEY}`);
     if (res.ok) {
@@ -530,7 +530,7 @@ async function fetchMarsPhotos() {
     }
   } catch (_) {}
 
-  // Step 2: Resilient Fallback to NASA's Official Image & Video Library (Always online)
+  // Step 2: Resilient Fallback to NASA's Official Image Library
   try {
     const res = await fetch('https://images-api.nasa.gov/search?q=perseverance%20mars%20surface%20sol&media_type=image');
     if (!res.ok) throw new Error();
@@ -909,11 +909,21 @@ function initAreaSearch() {
   });
 }
 
-// 15. NASA APOD (Generates Exact Date-Matched Official NASA Archive URL)
+// 15. NASA APOD (Calculated Strictly on US Eastern Time with Automatic 1-Day Fallback)
 async function fetchApod() {
   const media = document.getElementById('apod-media');
   try {
-    const res = await fetch(`https://api.nasa.gov/planetary/apod?api_key=${NASA_API_KEY}`);
+    // Calculate current date in US Eastern Time where NASA APOD is published
+    const usDateStr = new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
+    
+    let res = await fetch(`https://api.nasa.gov/planetary/apod?api_key=${NASA_API_KEY}&date=${usDateStr}`);
+    
+    // If today's image is not yet released on NASA's server (returns 404), step back 1 day
+    if (!res.ok) {
+      const yesterday = new Date(Date.now() - 86400000).toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
+      res = await fetch(`https://api.nasa.gov/planetary/apod?api_key=${NASA_API_KEY}&date=${yesterday}`);
+    }
+
     if (!res.ok) throw new Error();
     const d = await res.json();
 
@@ -927,17 +937,17 @@ async function fetchApod() {
     if (prevTitle) prevTitle.textContent = d.title;
     if (prevDesc) prevDesc.textContent = (d.explanation || '').slice(0, 110) + '...';
 
-    // Generates the exact date-stamped archive URL (apYYMMDD.html)
+    // GUARANTEED EXACT MATCH: Generates the date-stamped archive URL (apYYMMDD.html)
     if (d.date) {
       const parts = d.date.split('-');
       if (parts.length === 3) {
         const yy = parts[0].slice(2);
         const mm = parts[1];
         const dd = parts[2];
-        const archiveUrl = `https://apod.nasa.gov/apod/ap${yy}${mm}${dd}.html`;
+        const exactArchiveUrl = `https://apod.nasa.gov/apod/ap${yy}${mm}${dd}.html`;
         const link = document.getElementById('apod-link');
         if (link) {
-          link.href = archiveUrl;
+          link.href = exactArchiveUrl;
           link.textContent = `Official NASA APOD (${d.date}) ↗`;
         }
       }
@@ -1048,7 +1058,7 @@ function initWikiSearch() {
   });
 }
 
-// 17. Firebase Initialization, "Select All" Toggle & Boolean Firestore Sync
+// 17. Firebase Initialization, "Select All" Toggle, Booleans Sync & Interactive "Test Alert" Button
 const firebaseConfig = {
   apiKey: "AIzaSyAOn8eFL_CMGuYVeEa9hfpdkHRxZpjacqU",
   authDomain: "news-61e62.firebaseapp.com",
@@ -1099,6 +1109,7 @@ function initAlertPreferences() {
     showToast(allSelected ? 'All alerts enabled' : 'All alerts disabled');
   });
 
+  // Save to Firebase Button
   document.getElementById('save-firebase-btn')?.addEventListener('click', async () => {
     const isIss = document.getElementById('toggle-iss').checked;
     const isSolar = document.getElementById('toggle-solar').checked;
@@ -1120,7 +1131,6 @@ function initAlertPreferences() {
       if (messaging && db) {
         let token = null;
         try {
-          // Binding token to swRegistration resolves the mobile background push issue
           token = await messaging.getToken({ serviceWorkerRegistration: swRegistration });
         } catch (_) {}
 
@@ -1132,7 +1142,6 @@ function initAlertPreferences() {
           }
         }
 
-        // Writes explicit boolean flags to Firestore document
         await db.collection('space_fcm_tokens').doc(token).set({
           token: token,
           alertIss: Boolean(isIss),
@@ -1151,6 +1160,74 @@ function initAlertPreferences() {
       showToast('Notification preferences saved locally.');
     } catch (e) {
       showToast('Preferences saved: ' + (e.message || 'Complete'));
+    }
+  });
+
+  // Interactive "Test Alert" Button with Automatic Permission Prompt & Click Routing
+  document.getElementById('test-alert-btn')?.addEventListener('click', async () => {
+    // 1. Trigger permission prompt if not decided
+    if ('Notification' in window && Notification.permission === 'default') {
+      await Notification.requestPermission();
+    }
+
+    // 2. Alert user if permission is blocked in browser settings
+    if ('Notification' in window && Notification.permission === 'denied') {
+      showToast('⚠️ Notifications blocked. Tap lock icon in browser bar to allow.');
+      return;
+    }
+
+    if ('Notification' in window && Notification.permission === 'granted') {
+      const isIss = document.getElementById('toggle-iss').checked;
+      const isSolar = document.getElementById('toggle-solar').checked;
+      const isLaunch = document.getElementById('toggle-launches').checked;
+      const isQuake = document.getElementById('toggle-quake').checked;
+      const isAsteroid = document.getElementById('toggle-asteroid').checked;
+
+      // Select dynamic alert based on user's active checkboxes
+      let title = 'T&C Space Alert 🚀';
+      let body = 'All live telemetry sensors operational.';
+      let url = './#overview';
+
+      if (isLaunch) {
+        title = '🚀 Rocket Liftoff Alert';
+        body = 'Next launch countdown in final window. Tap to view spaceport manifest.';
+        url = './#launches';
+      } else if (isSolar) {
+        title = '☀️ Space Weather Alert';
+        body = 'Geomagnetic solar flux observation active. Tap to view heliophysics data.';
+        url = './#space-weather';
+      } else if (isQuake) {
+        title = '🌍 USGS Seismic Alert';
+        body = 'Recent global earthquake detected. Tap to inspect seismic radar.';
+        url = './#cosmos-hazards';
+      } else if (isAsteroid) {
+        title = '☄️ NASA JPL Radar Alert';
+        body = 'Near-Earth asteroid close approach confirmed. Tap to review trajectory.';
+        url = './#cosmos-hazards';
+      } else if (isIss) {
+        title = '🛰️ Satellite Tracking Alert';
+        body = 'Active orbital pass in tracking range. Tap to view ground track.';
+        url = './#satellites';
+      }
+
+      // Trigger via Service Worker for authentic mobile/desktop push test
+      if (swRegistration) {
+        swRegistration.showNotification(title, {
+          body: body,
+          icon: 'assets/space-hub-icon-192.png?v=1',
+          badge: 'assets/space-hub-icon-192.png?v=1',
+          vibrate: [200, 100, 200],
+          requireInteraction: true,
+          data: { url: url }
+        });
+      } else {
+        new Notification(title, {
+          body: body,
+          icon: 'assets/space-hub-icon-192.png?v=1'
+        });
+      }
+
+      showToast('🔔 Test Notification Dispatched!');
     }
   });
 }
