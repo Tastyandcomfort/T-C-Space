@@ -3,305 +3,593 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#000000" id="meta-theme-color">
-  <title>T&amp;C Space Hub — Live Space Intelligence</title>
+  <meta name="theme-color" content="#101114" id="theme-color-meta">
+  <title>T&amp;C Space Hub — Mission Control</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <link rel="stylesheet" href="styles.css">
+
+  <!-- Firebase App, Messaging & Firestore SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
+  <div class="app-shell">
 
-  <!-- Top Sticky Navigation Bar (Mobile & Desktop) -->
-  <header class="news-topbar">
-    <div class="news-topbar-inner">
-      <div class="brand-group">
-        <div class="brand-logo-frame">
-          <img src="assets/space-hub-icon-192.png?v=1" alt="T&C Space Hub" class="brand-logo-img" onerror="this.style.display='none'; document.getElementById('logo-fallback-icon').style.display='grid';">
-          <div id="logo-fallback-icon" class="brand-logo-fallback">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+    <!-- Desktop Sidebar Rail -->
+    <aside class="sidebar" id="sidebar">
+      <a class="brand" href="#overview">
+        <div class="brand-icon-box">
+          <img class="brand-icon" src="assets/space-hub-icon-192.png?v=1" alt="Logo" onerror="this.style.display='none'; document.getElementById('brand-svg-fallback').style.display='grid';">
+          <div id="brand-svg-fallback" class="brand-icon-fallback">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
           </div>
         </div>
-        <div class="brand-text">
-          <span class="brand-name">T&amp;C SPACE HUB</span>
-          <span class="brand-tagline">LIVE NEWS &amp; TELEMETRY</span>
-        </div>
-      </div>
+        <span class="brand-copy">
+          <b>SPACE HUB</b>
+          <small>MISSION CONTROL</small>
+        </span>
+      </a>
 
-      <div class="topbar-actions">
-        <!-- Dual IST and UTC Live Clock -->
-        <div class="apple-clock-pill" title="Live Space Mission Time">
-          <span class="pulse-dot green"></span>
-          <div class="clock-display">
-            <span class="clock-ist" id="clock-ist">--:--:-- IST</span>
-            <span class="clock-utc" id="clock-utc">--:--:-- UTC</span>
+      <div class="side-label">WORKSPACE</div>
+      <nav class="side-nav" aria-label="Main navigation">
+        <a class="nav-link active" href="#overview" data-nav="overview">
+          <span class="nav-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg></span>
+          <span>Overview</span>
+        </a>
+        <a class="nav-link" href="#satellites" data-nav="satellites">
+          <span class="nav-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg></span>
+          <span>Satellites &amp; Map</span>
+        </a>
+        <a class="nav-link" href="#launches" data-nav="launches">
+          <span class="nav-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/></svg></span>
+          <span>Rockets &amp; Flights</span>
+        </a>
+        <a class="nav-link" href="#space-weather" data-nav="space-weather">
+          <span class="nav-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/></svg></span>
+          <span>Space Weather</span>
+        </a>
+        <a class="nav-link" href="#astronomy" data-nav="astronomy">
+          <span class="nav-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span>
+          <span>Cosmos &amp; Asteroids</span>
+        </a>
+        <a class="nav-link" href="#earth-monitor" data-nav="earth-monitor">
+          <span class="nav-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg></span>
+          <span>Earthquakes (USGS)</span>
+        </a>
+        <a class="nav-link" href="#intel-brief" data-nav="intel-brief">
+          <span class="nav-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></span>
+          <span>Area Intel Brief</span>
+        </a>
+        <a class="nav-link" href="#wiki" data-nav="wiki">
+          <span class="nav-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></span>
+          <span>Space Wiki</span>
+        </a>
+        <a class="nav-link" href="#settings" data-nav="settings">
+          <span class="nav-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
+          <span>Preferences &amp; Alerts</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-bottom">
+        <div class="connection-indicator">
+          <i></i>
+          <span>Real-time Telemetry</span>
+          <b>LIVE</b>
+        </div>
+        <small>Curiosity has no borders.</small>
+      </div>
+    </aside>
+
+    <!-- Main Workspace Area -->
+    <main class="main-area">
+      <!-- Apple Sticky Topbar -->
+      <header class="topbar">
+        <div class="mobile-brand">
+          <div class="brand-icon-box small">
+            <img class="brand-icon" src="assets/space-hub-icon-192.png?v=1" alt="Logo" onerror="this.style.display='none'; document.getElementById('mob-svg-fallback').style.display='grid';">
+            <div id="mob-svg-fallback" class="brand-icon-fallback">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+            </div>
           </div>
+          <b>SPACE HUB</b>
         </div>
 
-        <!-- Settings Gear (Permanent on mobile & desktop) -->
-        <button class="topbar-icon-btn" id="open-settings-btn" title="Preferences & Alerts">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-        </button>
+        <div class="breadcrumb">
+          <span>Space Hub</span><i>/</i><b id="current-section-label">Overview</b>
+        </div>
 
-        <!-- Refresh Button -->
-        <button class="topbar-icon-btn" id="refresh-btn" title="Refresh Live Feeds">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg>
-        </button>
+        <div class="top-actions">
+          <!-- Live Dual IST & UTC Clocks -->
+          <div class="utc-clock" title="Indian Standard Time & Universal Coordinated Time">
+            <span class="live-dot"></span>
+            <div class="clock-duo">
+              <span id="ist-clock">--:--:-- IST</span>
+              <span id="utc-clock">--:--:-- UTC</span>
+            </div>
+          </div>
+
+          <label class="theme-picker" title="Toggle Appearance">
+            <span>🌓</span>
+            <select id="theme-select" aria-label="Appearance">
+              <option value="system">System</option>
+              <option value="light">Light</option>
+              <option value="dark" selected>Dark</option>
+            </select>
+          </label>
+
+          <button id="refresh-all" class="icon-btn" title="Refresh Live Sensors" aria-label="Refresh Data">↻</button>
+        </div>
+      </header>
+
+      <div class="content-wrap">
+
+        <!-- 1. OVERVIEW -->
+        <section class="section-block active-view" id="overview">
+          <div class="welcome-row">
+            <div>
+              <div class="eyebrow"><span class="live-dot"></span> T&amp;C SPACE INTELLIGENCE</div>
+              <h1>Mission control<span>.</span></h1>
+              <p>Authentic real-time space awareness streamed directly from NASA, USGS, WhereTheISS, and Open-Meteo.</p>
+            </div>
+            <div class="welcome-meta">
+              <span class="status-pill"><i></i> SYSTEMS OPERATIONAL</span>
+              <small id="last-updated">Connecting to sensor network…</small>
+            </div>
+          </div>
+
+          <!-- Ticker -->
+          <div class="ticker-row">
+            <div class="ticker-label"><span class="live-dot"></span> LIVE SENSORS</div>
+            <div id="ticker" class="ticker-content">Syncing real-time telemetry from international observatories…</div>
+            <div class="ticker-time">100% VERIFIED</div>
+          </div>
+
+          <!-- Metrics Grid -->
+          <div class="metrics-grid">
+            <article class="metric-card">
+              <div class="metric-top"><span>ISS ALTITUDE</span><span class="metric-symbol blue">◎</span></div>
+              <strong id="iss-alt"><div class="apple-spinner"></div></strong>
+              <small>kilometres above surface</small>
+              <div class="metric-bottom">WhereTheISS.at live API</div>
+            </article>
+
+            <article class="metric-card">
+              <div class="metric-top"><span>ISS VELOCITY</span><span class="metric-symbol purple">⌁</span></div>
+              <strong id="iss-velocity"><div class="apple-spinner"></div></strong>
+              <small>kilometres per second</small>
+              <div class="metric-bottom">Orbital velocity</div>
+            </article>
+
+            <article class="metric-card">
+              <div class="metric-top"><span>NEXT LAUNCH T-MINUS</span><span class="metric-symbol orange">🚀</span></div>
+              <strong id="hero-launch-timer"><div class="apple-spinner"></div></strong>
+              <small id="hero-launch-name">Fetching upcoming missions…</small>
+              <div class="metric-bottom" id="hero-launch-provider">Launch Library 2</div>
+            </article>
+
+            <article class="metric-card">
+              <div class="metric-top"><span>GLOBAL EARTHQUAKES</span><span class="metric-symbol green">◈</span></div>
+              <strong id="hero-quake-count"><div class="apple-spinner"></div></strong>
+              <small>events past 24 hours</small>
+              <div class="metric-bottom">USGS Seismic Feed (M2.5+)</div>
+            </article>
+          </div>
+        </section>
+
+        <!-- 2. SATELLITES & 2D MAP -->
+        <section class="section-block" id="satellites">
+          <div class="section-title">
+            <div>
+              <div class="eyebrow">ORBITAL INTELLIGENCE</div>
+              <h2>Real-Time Satellite Tracking</h2>
+              <p>Live sub-satellite tracking polled directly from WhereTheISS telemetry with clean, watermark-free map canvas.</p>
+            </div>
+          </div>
+
+          <article class="surface map-card">
+            <div class="card-heading">
+              <div>
+                <h3>Global Satellite Position</h3>
+                <p>Tracking the International Space Station with zero watermark clutter.</p>
+              </div>
+              <span class="live-tag"><i></i> LIVE SENSOR</span>
+            </div>
+
+            <!-- Leaflet Map Container -->
+            <div id="sat-map" class="map"></div>
+
+            <div class="map-foot">
+              <div><span>LATITUDE: </span><b id="map-lat">—</b></div>
+              <div><span>LONGITUDE: </span><b id="map-lon">—</b></div>
+              <div><span>ALTITUDE: </span><b id="map-alt">—</b></div>
+              <div><span>VELOCITY: </span><b id="map-vel">—</b></div>
+            </div>
+          </article>
+        </section>
+
+        <!-- 3. ROCKETS & FLIGHTS -->
+        <section class="section-block" id="launches">
+          <div class="section-title">
+            <div>
+              <div class="eyebrow">VERIFIED FLIGHT MANIFEST</div>
+              <h2>Rocket Liftoffs &amp; Countdowns</h2>
+              <p>Direct schedule from Launch Library 2: ISRO, SpaceX, NASA, Rocket Lab, ESA, and international launchpads.</p>
+            </div>
+          </div>
+
+          <!-- Spotlight Card with Ticking Countdown -->
+          <article class="surface launch-spotlight-card">
+            <div class="spotlight-left">
+              <div class="spotlight-tags">
+                <span class="mission-badge">NEXT GLOBAL LAUNCH</span>
+                <span class="status-pill" id="spotlight-status"><i></i> SCHEDULED</span>
+              </div>
+              <h3 id="spotlight-name">Querying flight manifest…</h3>
+              <p id="spotlight-desc">Tracking upcoming spaceport countdowns across the globe.</p>
+              <div class="spotlight-meta-grid">
+                <div><small>LAUNCH VEHICLE</small><b id="spotlight-rocket">—</b></div>
+                <div><small>LAUNCH PROVIDER</small><b id="spotlight-provider">—</b></div>
+                <div><small>LAUNCH COMPLEX</small><b id="spotlight-pad">—</b></div>
+                <div><small>LAUNCH WINDOW (IST)</small><b id="spotlight-time-ist">—</b></div>
+              </div>
+            </div>
+            <div class="spotlight-right">
+              <div class="countdown-box">
+                <div class="countdown-eyebrow">T-MINUS COUNTDOWN</div>
+                <div class="countdown-digits" id="spotlight-countdown"><div class="apple-spinner large"></div></div>
+                <div class="countdown-foot" id="spotlight-time-utc">Calculating target window…</div>
+              </div>
+            </div>
+          </article>
+
+          <!-- Upcoming Launch Manifest Stack -->
+          <div class="launches-grid" id="launches-list">
+            <div class="surface loading-box"><div class="apple-spinner"></div><p>Streaming verified manifests…</p></div>
+          </div>
+        </section>
+
+        <!-- 4. SPACE WEATHER -->
+        <section class="section-block" id="space-weather">
+          <div class="section-title">
+            <div>
+              <div class="eyebrow">HELIOPHYSICS &amp; SOLAR SENSORS</div>
+              <h2>Space Weather Watch (NASA DONKI)</h2>
+              <p>Solar flares and geomagnetic activity observed by NASA heliophysics satellites.</p>
+            </div>
+          </div>
+
+          <article class="surface weather-panel">
+            <div class="card-heading">
+              <div>
+                <h3>Recent Solar Activity &amp; Flares</h3>
+                <p>NASA Space Weather Database Of Notifications, Knowledge, Information.</p>
+              </div>
+              <button id="refresh-weather" class="subtle-button">Refresh DONKI ↻</button>
+            </div>
+            <div id="weather-events" class="event-list-scroll">
+              <div class="loading-state"><div class="apple-spinner"></div><p>Contacting NASA DONKI sensors…</p></div>
+            </div>
+          </article>
+        </section>
+
+        <!-- 5. COSMOS & ASTEROIDS -->
+        <section class="section-block" id="astronomy">
+          <div class="section-title">
+            <div>
+              <div class="eyebrow">COSMOS &amp; NEAR-EARTH OBJECTS</div>
+              <h2>Astronomy Picture &amp; Asteroids (NeoWs)</h2>
+              <p>NASA Astronomy Picture of the Day and live radar close approaches from NASA JPL.</p>
+            </div>
+          </div>
+
+          <!-- APOD Showcase -->
+          <article class="surface apod-layout">
+            <div id="apod-media" class="apod-media">
+              <div class="apple-spinner large"></div>
+            </div>
+            <div class="apod-copy">
+              <div class="eyebrow">NASA · ASTRONOMY PICTURE OF THE DAY</div>
+              <h3 id="apod-title">Loading astronomy feature…</h3>
+              <p id="apod-date" class="mono muted"></p>
+              <p id="apod-explanation" class="apod-explanation"></p>
+              <div class="apod-foot">
+                <span id="apod-copyright"></span>
+                <a id="apod-link" class="text-link" href="https://apod.nasa.gov/apod/astropix.html" target="_blank" rel="noopener">Official NASA APOD ↗</a>
+              </div>
+            </div>
+          </article>
+
+          <!-- NeoWs Asteroid Watch -->
+          <article class="surface neo-panel">
+            <div class="card-heading">
+              <div>
+                <h3>Near-Earth Object Radar (Asteroid Approaches)</h3>
+                <p>Verified close approaches for today from NASA Jet Propulsion Laboratory.</p>
+              </div>
+              <span class="small-chip blue">NASA NeoWs</span>
+            </div>
+            <div id="neo-list" class="neo-list-scroll">
+              <div class="loading-state"><div class="apple-spinner"></div><p>Scanning NASA NeoWs sensors…</p></div>
+            </div>
+          </article>
+        </section>
+
+        <!-- 6. EARTH MONITORING (USGS) -->
+        <section class="section-block" id="earth-monitor">
+          <div class="section-title">
+            <div>
+              <div class="eyebrow">PLANETARY HAZARDS &amp; SEISMOLOGY</div>
+              <h2>Real-Time Earthquakes (USGS)</h2>
+              <p>U.S. Geological Survey worldwide seismic activity (M 2.5+) recorded in the past 24 hours.</p>
+            </div>
+          </div>
+
+          <article class="surface earth-card">
+            <div class="card-heading">
+              <div>
+                <h3>USGS Global Seismic Network</h3>
+                <p>Live earthquake sensor log updated automatically.</p>
+              </div>
+              <span class="small-chip green" id="quake-count">USGS LIVE</span>
+            </div>
+            <div id="earthquake-list" class="earthquake-feed">
+              <div class="loading-state"><div class="apple-spinner"></div><p>Contacting USGS seismographs…</p></div>
+            </div>
+          </article>
+        </section>
+
+        <!-- 7. AREA INTELLIGENCE BRIEF -->
+        <section class="section-block" id="intel-brief">
+          <div class="section-title">
+            <div>
+              <div class="eyebrow">ENVIRONMENTAL SENSOR REANALYSIS</div>
+              <h2>Area-Wise Intelligence Brief</h2>
+              <p>Type any village, city, mandal, district, or state worldwide for instant atmospheric, air quality, and solar radiation readings.</p>
+            </div>
+          </div>
+
+          <article class="surface intel-panel">
+            <!-- Global Autocomplete Search Box -->
+            <div class="intel-search-wrapper">
+              <div class="intel-search-box">
+                <input id="intel-area-input" type="search" placeholder="Type any village, mandal, city, district or state worldwide (e.g., Warangal, Dallas, Guntur, Tokyo)…" autocomplete="off">
+                <button id="intel-search-btn" class="primary-button" type="button">Analyze <span>↗</span></button>
+              </div>
+              <div id="intel-suggestions" class="autocomplete-dropdown" hidden></div>
+            </div>
+
+            <!-- Quick Presets -->
+            <div class="intel-preset-chips" id="intel-presets">
+              <button class="area-pill active" data-lat="17.3850" data-lon="78.4867" data-name="Hyderabad, Telangana, India">Hyderabad</button>
+              <button class="area-pill" data-lat="28.6139" data-lon="77.2090" data-name="New Delhi, India">New Delhi</button>
+              <button class="area-pill" data-lat="12.9716" data-lon="77.5946" data-name="Bengaluru, Karnataka, India">Bengaluru</button>
+              <button class="area-pill" data-lat="19.0760" data-lon="72.8777" data-name="Mumbai, Maharashtra, India">Mumbai</button>
+              <button class="area-pill" data-lat="35.6762" data-lon="139.6503" data-name="Tokyo, Japan">Tokyo</button>
+              <button class="area-pill" data-lat="40.7128" data-lon="-74.0060" data-name="New York, USA">New York</button>
+            </div>
+
+            <!-- Location Status Header -->
+            <div class="intel-brief-box">
+              <div class="intel-brief-head">
+                <div>
+                  <span class="badge-pill green">VERIFIED SENSORS</span>
+                  <h3 id="intel-area-title">Hyderabad, Telangana, India</h3>
+                </div>
+                <span class="small-chip" id="intel-coords-tag">17.38° N, 78.48° E</span>
+              </div>
+            </div>
+
+            <!-- 5 Human-Understandable Metric Cards with Badges -->
+            <div class="intel-metrics-grid">
+              <div class="intel-metric-card">
+                <div class="metric-top"><span>AIR QUALITY (US AQI)</span><span class="metric-symbol green">🌬️</span></div>
+                <div class="val-group">
+                  <strong id="intel-aqi">—</strong>
+                  <span class="status-tag" id="intel-aqi-badge">Good</span>
+                </div>
+                <small id="intel-aqi-sub">Clean air, ideal for outdoor activity</small>
+              </div>
+
+              <div class="intel-metric-card">
+                <div class="metric-top"><span>FINE PARTICULATES (PM2.5)</span><span class="metric-symbol orange">🏭</span></div>
+                <div class="val-group">
+                  <strong id="intel-pm25">—</strong>
+                  <span class="status-tag" id="intel-pm25-badge">Safe</span>
+                </div>
+                <small id="intel-pm25-sub">Microscopic dust &amp; vehicle exhaust</small>
+              </div>
+
+              <div class="intel-metric-card">
+                <div class="metric-top"><span>COARSE PARTICULATES (PM10)</span><span class="metric-symbol orange">🌫️</span></div>
+                <div class="val-group">
+                  <strong id="intel-pm10">—</strong>
+                  <span class="status-tag" id="intel-pm10-badge">Safe</span>
+                </div>
+                <small id="intel-pm10-sub">Road dust, pollen &amp; construction particles</small>
+              </div>
+
+              <div class="intel-metric-card">
+                <div class="metric-top"><span>NITROGEN DIOXIDE (NO₂)</span><span class="metric-symbol teal">🚗</span></div>
+                <div class="val-group">
+                  <strong id="intel-no2">—</strong>
+                  <span class="status-tag" id="intel-no2-badge">Low</span>
+                </div>
+                <small id="intel-no2-sub">Urban traffic &amp; combustion emissions</small>
+              </div>
+
+              <div class="intel-metric-card">
+                <div class="metric-top"><span>SURFACE SOLAR FLUX</span><span class="metric-symbol purple">☀️</span></div>
+                <div class="val-group">
+                  <strong id="intel-solar">—</strong>
+                  <span class="status-tag" id="intel-solar-badge">Normal</span>
+                </div>
+                <small id="intel-solar-sub">Direct sunlight radiation reaching ground</small>
+              </div>
+            </div>
+          </article>
+        </section>
+
+        <!-- 8. SPACE WIKIPEDIA EXPLORER -->
+        <section class="section-block" id="wiki">
+          <div class="section-title">
+            <div>
+              <div class="eyebrow">ENCYCLOPEDIC INTELLIGENCE</div>
+              <h2>Space Encyclopedia (Wikimedia REST API)</h2>
+              <p>Instant encyclopedic lookup powered directly by Wikipedia live servers.</p>
+            </div>
+          </div>
+
+          <article class="surface wiki-panel">
+            <div class="wiki-search-box-wrapper">
+              <div class="wiki-search-box">
+                <input id="wiki-query-input" type="search" placeholder="Type any mission, spacecraft, or planet (e.g., Chandrayaan-3, Gaganyaan, Artemis)..." autocomplete="off">
+                <button id="wiki-search-btn" class="primary-button" type="button">Search <span>↗</span></button>
+              </div>
+              <div id="wiki-suggestions" class="autocomplete-dropdown" hidden></div>
+            </div>
+
+            <!-- Preset Quick Tiles -->
+            <div class="wiki-pills" id="wiki-presets">
+              <button class="wiki-pill active" data-topic="Chandrayaan-3">Chandrayaan-3</button>
+              <button class="wiki-pill" data-topic="Indian Space Research Organisation">ISRO</button>
+              <button class="wiki-pill" data-topic="James Webb Space Telescope">James Webb</button>
+              <button class="wiki-pill" data-topic="Artemis program">Artemis</button>
+              <button class="wiki-pill" data-topic="Gaganyaan">Gaganyaan</button>
+              <button class="wiki-pill" data-topic="SpaceX Starship">Starship</button>
+              <button class="wiki-pill" data-topic="Hubble Space Telescope">Hubble</button>
+            </div>
+
+            <div id="wiki-card" class="wiki-result-card">
+              <div class="wiki-result-thumb-wrap">
+                <img id="wiki-thumb" class="wiki-thumb" src="assets/space-hub-icon-192.png?v=1" alt="Thumbnail">
+              </div>
+              <div class="wiki-result-copy">
+                <span class="badge-pill" id="wiki-desc-tag">ENCYCLOPEDIC RECORD</span>
+                <h3 id="wiki-title">Chandrayaan-3</h3>
+                <p id="wiki-extract">Loading Wikipedia article summary…</p>
+                <a id="wiki-link" class="text-link" href="#" target="_blank" rel="noopener">Read Full Wikipedia Article ↗</a>
+              </div>
+            </div>
+          </article>
+        </section>
+
+        <!-- 9. PREFERENCES & ALERTS -->
+        <section class="section-block" id="settings">
+          <div class="section-title">
+            <div>
+              <div class="eyebrow">CONFIGURATION &amp; NOTIFICATION ENGINE</div>
+              <h2>Preferences &amp; Space Alerts</h2>
+              <p>Customize live telemetry appearance, time format, and granular device notification thresholds linked to Firebase.</p>
+            </div>
+          </div>
+
+          <div class="settings-grid">
+            <article class="surface settings-card">
+              <h3>Display &amp; Appearance</h3>
+              <div class="setting-item">
+                <div>
+                  <b>Appearance Theme</b>
+                  <small>Light, Dark, or System Match</small>
+                </div>
+                <select id="setting-theme" class="setting-select">
+                  <option value="system">Match System</option>
+                  <option value="light">Light Theme</option>
+                  <option value="dark" selected>Dark Theme</option>
+                </select>
+              </div>
+            </article>
+
+            <article class="surface settings-card">
+              <h3>Real-Time Alerts &amp; Firebase Notification Engine</h3>
+              <p class="muted">You will receive alerts on this device only for the events you select below.</p>
+
+              <div class="toggle-list">
+                <label class="toggle-row">
+                  <div>
+                    <b>ISS Overhead Pass Alert</b>
+                    <small>Notify when Space Station elevation is visible</small>
+                  </div>
+                  <input type="checkbox" checked class="apple-toggle" id="toggle-iss">
+                </label>
+
+                <label class="toggle-row">
+                  <div>
+                    <b>Severe Solar Storms (Kp 5+)</b>
+                    <small>Notify on NASA DONKI geomagnetic storm alerts</small>
+                  </div>
+                  <input type="checkbox" checked class="apple-toggle" id="toggle-solar">
+                </label>
+
+                <label class="toggle-row">
+                  <div>
+                    <b>Rocket Launch Countdowns</b>
+                    <small>Notify 1 hour prior to major orbital liftoffs</small>
+                  </div>
+                  <input type="checkbox" checked class="apple-toggle" id="toggle-launches">
+                </label>
+
+                <label class="toggle-row">
+                  <div>
+                    <b>Major Earthquake Alerts (M 5.0+)</b>
+                    <small>Notify on USGS rapid seismic detection</small>
+                  </div>
+                  <input type="checkbox" checked class="apple-toggle" id="toggle-quake">
+                </label>
+              </div>
+
+              <div class="setting-actions">
+                <button id="save-firebase-btn" class="primary-button full-width">Save &amp; Link Device with Firebase 🚀</button>
+              </div>
+            </article>
+          </div>
+        </section>
+
       </div>
-    </div>
 
-    <!-- News Category Pill Bar (Horizontal Scroll) -->
-    <nav class="news-category-bar">
-      <div class="category-scroll">
-        <button class="cat-pill active" data-cat="all">All News</button>
-        <button class="cat-pill" data-cat="launches">Rocket Launches</button>
-        <button class="cat-pill" data-cat="tracking">Orbital Map</button>
-        <button class="cat-pill" data-cat="asteroids">Near-Earth Asteroids</button>
-        <button class="cat-pill" data-cat="solar">Solar Weather</button>
-        <button class="cat-pill" data-cat="earthquakes">Earthquakes</button>
-        <button class="cat-pill" data-cat="intel">Area Intel</button>
-        <button class="cat-pill" data-cat="cosmos">Astronomy (APOD)</button>
-      </div>
-    </nav>
-  </header>
-
-  <!-- Live Telemetry Ticker (Breaking News Style) -->
-  <div class="breaking-ticker-bar">
-    <div class="ticker-badge">LIVE SENSORS</div>
-    <div class="ticker-content" id="live-ticker-text">Streaming real-time feeds from NASA, USGS, WhereTheISS, and Launch Library…</div>
-    <div class="ticker-time" id="ticker-sync-stamp">100% LIVE</div>
+      <!-- Minimal Classic Apple Footer -->
+      <footer class="footer">
+        <div class="footer-left">
+          <div class="footer-dot green"></div>
+          <b>T&amp;C SPACE HUB</b>
+          <span>· Real-time Space Intelligence · Curiosity has no borders.</span>
+        </div>
+        <div class="footer-right">
+          <a href="https://tastyandcomfort.github.io/T-C/" target="_blank" rel="noopener">T&amp;C Stall</a>
+          <a href="https://tastyandcomfort.github.io/news/" target="_blank" rel="noopener">T&amp;C News</a>
+          <a href="https://api.nasa.gov/" target="_blank" rel="noopener">NASA APIs</a>
+          <a href="https://earthquake.usgs.gov/" target="_blank" rel="noopener">USGS</a>
+        </div>
+      </footer>
+    </main>
   </div>
 
-  <!-- Main Container -->
-  <main class="news-container">
+  <!-- Mobile Bottom Frosted Navigation Dock -->
+  <nav class="mobile-dock" aria-label="Mobile Navigation">
+    <a class="dock-link active" href="#overview" data-nav="overview">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+      <span>Overview</span>
+    </a>
+    <a class="dock-link" href="#satellites" data-nav="satellites">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+      <span>Tracking</span>
+    </a>
+    <a class="dock-link" href="#launches" data-nav="launches">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/></svg>
+      <span>Launches</span>
+    </a>
+    <a class="dock-link" href="#intel-brief" data-nav="intel-brief">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      <span>Area Intel</span>
+    </a>
+    <a class="dock-link" href="#settings" data-nav="settings">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <span>Alerts</span>
+    </a>
+  </nav>
 
-    <!-- Hero Spotlight Story (Next Rocket Launch) -->
-    <section class="news-card hero-spotlight" data-section="launches">
-      <div class="card-meta">
-        <span class="badge red">COUNTDOWN SPOTLIGHT</span>
-        <span class="meta-time" id="hero-target-time">Target Launch Window: —</span>
-      </div>
-      <h1 class="hero-title" id="hero-launch-name">Retrieving flight manifest…</h1>
-      <p class="hero-summary" id="hero-launch-desc">Tracking upcoming orbital missions across global spaceports.</p>
-      <div class="hero-stats-row">
-        <div class="stat-box">
-          <small>T-MINUS</small>
-          <strong id="hero-tminus"><span class="apple-spinner"></span></strong>
-        </div>
-        <div class="stat-box">
-          <small>ROCKET VEHICLE</small>
-          <strong id="hero-vehicle">—</strong>
-        </div>
-        <div class="stat-box">
-          <small>LAUNCH PROVIDER</small>
-          <strong id="hero-provider">—</strong>
-        </div>
-        <div class="stat-box">
-          <small>SPACEPORT LOCATION</small>
-          <strong id="hero-pad">—</strong>
-        </div>
-      </div>
-    </section>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-    <!-- News Feed Grid -->
-    <div class="news-feed-grid">
-
-      <!-- CARD 1: LIVE ORBITAL MAP -->
-      <article class="news-card map-news-card" data-section="tracking">
-        <div class="card-meta">
-          <span class="badge blue">LIVE ORBITAL SENSORS</span>
-          <span class="meta-time" id="iss-ping-time">Streaming…</span>
-        </div>
-        <h2 class="card-heading">Global Real-Time Tracking</h2>
-        <p class="card-excerpt">Live coordinates polled directly from WhereTheISS telemetry with dark Apple canvas.</p>
-        <div id="news-sat-map" class="news-map-frame"></div>
-        <div class="map-stats-bar">
-          <div><span>LAT:</span> <b id="map-lat">—</b></div>
-          <div><span>LON:</span> <b id="map-lon">—</b></div>
-          <div><span>ALT:</span> <b id="map-alt">—</b></div>
-          <div><span>VEL:</span> <b id="map-vel">—</b></div>
-        </div>
-      </article>
-
-      <!-- CARD 2: NEAR-EARTH ASTEROIDS (NASA NEOWS) -->
-      <article class="news-card" data-section="asteroids">
-        <div class="card-meta">
-          <span class="badge orange">NASA JPL NEOWS RADAR</span>
-          <span class="meta-time">Verified Feed</span>
-        </div>
-        <h2 class="card-heading">Near-Earth Asteroid Flybys</h2>
-        <p class="card-excerpt">Real-time close approaches for today from NASA Jet Propulsion Laboratory.</p>
-        <div class="asteroid-feed-list" id="asteroid-list">
-          <div class="loading-state"><span class="apple-spinner"></span><p>Scanning NASA NeoWs sensors…</p></div>
-        </div>
-      </article>
-
-      <!-- CARD 3: SOLAR & SPACE WEATHER (NASA DONKI) -->
-      <article class="news-card" data-section="solar">
-        <div class="card-meta">
-          <span class="badge purple">NASA DONKI HELIOPHYSICS</span>
-          <span class="meta-time">Solar Disk</span>
-        </div>
-        <h2 class="card-heading">Solar Flares &amp; Space Weather</h2>
-        <p class="card-excerpt">Solar eruptions and coronal mass ejections observed by NASA space weather sensors.</p>
-        <div class="event-feed-list" id="solar-list">
-          <div class="loading-state"><span class="apple-spinner"></span><p>Querying DONKI sensor logs…</p></div>
-        </div>
-      </article>
-
-      <!-- CARD 4: GLOBAL EARTHQUAKES (USGS) -->
-      <article class="news-card" data-section="earthquakes">
-        <div class="card-meta">
-          <span class="badge green">USGS SEISMOLOGY NETWORK</span>
-          <span class="meta-time" id="quake-count-tag">Live Sensors</span>
-        </div>
-        <h2 class="card-heading">Recent Earthquakes (M2.5+ Past 24h)</h2>
-        <p class="card-excerpt">Global seismic events streamed directly from USGS earthquake sensors.</p>
-        <div class="event-feed-list" id="quake-list">
-          <div class="loading-state"><span class="apple-spinner"></span><p>Contacting USGS seismographs…</p></div>
-        </div>
-      </article>
-
-      <!-- CARD 5: AREA INTELLIGENCE BRIEF -->
-      <article class="news-card" data-section="intel">
-        <div class="card-meta">
-          <span class="badge teal">ATMOSPHERIC REANALYSIS</span>
-          <span class="meta-time">Open-Meteo</span>
-        </div>
-        <h2 class="card-heading">Area Environmental Intelligence</h2>
-        <p class="card-excerpt">Live ground-level AQI, particulate pollution (PM2.5), and solar radiation.</p>
-        
-        <div class="city-pill-scroll">
-          <button class="city-pill active" data-lat="17.3850" data-lon="78.4867" data-city="Hyderabad, India">Hyderabad</button>
-          <button class="city-pill" data-lat="28.6139" data-lon="77.2090" data-city="New Delhi, India">New Delhi</button>
-          <button class="city-pill" data-lat="12.9716" data-lon="77.5946" data-city="Bengaluru, India">Bengaluru</button>
-          <button class="city-pill" data-lat="19.0760" data-lon="72.8777" data-city="Mumbai, India">Mumbai</button>
-          <button class="city-pill" data-lat="35.6762" data-lon="139.6503" data-city="Tokyo, Japan">Tokyo</button>
-          <button class="city-pill" data-lat="40.7128" data-lon="-74.0060" data-city="New York, USA">New York</button>
-        </div>
-
-        <div class="intel-grid">
-          <div class="intel-item">
-            <small>AIR QUALITY (US AQI)</small>
-            <strong id="intel-aqi">—</strong>
-          </div>
-          <div class="intel-item">
-            <small>PM 2.5 PARTICULATES</small>
-            <strong id="intel-pm25">—</strong>
-          </div>
-          <div class="intel-item">
-            <small>PM 10 PARTICULATES</small>
-            <strong id="intel-pm10">—</strong>
-          </div>
-          <div class="intel-item">
-            <small>NITROGEN DIOXIDE</small>
-            <strong id="intel-no2">—</strong>
-          </div>
-          <div class="intel-item">
-            <small>SOLAR IRRADIANCE</small>
-            <strong id="intel-solar">—</strong>
-          </div>
-          <div class="intel-item">
-            <small>REPORTED LOCATION</small>
-            <strong class="text-truncate" id="intel-city">Hyderabad</strong>
-          </div>
-        </div>
-      </article>
-
-      <!-- CARD 6: NASA ASTRONOMY (APOD) -->
-      <article class="news-card apod-card" data-section="cosmos">
-        <div class="card-meta">
-          <span class="badge blue">NASA COSMIC ARCHIVE</span>
-          <span class="meta-time" id="apod-date-tag">Today</span>
-        </div>
-        <h2 class="card-heading" id="apod-title">Loading astronomy feature…</h2>
-        <div class="apod-frame" id="apod-media">
-          <span class="apple-spinner large"></span>
-        </div>
-        <p class="card-excerpt" id="apod-explanation"></p>
-        <small class="meta-credit" id="apod-credit"></small>
-      </article>
-
-    </div>
-  </main>
-
-  <!-- Apple Settings & Alerts Sheet Modal -->
-  <div class="apple-modal-backdrop" id="settings-modal" aria-hidden="true">
-    <div class="apple-sheet" role="dialog" aria-modal="true">
-      <div class="sheet-grabber"></div>
-      <div class="sheet-header">
-        <h3 class="sheet-title">Preferences &amp; Space Alerts</h3>
-        <button class="sheet-done-btn" id="close-settings-btn">Done</button>
-      </div>
-
-      <div class="sheet-body">
-        <div class="sheet-group">
-          <div class="group-title">APPEARANCE</div>
-          <div class="sheet-row">
-            <span>Color Theme</span>
-            <div class="apple-segmented" id="theme-segmented">
-              <button class="seg-btn" data-theme="light">Light</button>
-              <button class="seg-btn active" data-theme="dark">Dark</button>
-              <button class="seg-btn" data-theme="system">System</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="sheet-group">
-          <div class="group-title">ALERT THRESHOLDS (REAL-TIME NOTIFICATIONS)</div>
-          <div class="sheet-row">
-            <div>
-              <b>Solar Storm Alerts</b>
-              <small>Notify on Geomagnetic storm Kp 5.0+</small>
-            </div>
-            <select class="apple-select" id="pref-solar-kp">
-              <option value="4">Moderate (Kp 4+)</option>
-              <option value="5" selected>Severe (Kp 5+)</option>
-              <option value="7">Extreme (Kp 7+)</option>
-            </select>
-          </div>
-
-          <div class="sheet-row">
-            <div>
-              <b>Earthquake Alerts</b>
-              <small>Notify when magnitude exceeds</small>
-            </div>
-            <select class="apple-select" id="pref-quake-mag">
-              <option value="4.0">M 4.0+</option>
-              <option value="5.0" selected>M 5.0+</option>
-              <option value="6.0">M 6.0+ Major</option>
-            </select>
-          </div>
-
-          <div class="sheet-row">
-            <div>
-              <b>Rocket Liftoff Alert</b>
-              <small>Reminder before liftoff</small>
-            </div>
-            <select class="apple-select" id="pref-launch-time">
-              <option value="15">T-15 Minutes</option>
-              <option value="60" selected>T-60 Minutes</option>
-              <option value="1440">T-24 Hours</option>
-            </select>
-          </div>
-
-          <div class="sheet-row">
-            <div>
-              <b>Browser Notifications</b>
-              <small>Request Web Notification permission</small>
-            </div>
-            <input type="checkbox" class="apple-switch" id="pref-enable-alerts" checked>
-          </div>
-
-          <div class="sheet-btn-row">
-            <button class="apple-btn-secondary full-width" id="trigger-test-alert">Test Space Alert Notification</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="apple-toast" id="toast-message"></div>
-
-  <!-- Scripts -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="app.js"></script>
 </body>
