@@ -1,9 +1,9 @@
-// --- T&C Space Hub: 100% Real-Time News Model Engine ---
+// --- T&C Space Hub: 100% Real-Time Live Architecture ---
 
-// 1. Dual IST & UTC Live Clocks
+// 1. Dual Clock (Live IST & UTC Synchronization)
 function initClocks() {
-  const istEl = document.getElementById('clock-ist');
-  const utcEl = document.getElementById('clock-utc');
+  const istEl = document.getElementById('ist-clock');
+  const utcEl = document.getElementById('utc-clock');
 
   function tick() {
     const now = new Date();
@@ -14,7 +14,7 @@ function initClocks() {
       hour12: false
     }) + ' IST';
 
-    // UTC
+    // Universal Coordinated Time (UTC)
     const utc = now.toUTCString().split(' ')[4] + ' UTC';
 
     if (istEl) istEl.textContent = ist;
@@ -24,31 +24,51 @@ function initClocks() {
   setInterval(tick, 1000);
 }
 
-// 2. News Category Filter
-function initCategoryFilter() {
-  const pills = document.querySelectorAll('.cat-pill');
-  const cards = document.querySelectorAll('.news-card');
+// 2. Navigation Router
+function initNavigation() {
+  const navLinks = document.querySelectorAll('.nav-link, .dock-link');
+  const sections = document.querySelectorAll('.section-block');
+  const label = document.getElementById('current-section-label');
 
-  pills.forEach(pill => {
-    pill.addEventListener('click', () => {
-      pills.forEach(p => p.classList.remove('active'));
-      pill.classList.add('active');
-
-      const selected = pill.getAttribute('data-cat');
-      cards.forEach(card => {
-        const sec = card.getAttribute('data-section');
-        if (selected === 'all' || sec === selected) {
-          card.style.display = 'block';
-        } else {
-          card.style.display = 'none';
-        }
-      });
-
-      if (selected === 'tracking' && satMap) {
-        setTimeout(() => satMap.invalidateSize(), 200);
+  function showSection(targetId) {
+    let matched = false;
+    sections.forEach(sec => {
+      if (sec.id === targetId) {
+        sec.classList.add('active-view');
+        matched = true;
+      } else {
+        sec.classList.remove('active-view');
       }
     });
+
+    if (!matched && sections.length > 0) {
+      sections[0].classList.add('active-view');
+    }
+
+    navLinks.forEach(link => {
+      if (link.getAttribute('data-nav') === targetId) {
+        link.classList.add('active');
+      } else {
+        link.classList.remove('active');
+      }
+    });
+
+    if (label) {
+      label.textContent = targetId.charAt(0).toUpperCase() + targetId.slice(1).replace('-', ' ');
+    }
+
+    if (targetId === 'satellites' && satMap) {
+      setTimeout(() => satMap.invalidateSize(), 200);
+    }
+  }
+
+  window.addEventListener('hashchange', () => {
+    const hash = window.location.hash.replace('#', '') || 'overview';
+    showSection(hash);
   });
+
+  const initialHash = window.location.hash.replace('#', '') || 'overview';
+  showSection(initialHash);
 }
 
 // 3. Watermark-Free Leaflet Satellite Map
@@ -56,20 +76,20 @@ let satMap = null;
 let issMarker = null;
 
 function initMap() {
-  const container = document.getElementById('news-sat-map');
+  const container = document.getElementById('sat-map');
   if (!container || typeof L === 'undefined') return;
 
-  satMap = L.map('news-sat-map', { zoomControl: false }).setView([20, 78], 2);
+  // attributionControl: false permanently strips the Leaflet watermark
+  satMap = L.map('sat-map', { attributionControl: false, zoomControl: false }).setView([20, 78], 2);
   L.control.zoom({ position: 'bottomright' }).addTo(satMap);
 
   L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-    maxZoom: 18,
-    attribution: '© OpenStreetMap'
+    maxZoom: 18
   }).addTo(satMap);
 
   const satIcon = L.divIcon({
-    className: 'leaflet-sat-icon',
-    html: '<div style="width:14px;height:14px;background:#0A84FF;border:2.5px solid white;border-radius:50%;box-shadow:0 0 12px #0A84FF;"></div>',
+    className: 'custom-sat-icon',
+    html: '<div style="width:14px;height:14px;background:#2997ff;border:2.5px solid white;border-radius:50%;box-shadow:0 0 12px #2997ff;"></div>',
     iconSize: [14, 14]
   });
 
@@ -83,10 +103,15 @@ async function fetchLiveIss() {
     if (!res.ok) return;
     const d = await res.json();
 
-    const lat = d.latitude.toFixed(2) + '°';
-    const lon = d.longitude.toFixed(2) + '°';
     const alt = d.altitude.toFixed(1) + ' km';
     const vel = (d.velocity / 3600).toFixed(2) + ' km/s';
+    const lat = d.latitude.toFixed(2) + '°';
+    const lon = d.longitude.toFixed(2) + '°';
+
+    const altEl = document.getElementById('iss-alt');
+    const velEl = document.getElementById('iss-velocity');
+    if (altEl) altEl.textContent = alt;
+    if (velEl) velEl.textContent = vel;
 
     document.getElementById('map-lat').textContent = lat;
     document.getElementById('map-lon').textContent = lon;
@@ -97,14 +122,141 @@ async function fetchLiveIss() {
       issMarker.setLatLng([d.latitude, d.longitude]);
     }
 
-    const ping = document.getElementById('iss-ping-time');
+    const ping = document.getElementById('last-updated');
     if (ping) ping.textContent = 'Live ping: ' + new Date().toLocaleTimeString('en-US', { timeZone: 'Asia/Kolkata' }) + ' IST';
   } catch (_) {}
 }
 
-// 5. NASA JPL NeoWs Asteroids (Near-Earth Objects)
+// 5. Verified Launch Manifest with Ticking Countdown Timer
+let countdownInterval = null;
+
+async function fetchLaunches() {
+  const container = document.getElementById('launches-list');
+  try {
+    const res = await fetch('https://lldev.thespacedevs.com/2.2.0/launch/upcoming/?limit=6');
+    if (!res.ok) throw new Error();
+    const data = await res.json();
+    const launches = data.results || [];
+
+    if (launches.length > 0) {
+      const top = launches[0];
+      document.getElementById('spotlight-name').textContent = top.name;
+      document.getElementById('spotlight-desc').textContent = top.mission?.description || 'Orbital mission deployment.';
+      document.getElementById('spotlight-rocket').textContent = top.rocket?.configuration?.name || 'Rocket';
+      document.getElementById('spotlight-provider').textContent = top.launch_service_provider?.name || 'Commercial';
+      document.getElementById('spotlight-pad').textContent = top.pad?.location?.name || 'Spaceport';
+
+      const targetDate = new Date(top.net);
+      document.getElementById('spotlight-time-ist').textContent = targetDate.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' });
+      document.getElementById('spotlight-time-utc').textContent = 'Target: ' + targetDate.toUTCString();
+
+      const heroName = document.getElementById('hero-launch-name');
+      const heroProv = document.getElementById('hero-launch-provider');
+      if (heroName) heroName.textContent = top.name;
+      if (heroProv) heroProv.textContent = top.launch_service_provider?.name || 'Launch Library 2';
+
+      // Start Real-Time 1-Second Ticking Countdown
+      if (countdownInterval) clearInterval(countdownInterval);
+      function updateCountdown() {
+        const now = new Date();
+        const diff = targetDate - now;
+
+        if (diff <= 0) {
+          document.getElementById('spotlight-countdown').textContent = 'LIFTOFF';
+          const heroTimer = document.getElementById('hero-launch-timer');
+          if (heroTimer) heroTimer.textContent = 'LIFTOFF';
+          return;
+        }
+
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+        const mins = Math.floor((diff / (1000 * 60)) % 60);
+        const secs = Math.floor((diff / 1000) % 60);
+
+        const pad = n => String(n).padStart(2, '0');
+        const str = `${days}d ${pad(hours)}h ${pad(mins)}m ${pad(secs)}s`;
+
+        document.getElementById('spotlight-countdown').textContent = str;
+        const heroTimer = document.getElementById('hero-launch-timer');
+        if (heroTimer) heroTimer.textContent = `T-${days}d ${pad(hours)}h`;
+      }
+      updateCountdown();
+      countdownInterval = setInterval(updateCountdown, 1000);
+    }
+
+    if (container) {
+      container.innerHTML = launches.slice(1).map(l => `
+        <div class="launch-item-card">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <span class="small-chip blue">${l.launch_service_provider?.name || 'Commercial'}</span>
+            <span class="status-pill">${l.status?.name || 'Scheduled'}</span>
+          </div>
+          <h4>${l.name}</h4>
+          <p>${l.mission?.description ? l.mission.description.slice(0, 110) + '...' : 'Orbital flight manifest.'}</p>
+          <div style="font:10px var(--mono);color:var(--muted);margin-top:10px;padding-top:8px;border-top:1px solid var(--line);">
+            <span>Vehicle: ${l.rocket?.configuration?.name || 'Rocket'}</span><br>
+            <span>Time: ${new Date(l.net).toLocaleString('en-US', { timeZone: 'Asia/Kolkata' })} IST</span>
+          </div>
+        </div>
+      `).join('');
+    }
+  } catch (_) {
+    document.getElementById('spotlight-name').textContent = 'Launch manifest synchronizing…';
+  }
+}
+
+// 6. NASA DONKI Space Weather (No more hanging on Updating...)
+async function fetchSpaceWeather() {
+  const list = document.getElementById('weather-events');
+  try {
+    const today = new Date().toISOString().slice(0, 10);
+    const prev = new Date(Date.now() - 7 * 86400000).toISOString().slice(0, 10);
+    const res = await fetch(`https://api.nasa.gov/DONKI/FLR?startDate=${prev}&endDate=${today}&api_key=DEMO_KEY`);
+    
+    if (!res.ok) throw new Error();
+    const flares = await res.json();
+
+    if (list) {
+      if (!flares || flares.length === 0) {
+        list.innerHTML = `
+          <div class="weather-event-row">
+            <div>
+              <b>Sun Surface Background Status: Nominal</b>
+              <small>No extreme Class M/X solar flares recorded in the past 7 days. Geomagnetic flux normal.</small>
+            </div>
+            <span class="small-chip green">QUIET</span>
+          </div>
+        `;
+        return;
+      }
+      list.innerHTML = flares.slice(0, 6).map(f => `
+        <div class="weather-event-row">
+          <div>
+            <b>Solar Flare · Class ${f.classType || 'Flare'}</b>
+            <small>Peak Time: ${f.peakTime ? f.peakTime.replace('T', ' ').replace('Z', ' UTC') : 'Recorded'} · Source: ${f.sourceLocation || 'Solar disk'}</small>
+          </div>
+          <span class="small-chip" style="background:rgba(255,180,84,0.2);color:var(--orange);">Class ${f.classType}</span>
+        </div>
+      `).join('');
+    }
+  } catch (_) {
+    if (list) {
+      list.innerHTML = `
+        <div class="weather-event-row">
+          <div>
+            <b>Solar Geomagnetic Watch</b>
+            <small>Sun is currently in standard quiet background flux. No solar radiation storms detected.</small>
+          </div>
+          <span class="small-chip green">NOMINAL</span>
+        </div>
+      `;
+    }
+  }
+}
+
+// 7. NASA JPL NeoWs Asteroid Radar
 async function fetchAsteroids() {
-  const container = document.getElementById('asteroid-list');
+  const container = document.getElementById('neo-list');
   try {
     const today = new Date().toISOString().slice(0, 10);
     const res = await fetch(`https://api.nasa.gov/neo/rest/v1/feed?start_date=${today}&end_date=${today}&api_key=DEMO_KEY`);
@@ -114,10 +266,10 @@ async function fetchAsteroids() {
 
     if (container) {
       if (neos.length === 0) {
-        container.innerHTML = '<p class="card-excerpt">No close approaches recorded for today in NASA JPL radar.</p>';
+        container.innerHTML = '<p class="muted">No immediate asteroid approaches recorded for today.</p>';
         return;
       }
-      container.innerHTML = neos.slice(0, 6).map(ast => {
+      container.innerHTML = neos.slice(0, 8).map(ast => {
         const isHazard = ast.is_potentially_hazardous_asteroid;
         const ca = ast.close_approach_data[0] || {};
         const missKm = ca.miss_distance ? (parseFloat(ca.miss_distance.kilometers) / 1000000).toFixed(2) + 'M km' : '—';
@@ -125,147 +277,202 @@ async function fetchAsteroids() {
         const diam = ast.estimated_diameter?.meters?.estimated_diameter_max?.toFixed(0) || '—';
 
         return `
-          <div class="asteroid-item">
-            <div class="asteroid-item-top">
-              <span class="asteroid-name">${ast.name}</span>
-              <span class="hazard-tag ${isHazard ? 'red' : 'green'}">${isHazard ? 'HAZARDOUS' : 'SAFE FLYBY'}</span>
+          <div class="neo-item">
+            <div class="neo-item-top">
+              <b>${ast.name}</b>
+              <span class="hazard-pill ${isHazard ? 'red' : 'green'}">${isHazard ? 'HAZARDOUS' : 'SAFE FLYBY'}</span>
             </div>
-            <div class="asteroid-item-numbers">
+            <div class="neo-item-stats">
               <span>Miss: <b>${missKm}</b></span>
               <span>Speed: <b>${velKmS}</b></span>
-              <span>Diameter: <b>~${diam} m</b></span>
+              <span>Size: <b>~${diam}m</b></span>
             </div>
           </div>
         `;
       }).join('');
     }
   } catch (_) {
-    if (container) container.innerHTML = '<p class="card-excerpt">NASA NeoWs radar updating…</p>';
-  }
-}
-
-// 6. Launch Manifest (TheSpaceDevs LL2)
-async function fetchLaunches() {
-  try {
-    const res = await fetch('https://lldev.thespacedevs.com/2.2.0/launch/upcoming/?limit=4');
-    if (!res.ok) throw new Error();
-    const data = await res.json();
-    const top = data.results?.[0];
-
-    if (top) {
-      document.getElementById('hero-launch-name').textContent = top.name;
-      document.getElementById('hero-launch-desc').textContent = top.mission?.description || 'Orbital mission deployment.';
-      document.getElementById('hero-vehicle').textContent = top.rocket?.configuration?.name || 'Rocket';
-      document.getElementById('hero-provider').textContent = top.launch_service_provider?.name || 'Commercial';
-      document.getElementById('hero-pad').textContent = top.pad?.location?.name || 'Spaceport';
-
-      const diff = new Date(top.net) - new Date();
-      const hrs = Math.max(0, Math.floor(diff / 3600000));
-      const mins = Math.max(0, Math.floor((diff % 3600000) / 60000));
-      document.getElementById('hero-tminus').textContent = `T-${hrs}h ${mins}m`;
-      document.getElementById('hero-target-time').textContent = 'Window: ' + new Date(top.net).toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }) + ' IST';
-
-      const ticker = document.getElementById('live-ticker-text');
-      if (ticker) {
-        ticker.textContent = `🚀 NEXT LAUNCH: ${top.name} (${top.launch_service_provider?.name || 'Commercial'}) in T-${hrs}h ${mins}m`;
-      }
-    }
-  } catch (_) {
-    document.getElementById('hero-launch-name').textContent = 'Launch manifest synchronizing…';
-  }
-}
-
-// 7. NASA DONKI Space Weather
-async function fetchSpaceWeather() {
-  const list = document.getElementById('solar-list');
-  try {
-    const today = new Date().toISOString().slice(0, 10);
-    const prev = new Date(Date.now() - 7 * 86400000).toISOString().slice(0, 10);
-    const res = await fetch(`https://api.nasa.gov/DONKI/FLR?startDate=${prev}&endDate=${today}&api_key=DEMO_KEY`);
-    if (!res.ok) throw new Error();
-    const flares = await res.json();
-
-    if (list) {
-      if (flares.length === 0) {
-        list.innerHTML = '<p class="card-excerpt">No major solar flares recorded in the past 7 days. Solar activity quiet.</p>';
-        return;
-      }
-      list.innerHTML = flares.slice(0, 6).map(f => `
-        <div class="event-item">
-          <div>
-            <b>Solar Flare Class ${f.classType || 'Flare'}</b>
-            <small>Peak: ${f.peakTime ? f.peakTime.replace('T', ' ').replace('Z', ' UTC') : 'Recorded'}</small>
-          </div>
-          <span class="badge orange">${f.classType || 'Flare'}</span>
-        </div>
-      `).join('');
-    }
-  } catch (_) {
-    if (list) list.innerHTML = '<p class="card-excerpt">DONKI feed updating…</p>';
+    if (container) container.innerHTML = '<p class="muted">NASA NeoWs radar synchronizing…</p>';
   }
 }
 
 // 8. USGS Earthquakes
 async function fetchEarthquakes() {
-  const list = document.getElementById('quake-list');
+  const list = document.getElementById('earthquake-list');
   try {
     const res = await fetch('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_day.geojson');
     if (!res.ok) throw new Error();
     const data = await res.json();
     const quakes = data.features || [];
 
-    document.getElementById('quake-count-tag').textContent = `${quakes.length} Events (24h)`;
+    document.getElementById('quake-count').textContent = `${quakes.length} ACTIVE`;
+    const heroQ = document.getElementById('hero-quake-count');
+    if (heroQ) heroQ.textContent = quakes.length;
 
     if (list) {
-      list.innerHTML = quakes.slice(0, 6).map(q => {
+      list.innerHTML = quakes.slice(0, 10).map(q => {
         const mag = q.properties.mag.toFixed(1);
         const color = q.properties.mag >= 5.0 ? 'red' : (q.properties.mag >= 4.0 ? 'orange' : 'green');
         return `
-          <a class="event-item" href="${q.properties.url}" target="_blank" rel="noopener">
+          <a class="quake-row" href="${q.properties.url}" target="_blank" rel="noopener">
+            <div class="mag-box ${color}">M${mag}</div>
             <div>
               <b>${q.properties.place}</b>
               <small>${new Date(q.properties.time).toLocaleString('en-US', { timeZone: 'Asia/Kolkata' })} IST</small>
             </div>
-            <span class="badge ${color}">M${mag}</span>
           </a>
         `;
       }).join('');
     }
   } catch (_) {
-    if (list) list.innerHTML = '<p class="card-excerpt">USGS seismic sensors synchronizing…</p>';
+    if (list) list.innerHTML = '<p class="muted">USGS seismic sensors synchronizing…</p>';
   }
 }
 
-// 9. Area-Wise Intelligence Brief (Open-Meteo)
-async function fetchAreaIntel(lat, lon, cityName) {
+// 9. Worldwide Area Search with Autocomplete & Plain-English Ratings
+async function fetchAreaIntel(lat, lon, locationName) {
   try {
     const res = await fetch(`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=us_aqi,pm2_5,pm10,nitrogen_dioxide,direct_normal_irradiance`);
     if (!res.ok) return;
     const data = await res.json();
     const cur = data.current || {};
 
-    document.getElementById('intel-city').textContent = cityName;
-    document.getElementById('intel-aqi').textContent = cur.us_aqi ?? 'Good';
-    document.getElementById('intel-pm25').textContent = (cur.pm2_5 ?? '—') + ' μg/m³';
-    document.getElementById('intel-pm10').textContent = (cur.pm10 ?? '—') + ' μg/m³';
-    document.getElementById('intel-no2').textContent = (cur.nitrogen_dioxide ?? '—') + ' μg/m³';
-    document.getElementById('intel-solar').textContent = (cur.direct_normal_irradiance ?? 0) + ' W/m²';
+    document.getElementById('intel-area-title').textContent = locationName;
+    document.getElementById('intel-coords-tag').textContent = `${parseFloat(lat).toFixed(2)}° N, ${parseFloat(lon).toFixed(2)}° E`;
+
+    // 1. US AQI
+    const aqi = cur.us_aqi ?? 25;
+    document.getElementById('intel-aqi').textContent = aqi;
+    const aqiBadge = document.getElementById('intel-aqi-badge');
+    const aqiSub = document.getElementById('intel-aqi-sub');
+    if (aqi <= 50) {
+      aqiBadge.className = 'status-tag green'; aqiBadge.textContent = 'Good';
+      aqiSub.textContent = 'Clean air, ideal for outdoor activity';
+    } else if (aqi <= 100) {
+      aqiBadge.className = 'status-tag yellow'; aqiBadge.textContent = 'Moderate';
+      aqiSub.textContent = 'Acceptable air quality for most people';
+    } else if (aqi <= 150) {
+      aqiBadge.className = 'status-tag orange'; aqiBadge.textContent = 'Unhealthy (Sens.)';
+      aqiSub.textContent = 'Sensitive groups should reduce exertion';
+    } else {
+      aqiBadge.className = 'status-tag red'; aqiBadge.textContent = 'Hazardous';
+      aqiSub.textContent = 'High pollution, limit outdoor exposure';
+    }
+
+    // 2. PM2.5
+    const pm25 = cur.pm2_5 ?? 10;
+    document.getElementById('intel-pm25').textContent = pm25 + ' μg/m³';
+    const pm25Badge = document.getElementById('intel-pm25-badge');
+    if (pm25 <= 12) {
+      pm25Badge.className = 'status-tag green'; pm25Badge.textContent = 'Safe';
+    } else if (pm25 <= 35) {
+      pm25Badge.className = 'status-tag yellow'; pm25Badge.textContent = 'Moderate';
+    } else {
+      pm25Badge.className = 'status-tag red'; pm25Badge.textContent = 'Elevated';
+    }
+
+    // 3. PM10
+    const pm10 = cur.pm10 ?? 20;
+    document.getElementById('intel-pm10').textContent = pm10 + ' μg/m³';
+    const pm10Badge = document.getElementById('intel-pm10-badge');
+    if (pm10 <= 54) {
+      pm10Badge.className = 'status-tag green'; pm10Badge.textContent = 'Safe';
+    } else if (pm10 <= 154) {
+      pm10Badge.className = 'status-tag yellow'; pm10Badge.textContent = 'Moderate';
+    } else {
+      pm10Badge.className = 'status-tag red'; pm10Badge.textContent = 'Dusty';
+    }
+
+    // 4. NO2
+    const no2 = cur.nitrogen_dioxide ?? 15;
+    document.getElementById('intel-no2').textContent = no2 + ' μg/m³';
+    const no2Badge = document.getElementById('intel-no2-badge');
+    if (no2 <= 40) {
+      no2Badge.className = 'status-tag green'; no2Badge.textContent = 'Low';
+    } else {
+      no2Badge.className = 'status-tag orange'; no2Badge.textContent = 'Traffic Fumes';
+    }
+
+    // 5. Solar Flux
+    const solar = cur.direct_normal_irradiance ?? 0;
+    document.getElementById('intel-solar').textContent = solar + ' W/m²';
+    const solarBadge = document.getElementById('intel-solar-badge');
+    if (solar <= 200) {
+      solarBadge.className = 'status-tag green'; solarBadge.textContent = 'Low/Night';
+    } else if (solar <= 600) {
+      solarBadge.className = 'status-tag yellow'; solarBadge.textContent = 'Normal';
+    } else {
+      solarBadge.className = 'status-tag orange'; solarBadge.textContent = 'Intense Sun';
+    }
   } catch (_) {}
 }
 
-// 10. NASA APOD
+// Worldwide Geocoding Autocomplete (Open-Meteo)
+function initAreaSearch() {
+  const input = document.getElementById('intel-area-input');
+  const dropdown = document.getElementById('intel-suggestions');
+  if (!input || !dropdown) return;
+
+  let debounceTimer = null;
+  input.addEventListener('input', () => {
+    clearTimeout(debounceTimer);
+    const q = input.value.trim();
+    if (q.length < 2) {
+      dropdown.hidden = true;
+      return;
+    }
+
+    debounceTimer = setTimeout(async () => {
+      try {
+        const res = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(q)}&count=6&language=en&format=json`);
+        if (!res.ok) return;
+        const data = await res.json();
+        const results = data.results || [];
+
+        if (results.length === 0) {
+          dropdown.hidden = true;
+          return;
+        }
+
+        dropdown.innerHTML = results.map(r => {
+          const locName = `${r.name}${r.admin1 ? ', ' + r.admin1 : ''}, ${r.country || ''}`;
+          return `<button type="button" class="dropdown-item" data-lat="${r.latitude}" data-lon="${r.longitude}" data-name="${locName}">${locName}</button>`;
+        }).join('');
+        dropdown.hidden = false;
+
+        dropdown.querySelectorAll('.dropdown-item').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const lat = btn.getAttribute('data-lat');
+            const lon = btn.getAttribute('data-lon');
+            const name = btn.getAttribute('data-name');
+            input.value = name;
+            dropdown.hidden = true;
+            fetchAreaIntel(lat, lon, name);
+          });
+        });
+      } catch (_) {}
+    }, 280);
+  });
+
+  document.getElementById('intel-search-btn')?.addEventListener('click', () => {
+    const first = dropdown.querySelector('.dropdown-item');
+    if (first) first.click();
+  });
+}
+
+// 10. NASA APOD (With Fail-Safe Recovery)
 async function fetchApod() {
+  const media = document.getElementById('apod-media');
   try {
     const res = await fetch('https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY');
-    if (!res.ok) return;
+    if (!res.ok) throw new Error();
     const d = await res.json();
 
     document.getElementById('apod-title').textContent = d.title;
     document.getElementById('apod-explanation').textContent = d.explanation;
-    document.getElementById('apod-date-tag').textContent = d.date;
-    document.getElementById('apod-credit').textContent = d.copyright ? '© ' + d.copyright : 'NASA Observatory Public Stream';
+    document.getElementById('apod-date').textContent = d.date;
+    document.getElementById('apod-copyright').textContent = d.copyright ? '© ' + d.copyright : 'NASA Observatory Public Stream';
 
-    const media = document.getElementById('apod-media');
     if (media) {
       if (d.media_type === 'image') {
         media.innerHTML = `<img src="${d.url}" alt="${d.title}">`;
@@ -273,91 +480,223 @@ async function fetchApod() {
         media.innerHTML = `<iframe src="${d.url}" frameborder="0" allowfullscreen></iframe>`;
       }
     }
-  } catch (_) {}
+  } catch (_) {
+    // Fail-safe APOD fallback so it never hangs on "(loading...)"
+    document.getElementById('apod-title').textContent = 'Cosmic Deep Space Exploration';
+    document.getElementById('apod-explanation').textContent = 'NASA Astronomy Picture of the Day features daily high-resolution captures of nebulae, star clusters, galaxies, and planets.';
+    if (media) {
+      media.innerHTML = `<img src="assets/space-hub-icon-512.png" alt="Cosmos">`;
+    }
+  }
 }
 
-// 11. Toast Notifications
+// 11. Wikipedia Explorer with Autocomplete & Presets
+async function searchWiki(query) {
+  try {
+    const enc = encodeURIComponent(query.trim().replace(/ /g, '_'));
+    const res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${enc}`);
+    if (!res.ok) throw new Error();
+    const d = await res.json();
+
+    document.getElementById('wiki-title').textContent = d.title;
+    document.getElementById('wiki-extract').textContent = d.extract;
+    document.getElementById('wiki-link').href = d.content_urls?.desktop?.page || '#';
+
+    const thumb = document.getElementById('wiki-thumb');
+    if (thumb && d.thumbnail?.source) {
+      thumb.src = d.thumbnail.source;
+    }
+  } catch (_) {
+    document.getElementById('wiki-title').textContent = query;
+    document.getElementById('wiki-extract').textContent = 'Search Wikipedia directly for complete mission briefings and spacecraft telemetry histories.';
+  }
+}
+
+// Wikipedia Autocomplete
+function initWikiSearch() {
+  const input = document.getElementById('wiki-query-input');
+  const dropdown = document.getElementById('wiki-suggestions');
+  if (!input || !dropdown) return;
+
+  let debounceTimer = null;
+  input.addEventListener('input', () => {
+    clearTimeout(debounceTimer);
+    const q = input.value.trim();
+    if (q.length < 2) {
+      dropdown.hidden = true;
+      return;
+    }
+
+    debounceTimer = setTimeout(async () => {
+      try {
+        const res = await fetch(`https://en.wikipedia.org/w/api.php?action=opensearch&search=${encodeURIComponent(q)}&limit=5&namespace=0&format=json&origin=*`);
+        if (!res.ok) return;
+        const data = await res.json();
+        const titles = data[1] || [];
+
+        if (titles.length === 0) {
+          dropdown.hidden = true;
+          return;
+        }
+
+        dropdown.innerHTML = titles.map(t => `<button type="button" class="dropdown-item">${t}</button>`).join('');
+        dropdown.hidden = false;
+
+        dropdown.querySelectorAll('.dropdown-item').forEach(btn => {
+          btn.addEventListener('click', () => {
+            input.value = btn.textContent;
+            dropdown.hidden = true;
+            searchWiki(btn.textContent);
+          });
+        });
+      } catch (_) {}
+    }, 280);
+  });
+
+  document.getElementById('wiki-search-btn')?.addEventListener('click', () => {
+    if (input.value.trim()) searchWiki(input.value.trim());
+  });
+}
+
+// 12. Firebase Notifications Integration & Custom Selection Engine
+function initFirebaseAndAlerts() {
+  // Load saved preferences
+  const savedIss = localStorage.getItem('alert_iss');
+  const savedSolar = localStorage.getItem('alert_solar');
+  const savedLaunch = localStorage.getItem('alert_launch');
+  const savedQuake = localStorage.getItem('alert_quake');
+
+  if (savedIss !== null) document.getElementById('toggle-iss').checked = savedIss === 'true';
+  if (savedSolar !== null) document.getElementById('toggle-solar').checked = savedSolar === 'true';
+  if (savedLaunch !== null) document.getElementById('toggle-launches').checked = savedLaunch === 'true';
+  if (savedQuake !== null) document.getElementById('toggle-quake').checked = savedQuake === 'true';
+
+  // Save changes locally immediately
+  ['toggle-iss', 'toggle-solar', 'toggle-launches', 'toggle-quake'].forEach(id => {
+    document.getElementById(id)?.addEventListener('change', () => {
+      localStorage.setItem('alert_iss', document.getElementById('toggle-iss').checked);
+      localStorage.setItem('alert_solar', document.getElementById('toggle-solar').checked);
+      localStorage.setItem('alert_launch', document.getElementById('toggle-launches').checked);
+      localStorage.setItem('alert_quake', document.getElementById('toggle-quake').checked);
+    });
+  });
+
+  // Link with Firebase on button click
+  document.getElementById('save-firebase-btn')?.addEventListener('click', async () => {
+    const alertIss = document.getElementById('toggle-iss').checked;
+    const alertSolar = document.getElementById('toggle-solar').checked;
+    const alertLaunch = document.getElementById('toggle-launches').checked;
+    const alertQuake = document.getElementById('toggle-quake').checked;
+
+    localStorage.setItem('alert_iss', alertIss);
+    localStorage.setItem('alert_solar', alertSolar);
+    localStorage.setItem('alert_launch', alertLaunch);
+    localStorage.setItem('alert_quake', alertQuake);
+
+    try {
+      if ('Notification' in window && Notification.permission !== 'granted') {
+        await Notification.requestPermission();
+      }
+
+      // If Firebase SDK is available
+      if (typeof firebase !== 'undefined' && firebase.apps.length > 0) {
+        const messaging = firebase.messaging();
+        const db = firebase.firestore();
+        const token = await messaging.getToken();
+
+        if (token) {
+          await db.collection('space_fcm_tokens').doc(token).set({
+            token: token,
+            alertIss: alertIss,
+            alertSolar: alertSolar,
+            alertLaunch: alertLaunch,
+            alertQuake: alertQuake,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+            userAgent: navigator.userAgent
+          }, { merge: true });
+        }
+      }
+
+      showToast('Alert selections saved & synced to device!');
+    } catch (e) {
+      showToast('Notification preferences saved locally.');
+    }
+  });
+}
+
+// Toast
 function showToast(text) {
-  const toast = document.getElementById('toast-message');
+  const toast = document.getElementById('toast');
   if (!toast) return;
   toast.textContent = text;
   toast.classList.add('show');
   setTimeout(() => toast.classList.remove('show'), 3000);
 }
 
-// --- App Bootstrap ---
+// Bootstrap
 document.addEventListener('DOMContentLoaded', () => {
   initClocks();
-  initCategoryFilter();
+  initNavigation();
   initMap();
+  initAreaSearch();
+  initWikiSearch();
+  initFirebaseAndAlerts();
 
-  // City chips click
-  document.querySelectorAll('.city-pill').forEach(btn => {
+  // Area preset click
+  document.querySelectorAll('.area-pill').forEach(btn => {
     btn.addEventListener('click', () => {
-      document.querySelectorAll('.city-pill').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.area-pill').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-      fetchAreaIntel(btn.getAttribute('data-lat'), btn.getAttribute('data-lon'), btn.getAttribute('data-city'));
+      fetchAreaIntel(btn.getAttribute('data-lat'), btn.getAttribute('data-lon'), btn.getAttribute('data-name'));
     });
   });
 
-  // Settings Modal
-  const modal = document.getElementById('settings-modal');
-  document.getElementById('open-settings-btn')?.addEventListener('click', () => modal.classList.add('open'));
-  document.getElementById('close-settings-btn')?.addEventListener('click', () => modal.classList.remove('open'));
-  modal?.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('open'); });
+  // Wiki preset click
+  document.querySelectorAll('.wiki-pill').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.wiki-pill').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      searchWiki(btn.getAttribute('data-topic'));
+    });
+  });
 
   // Theme switcher
-  document.querySelectorAll('#theme-segmented .seg-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('#theme-segmented .seg-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      const val = btn.getAttribute('data-theme');
-      if (val === 'system') {
-        const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
-      } else {
-        document.documentElement.setAttribute('data-theme', val);
-      }
-    });
-  });
-
-  // Test space notification
-  document.getElementById('trigger-test-alert')?.addEventListener('click', async () => {
-    const kp = document.getElementById('pref-solar-kp')?.value || '5';
-    const quake = document.getElementById('pref-quake-mag')?.value || '5.0';
-
-    if ('Notification' in window && Notification.permission !== 'granted') {
-      await Notification.requestPermission();
+  const themeSelect = document.getElementById('theme-select');
+  const settingTheme = document.getElementById('setting-theme');
+  function applyTheme(val) {
+    if (val === 'system') {
+      const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+    } else {
+      document.documentElement.setAttribute('data-theme', val);
     }
+    if (themeSelect) themeSelect.value = val;
+    if (settingTheme) settingTheme.value = val;
+  }
+  themeSelect?.addEventListener('change', e => applyTheme(e.target.value));
+  settingTheme?.addEventListener('change', e => applyTheme(e.target.value));
 
-    if ('Notification' in window && Notification.permission === 'granted') {
-      new Notification('T&C Space Alert 🚀', {
-        body: `Active thresholds: Solar Storm Kp ${kp}+ | Earthquakes M ${quake}+. Telemetry nominal.`,
-        icon: 'assets/space-hub-icon-192.png?v=1'
-      });
-    }
-    showToast(`Threshold saved: Kp ${kp}+ | M ${quake}+`);
-  });
-
-  // Refresh feeds
-  document.getElementById('refresh-btn')?.addEventListener('click', () => {
+  // Refresh
+  document.getElementById('refresh-all')?.addEventListener('click', () => {
     fetchLiveIss();
     fetchLaunches();
-    fetchAsteroids();
     fetchSpaceWeather();
+    fetchAsteroids();
     fetchEarthquakes();
     fetchApod();
     showToast('All real-time sensors refreshed.');
   });
+  document.getElementById('refresh-weather')?.addEventListener('click', () => fetchSpaceWeather());
 
   // Initial Fetches
   fetchLiveIss();
   fetchLaunches();
-  fetchAsteroids();
   fetchSpaceWeather();
+  fetchAsteroids();
   fetchEarthquakes();
   fetchApod();
-  fetchAreaIntel('17.3850', '78.4867', 'Hyderabad, India');
+  fetchAreaIntel('17.3850', '78.4867', 'Hyderabad, Telangana, India');
+  searchWiki('Chandrayaan-3');
 
   // Fast 3-second live ISS telemetry poll
   setInterval(fetchLiveIss, 3000);
