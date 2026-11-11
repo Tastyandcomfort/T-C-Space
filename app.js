@@ -59,6 +59,7 @@ function initNavigation() {
       label.textContent = targetId.charAt(0).toUpperCase() + targetId.slice(1).replace('-', ' ');
     }
 
+    // Auto-resize Leaflet map to fix gray tiles when navigating to #satellites
     if (targetId === 'satellites' && satMap) {
       setTimeout(() => satMap.invalidateSize(), 200);
     }
@@ -90,6 +91,7 @@ let issTrackLine = null;
 const issTrackPoints = [];
 let currentSatelliteId = 25544; // Default: ISS (Zarya)
 let currentSatelliteName = "ISS (ZARYA)";
+const satelliteOmmCache = new Map();
 
 let quakeLayerGroup = null;
 let hazardLayerGroup = null;
@@ -119,7 +121,7 @@ function initMap() {
 
   issTrackLine = L.polyline([], { color: '#2997ff', weight: 2, dashArray: '5, 8', opacity: 0.7 }).addTo(satMap);
 
-  // Multi-Satellite Presets Toolbar
+  // Multi-Satellite Presets Toolbar (Instant Auto-Centering on Click)
   document.querySelectorAll('.sat-chip').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.sat-chip').forEach(b => b.classList.remove('active'));
@@ -133,7 +135,7 @@ function initMap() {
 
       issTrackPoints.length = 0;
       issTrackLine.setLatLngs([]);
-      fetchLiveSatelliteTelemetry();
+      fetchLiveSatelliteTelemetry(true); // true = center map immediately
     });
   });
 
@@ -229,16 +231,16 @@ function initSatelliteSearch() {
 
         issTrackPoints.length = 0;
         issTrackLine.setLatLngs([]);
-        fetchLiveSatelliteTelemetry();
+        fetchLiveSatelliteTelemetry(true); // Centers map directly
       });
     });
   });
 }
 
-// 5. Live Satellite Telemetry Stream
+// 5. Live Satellite Telemetry Stream (With Instant Centering & Popup)
 let lastSatData = null;
 
-async function fetchLiveSatelliteTelemetry() {
+async function fetchLiveSatelliteTelemetry(shouldCenterMap = false) {
   try {
     let lat = 0, lon = 0, alt = 418.0, vel = 7.66;
 
@@ -252,21 +254,28 @@ async function fetchLiveSatelliteTelemetry() {
         vel = d.velocity / 3600;
       }
     } else {
-      const res = await fetch(`https://celestrak.org/NORAD/elements/gp.php?CATNR=${currentSatelliteId}&FORMAT=JSON`);
-      if (res.ok) {
-        const arr = await res.json();
-        if (arr.length > 0) {
-          const omm = arr[0];
-          const mm = omm.MEAN_MOTION || 15.0;
-          const inc = omm.INCLINATION || 51.6;
-          const nowSec = (Date.now() / 1000) % (86400 / mm);
-          const phase = (nowSec / (86400 / mm)) * 2 * Math.PI;
-
-          lat = Math.sin(phase) * inc;
-          lon = ((phase * 180 / Math.PI * 2) - 180) % 360;
-          alt = omm.SEMIMAJOR_AXIS ? Math.max(200, omm.SEMIMAJOR_AXIS - 6378.137) : 500.0;
-          vel = Math.sqrt(398600.44 / (6378.137 + alt));
+      let omm = satelliteOmmCache.get(currentSatelliteId);
+      if (!omm) {
+        const res = await fetch(`https://celestrak.org/NORAD/elements/gp.php?CATNR=${currentSatelliteId}&FORMAT=JSON`);
+        if (res.ok) {
+          const arr = await res.json();
+          if (arr.length > 0) {
+            omm = arr[0];
+            satelliteOmmCache.set(currentSatelliteId, omm);
+          }
         }
+      }
+
+      if (omm) {
+        const mm = omm.MEAN_MOTION || 15.0;
+        const inc = omm.INCLINATION || 51.6;
+        const nowSec = (Date.now() / 1000) % (86400 / mm);
+        const phase = (nowSec / (86400 / mm)) * 2 * Math.PI;
+
+        lat = Math.sin(phase) * inc;
+        lon = ((phase * 180 / Math.PI * 2) - 180) % 360;
+        alt = omm.SEMIMAJOR_AXIS ? Math.max(200, omm.SEMIMAJOR_AXIS - 6378.137) : 500.0;
+        vel = Math.sqrt(398600.44 / (6378.137 + alt));
       }
     }
 
@@ -303,6 +312,12 @@ async function fetchLiveSatelliteTelemetry() {
           <span>Velocity: ${velStr}</span>
         </div>
       `);
+
+      // Centers map and opens popup on user tap
+      if (shouldCenterMap) {
+        satMap.flyTo([lat, lon], 4, { duration: 1.2 });
+        issMarker.openPopup();
+      }
 
       issTrackPoints.push([lat, lon]);
       if (issTrackPoints.length > 50) issTrackPoints.shift();
@@ -424,10 +439,81 @@ async function fetchLaunches() {
   }
 }
 
-// 8. Earth From 1,000,000 Miles Away (NASA DSCOVR EPIC + In-App Lightbox)
-let currentEpicImageUrl = "";
-let currentEpicDateStr = "";
+// 8. Universal Lightbox with Real Blob Download & Share
+let activeLightboxMedia = {
+  url: "",
+  title: "NASA Space Telemetry",
+  time: "",
+  filename: "nasa-space-hub.jpg"
+};
 
+function openUniversalLightbox(url, title, timeStr, filename) {
+  const modal = document.getElementById('universal-media-lightbox');
+  const img = document.getElementById('universal-lightbox-img');
+  const titleEl = document.getElementById('universal-lightbox-title');
+  const timeEl = document.getElementById('universal-lightbox-time');
+
+  activeLightboxMedia = { url, title, time: timeStr, filename };
+
+  img.src = url;
+  titleEl.textContent = title;
+  timeEl.textContent = timeStr;
+  modal.classList.add('open');
+}
+
+function initUniversalLightbox() {
+  const modal = document.getElementById('universal-media-lightbox');
+  const closeBtn = document.getElementById('close-universal-lightbox-btn');
+  const downloadBtn = document.getElementById('universal-download-btn');
+  const shareBtn = document.getElementById('universal-share-btn');
+
+  closeBtn?.addEventListener('click', () => modal.classList.remove('open'));
+  modal?.addEventListener('click', (e) => {
+    if (e.target === modal) modal.classList.remove('open');
+  });
+
+  // Real Blob Download (Bypasses Cross-Origin Browser Download Restrictions)
+  downloadBtn?.addEventListener('click', async () => {
+    if (!activeLightboxMedia.url) return;
+    try {
+      showToast('Preparing download…');
+      const res = await fetch(activeLightboxMedia.url, { mode: 'cors' });
+      if (!res.ok) throw new Error();
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = activeLightboxMedia.filename || 'space-hub-image.jpg';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+      showToast('Download complete!');
+    } catch (_) {
+      // Fallback: Open in new tab
+      window.open(activeLightboxMedia.url, '_blank');
+      showToast('Opened in new tab — Long press or right click to save.');
+    }
+  });
+
+  // Native Web Share
+  shareBtn?.addEventListener('click', async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: activeLightboxMedia.title,
+          text: `${activeLightboxMedia.title} · ${activeLightboxMedia.time}`,
+          url: activeLightboxMedia.url
+        });
+      } catch (_) {}
+    } else {
+      navigator.clipboard.writeText(activeLightboxMedia.url);
+      showToast('Image URL copied to clipboard!');
+    }
+  });
+}
+
+// 9. Earth From 1,000,000 Miles Away (NASA DSCOVR EPIC)
 async function fetchEpicEarth() {
   const box = document.getElementById('epic-media-box');
   try {
@@ -439,11 +525,10 @@ async function fetchEpicEarth() {
       const item = data[0];
       const dateParts = item.date.split(' ')[0].split('-'); // [YYYY, MM, DD]
       const imgUrl = `https://epic.gsfc.nasa.gov/archive/natural/${dateParts[0]}/${dateParts[1]}/${dateParts[2]}/jpg/${item.image}.jpg`;
-      currentEpicImageUrl = imgUrl;
 
       const dateUtc = new Date(item.date + ' UTC');
       const dateIstStr = dateUtc.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }) + ' IST';
-      currentEpicDateStr = `${item.date} UTC · ${dateIstStr}`;
+      const fullTimeStr = `${item.date} UTC · ${dateIstStr}`;
 
       document.getElementById('epic-title').textContent = 'Live Sunlit Earth: ' + item.date.split(' ')[0];
       document.getElementById('epic-caption').textContent = item.caption || 'Full-disc natural color portrait taken by NASA EPIC camera on the DSCOVR spacecraft 1 million miles away.';
@@ -457,6 +542,9 @@ async function fetchEpicEarth() {
 
       if (box) {
         box.innerHTML = `<img src="${imgUrl}" alt="Earth from 1,000,000 miles" loading="lazy">`;
+        box.onclick = () => {
+          openUniversalLightbox(imgUrl, "Earth From 1,000,000 Miles (NASA DSCOVR EPIC)", fullTimeStr, `NASA_DSCOVR_EPIC_${dateParts.join('')}.jpg`);
+        };
       }
     }
   } catch (_) {
@@ -466,50 +554,12 @@ async function fetchEpicEarth() {
   }
 }
 
-function initEpicLightbox() {
-  const box = document.getElementById('epic-media-box');
-  const modal = document.getElementById('epic-lightbox');
-  const closeBtn = document.getElementById('close-lightbox-btn');
-  const img = document.getElementById('lightbox-img');
-  const dateTxt = document.getElementById('lightbox-time-text');
-  const downloadBtn = document.getElementById('lightbox-download-btn');
-  const shareBtn = document.getElementById('lightbox-share-btn');
-
-  box?.addEventListener('click', () => {
-    if (!currentEpicImageUrl) return;
-    img.src = currentEpicImageUrl;
-    dateTxt.textContent = "NASA Observation Time: " + currentEpicDateStr;
-    downloadBtn.href = currentEpicImageUrl;
-    modal.classList.add('open');
-  });
-
-  closeBtn?.addEventListener('click', () => modal.classList.remove('open'));
-  modal?.addEventListener('click', (e) => {
-    if (e.target === modal) modal.classList.remove('open');
-  });
-
-  shareBtn?.addEventListener('click', async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: 'Earth from 1,000,000 Miles Away',
-          text: `Direct NASA DSCOVR EPIC capture taken at ${currentEpicDateStr}`,
-          url: currentEpicImageUrl
-        });
-      } catch (_) {}
-    } else {
-      navigator.clipboard.writeText(currentEpicImageUrl);
-      showToast('Image URL copied to clipboard!');
-    }
-  });
-}
-
-// 9. Mars Exploration: Curiosity Live + Official NASA Image Library Fallback
+// 10. Mars Exploration: Curiosity Live + Official NASA Image Library Fallback
 async function fetchMarsPhotos() {
   const container = document.getElementById('mars-photos-container');
   if (!container) return;
 
-  // Step 1: Try NASA Mars Rover Photos endpoint
+  // Step 1: Try NASA Mars Rover Photos endpoint (Curiosity)
   try {
     const res = await fetch(`https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/latest_photos?api_key=${NASA_API_KEY}`);
     if (res.ok) {
@@ -520,7 +570,7 @@ async function fetchMarsPhotos() {
         document.getElementById('mars-gallery-title').textContent = 'Latest Surface Photos (Curiosity Rover)';
 
         container.innerHTML = photos.slice(0, 4).map(p => `
-          <div class="mars-photo-item">
+          <div class="mars-photo-item" onclick="openUniversalLightbox('${p.img_src.replace('http://', 'https://')}', 'Mars Surface (${p.rover.name} Rover - ${p.camera.full_name})', 'Sol ${p.sol} · Earth Date: ${p.earth_date}', 'Mars_${p.rover.name}_Sol_${p.sol}.jpg')">
             <img src="${p.img_src.replace('http://', 'https://')}" alt="Mars surface photo" loading="lazy">
             <span class="mars-photo-tag">${p.camera.full_name || 'Navcam'} · Sol ${p.sol}</span>
           </div>
@@ -530,7 +580,7 @@ async function fetchMarsPhotos() {
     }
   } catch (_) {}
 
-  // Step 2: Resilient Fallback to NASA's Official Image & Video Library (Always online)
+  // Step 2: Resilient Fallback to NASA's Official Image & Video Library
   try {
     const res = await fetch('https://images-api.nasa.gov/search?q=perseverance%20mars%20surface%20sol&media_type=image');
     if (!res.ok) throw new Error();
@@ -546,7 +596,7 @@ async function fetchMarsPhotos() {
         const date = item.data?.[0]?.date_created?.slice(0, 10) || 'Recent';
 
         return `
-          <div class="mars-photo-item">
+          <div class="mars-photo-item" onclick="openUniversalLightbox('${imgUrl}', 'Martian Surface (${title})', 'Captured: ${date}', 'Mars_NASA_Capture.jpg')">
             <img src="${imgUrl}" alt="${title}" loading="lazy">
             <span class="mars-photo-tag">${title.slice(0, 24)} · ${date}</span>
           </div>
@@ -560,7 +610,7 @@ async function fetchMarsPhotos() {
   }
 }
 
-// 10. Space Weather (DONKI with Personal Key & 60s Auto-Poll)
+// 11. Space Weather (DONKI with Personal Key & 60s Auto-Poll)
 async function fetchSpaceWeather() {
   const list = document.getElementById('weather-events');
   try {
@@ -620,7 +670,7 @@ async function fetchSpaceWeather() {
   }
 }
 
-// 11. NASA NeoWs Asteroids with Direct JPL Verification Link
+// 12. NASA NeoWs Asteroids with Direct JPL Verification Link
 async function fetchAsteroids() {
   const container = document.getElementById('neo-list');
   try {
@@ -664,7 +714,7 @@ async function fetchAsteroids() {
   }
 }
 
-// 12. USGS Earthquakes Plotted as Circles on Map with Info Popups
+// 13. USGS Earthquakes Plotted as Circles on Map with Info Popups
 async function fetchEarthquakes() {
   const list = document.getElementById('earthquake-list');
   try {
@@ -731,7 +781,7 @@ async function fetchEarthquakes() {
   }
 }
 
-// 13. NASA EONET Hazards Plotted on Map
+// 14. NASA EONET Hazards Plotted on Map
 async function fetchEonetHazards() {
   const list = document.getElementById('hazard-list');
   try {
@@ -782,7 +832,7 @@ async function fetchEonetHazards() {
   } catch (_) {}
 }
 
-// 14. Worldwide Area Search with Autocomplete & Plain-English Ratings
+// 15. Worldwide Area Search with Autocomplete & Plain-English Ratings
 async function fetchAreaIntel(lat, lon, locationName) {
   try {
     const res = await fetch(`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=us_aqi,pm2_5,pm10,nitrogen_dioxide,direct_normal_irradiance`);
@@ -909,11 +959,10 @@ function initAreaSearch() {
   });
 }
 
-// 15. NASA APOD (Direct science.nasa.gov endpoint matching today's picture)
+// 16. NASA APOD (Direct science.nasa.gov Endpoint with In-App Lightbox)
 async function fetchApod() {
   const media = document.getElementById('apod-media');
   try {
-    // 1. Query NASA Science official APOD endpoint directly
     let res = await fetch('https://science.nasa.gov/wp-json/wp/v2/apod-basic?per_page=1');
     let entry = null;
 
@@ -922,29 +971,23 @@ async function fetchApod() {
       entry = Array.isArray(data) ? data[0] : data;
     }
 
-    // Fallback to api.nasa.gov with your personal key if science.nasa.gov fails
     if (!entry) {
       res = await fetch(`https://api.nasa.gov/planetary/apod?api_key=${NASA_API_KEY}`);
-      if (res.ok) {
-        entry = await res.json();
-      }
+      if (res.ok) entry = await res.json();
     }
 
     if (!entry) throw new Error("No APOD payload");
 
-    // Extract fields (handle both string & object titles)
     const title = typeof entry.title === 'object' ? (entry.title.rendered || 'Astronomy Picture of the Day') : (entry.title || 'Astronomy Picture of the Day');
     let explanation = typeof entry.explanation === 'object' ? (entry.explanation.rendered || '') : (entry.explanation || '');
     explanation = explanation.replace(/^Explanation:\s*/i, '').replace(/<[^>]*>/g, '').trim();
 
     const date = entry.date || new Date().toISOString().slice(0, 10);
     const credit = entry.credit || entry.copyright || 'NASA, ESA, and Hubble Heritage';
-    
-    // In the new API: hdurl is the actual image; url is the article page
+
     const actualImageSrc = entry.hdurl || entry.image || entry.url;
     const officialArticleUrl = entry.url && entry.url.includes('science.nasa.gov') ? entry.url : 'https://science.nasa.gov/apod/';
 
-    // Update DOM text
     document.getElementById('apod-title').textContent = title;
     document.getElementById('apod-explanation').textContent = explanation;
     document.getElementById('apod-date').textContent = date;
@@ -955,19 +998,20 @@ async function fetchApod() {
     if (prevTitle) prevTitle.textContent = title;
     if (prevDesc) prevDesc.textContent = explanation.slice(0, 110) + '...';
 
-    // Update source link to point directly to NASA Science APOD
     const link = document.getElementById('apod-link');
     if (link) {
       link.href = officialArticleUrl;
       link.textContent = `Official NASA Science APOD (${date}) ↗`;
     }
 
-    // Render image
     if (media && actualImageSrc) {
       if (entry.media_type === 'video' || actualImageSrc.includes('youtube') || actualImageSrc.includes('vimeo')) {
         media.innerHTML = `<iframe src="${actualImageSrc}" frameborder="0" allowfullscreen style="width:100%;height:100%;border-radius:14px;"></iframe>`;
       } else {
-        media.innerHTML = `<img src="${actualImageSrc}" alt="${title}" style="width:100%;height:100%;object-fit:cover;border-radius:14px;" loading="lazy">`;
+        media.innerHTML = `<img src="${actualImageSrc}" alt="${title}" style="width:100%;height:100%;object-fit:cover;border-radius:14px;cursor:pointer;" loading="lazy">`;
+        media.onclick = () => {
+          openUniversalLightbox(actualImageSrc, title, `NASA APOD · ${date} · Credit: ${credit}`, `NASA_APOD_${date}.jpg`);
+        };
       }
     }
   } catch (err) {
@@ -975,7 +1019,7 @@ async function fetchApod() {
   }
 }
 
-// 16. Wikipedia Explorer with Autocomplete & Presets
+// 17. Wikipedia Explorer with Autocomplete & Presets
 async function searchWiki(query) {
   try {
     const enc = encodeURIComponent(query.trim().replace(/ /g, '_'));
@@ -1044,7 +1088,7 @@ function initWikiSearch() {
   });
 }
 
-// 17. Firebase Initialization, "Select All" Toggle, Booleans Sync & Interactive "Test Alert" Button
+// 18. Firebase Initialization, "Select All" Toggle, Booleans Sync & Interactive "Test Alert" Button
 const firebaseConfig = {
   apiKey: "AIzaSyAOn8eFL_CMGuYVeEa9hfpdkHRxZpjacqU",
   authDomain: "news-61e62.firebaseapp.com",
@@ -1128,7 +1172,6 @@ function initAlertPreferences() {
           }
         }
 
-        // Writes explicit boolean flags to Firestore document
         await db.collection('space_fcm_tokens').doc(token).set({
           token: token,
           alertIss: Boolean(isIss),
@@ -1215,7 +1258,7 @@ function initAlertPreferences() {
   });
 }
 
-// 18. Automatic System Theme Detection
+// 19. Automatic System Theme Detection
 function initTheme() {
   const themeSelect = document.getElementById('theme-select');
   const saved = localStorage.getItem('app_theme') || 'system';
@@ -1245,7 +1288,7 @@ function initTheme() {
   apply(saved);
 }
 
-// 19. Dynamic PWA 1-Tap Install Button
+// 20. Dynamic PWA 1-Tap Install Button
 let deferredInstallPrompt = null;
 
 function initPwaInstall() {
@@ -1295,7 +1338,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initNavigation();
   initOverviewClickableCards();
   initMap();
-  initEpicLightbox();
+  initUniversalLightbox();
   initAreaSearch();
   initWikiSearch();
   initFirebase();
@@ -1333,7 +1376,6 @@ document.addEventListener('DOMContentLoaded', () => {
     fetchApod();
     showToast('All real-time sensors refreshed.');
   });
-  document.getElementById('refresh-weather')?.addEventListener('click', () => fetchSpaceWeather());
 
   // Initial Data Stream Fetches
   fetchLiveSatelliteTelemetry();
