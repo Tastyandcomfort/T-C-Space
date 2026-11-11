@@ -142,6 +142,21 @@ button { font-family: inherit; }
 .breadcrumb b { color: var(--text); font-weight: 600; }
 
 .top-actions { display: flex; align-items: center; gap: 10px; }
+.install-pill-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--blue);
+  color: #fff;
+  border: 0;
+  border-radius: 99px;
+  padding: 6px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.install-pill-btn:hover { filter: brightness(1.08); }
+
 .utc-clock {
   display: flex;
   align-items: center;
@@ -224,6 +239,7 @@ button { font-family: inherit; }
 .status-pill { background: var(--green-soft); color: var(--green); }
 .small-chip.green { background: var(--green-soft); color: var(--green); }
 .small-chip.blue { background: var(--blue-soft); color: var(--blue); }
+.small-chip.orange { background: rgba(255, 180, 84, 0.2); color: var(--orange); }
 
 .ticker-row {
   display: flex;
@@ -253,7 +269,29 @@ button { font-family: inherit; }
 .metric-card small { font-size: 10px; color: var(--muted); }
 .metric-bottom { margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--line); font-size: 9px; color: var(--muted); }
 
-/* Map Viewport & Overlay Controls */
+/* Multi-Satellite Presets Toolbar */
+.sat-presets-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+.sat-select-lbl { font-size: 9px; font-weight: 750; color: var(--dim); letter-spacing: 0.8px; }
+.sat-chip {
+  padding: 6px 14px;
+  border-radius: 99px;
+  border: 1px solid var(--line);
+  background: var(--surface-solid);
+  color: var(--muted);
+  font: inherit;
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.sat-chip.active { background: var(--blue); color: #fff; border-color: var(--blue); }
+
 .map-toolbar-row { margin-bottom: 12px; }
 .map-layer-chips { display: flex; gap: 8px; flex-wrap: wrap; }
 .layer-chip {
@@ -275,10 +313,7 @@ button { font-family: inherit; }
 html[data-theme="dark"] .leaflet-tile {
   filter: brightness(0.68) invert(1) contrast(2.8) hue-rotate(180deg) saturate(0.35);
 }
-/* Complete removal of watermark box */
-.leaflet-control-attribution {
-  display: none !important;
-}
+.leaflet-control-attribution { display: none !important; }
 
 /* Map HUD & Legend Overlays */
 .map-hud-chip {
@@ -327,7 +362,7 @@ html[data-theme="dark"] .leaflet-tile {
 .map-foot { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 12px; font-size: 10px; color: var(--muted); }
 .map-foot b { font-family: var(--mono); color: var(--blue); }
 
-/* Spotlight Launch Card (Strict No-Overflow) */
+/* Spotlight Launch Card */
 .launch-spotlight-card {
   display: grid;
   grid-template-columns: minmax(0, 1.4fr) minmax(0, 0.8fr);
@@ -377,13 +412,62 @@ html[data-theme="dark"] .leaflet-tile {
 .launch-item-card h4 { font-size: 14px; margin: 4px 0 6px; overflow-wrap: anywhere; }
 .launch-item-card p { font-size: 10px; color: var(--muted); line-height: 1.5; flex: 1; overflow-wrap: anywhere; }
 
-/* Mars Exploration Grid */
-.mars-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+/* Earth from 1M Miles (NASA DSCOVR EPIC) */
+.epic-viewport {
+  height: 480px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #000;
+  display: grid;
+  place-items: center;
+  margin: 14px 0;
+}
+.epic-viewport img { width: 100%; height: 100%; object-fit: contain; }
+.epic-stats-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+.epic-stats-strip small { font-size: 8px; color: var(--dim); display: block; margin-bottom: 2px; }
+.epic-stats-strip b { font: 600 11px var(--mono); color: var(--blue); }
+
+/* Mars Exploration & Photos */
+.mars-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-bottom: 18px; }
 .mars-card { min-width: 0; }
 .mars-stats-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; padding: 12px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); margin: 12px 0; }
 .mars-stat small { font-size: 8px; color: var(--dim); display: block; margin-bottom: 2px; }
 .mars-stat b { font: 600 11px var(--mono); color: var(--orange); }
-.mars-summary { font-size: 11px; color: var(--muted); line-height: 1.6; }
+
+.mars-photos-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-top: 12px;
+}
+.mars-photo-item {
+  height: 180px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #000;
+  position: relative;
+}
+.mars-photo-item img { width: 100%; height: 100%; object-fit: cover; }
+.mars-photo-tag {
+  position: absolute;
+  bottom: 6px;
+  left: 6px;
+  right: 6px;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 4px 6px;
+  border-radius: 6px;
+  font: 8px var(--mono);
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
 /* Space Weather (DONKI) - Compact scrollable list */
 .event-list-scroll { display: flex; flex-direction: column; gap: 10px; max-height: 380px; overflow-y: auto; }
@@ -417,6 +501,7 @@ html[data-theme="dark"] .leaflet-tile {
 .mag-box.green { background: var(--green-soft); color: var(--green); }
 .mag-box.orange { background: rgba(255, 180, 84, 0.2); color: var(--orange); }
 .mag-box.red { background: rgba(255, 69, 58, 0.2); color: var(--red); }
+.mag-box.purple { background: rgba(191, 90, 242, 0.2); color: var(--purple); }
 .quake-row b { font-size: 11px; display: block; overflow-wrap: anywhere; }
 .quake-row small { font-size: 9px; color: var(--muted); }
 
@@ -616,10 +701,12 @@ html[data-theme="dark"] .leaflet-tile {
   .launches-grid { grid-template-columns: 1fr; }
   .launch-spotlight-card { grid-template-columns: 1fr; }
   .mars-grid { grid-template-columns: 1fr; }
+  .mars-photos-grid { grid-template-columns: repeat(2, 1fr); }
   .dual-grid { grid-template-columns: 1fr; }
   .neo-list-scroll { grid-template-columns: 1fr; }
   .apod-layout { grid-template-columns: 1fr; }
   .intel-metrics-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .epic-stats-strip { grid-template-columns: repeat(2, 1fr); }
 
   /* Mobile Bottom Dock */
   .mobile-dock {
@@ -656,6 +743,7 @@ html[data-theme="dark"] .leaflet-tile {
   .intel-metrics-grid { grid-template-columns: 1fr; }
   .spotlight-meta-grid { grid-template-columns: 1fr; }
   .mars-stats-row { grid-template-columns: 1fr; }
+  .mars-photos-grid { grid-template-columns: 1fr; }
   #utc-clock { display: none; }
   .footer { flex-direction: column; gap: 8px; align-items: flex-start; }
 }
