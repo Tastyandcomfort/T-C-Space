@@ -631,26 +631,113 @@ function initUniversalLightbox() {
 }
 
 // ============================================================================
-// 11. PLANETARY EXPLORER (ROBUST LIVE NASA FETCHER WITH REAL PLANETARY IMAGES)
+// 11. PLANETARY EXPLORER (CHRONOLOGICAL REAL-TIME & ARCHIVE ENGINE)
 // ============================================================================
-const NASA_TOPIC_QUERIES = {
-  latest: { name: "Latest Discoveries", query: "space discovery 2026" },
-  sun: { name: "The Sun", query: "solar dynamics observatory sun flare" },
-  mercury: { name: "Mercury", query: "messenger mercury planet" },
-  venus: { name: "Venus", query: "magellan venus planet surface" },
-  earth: { name: "Earth", query: "earth from space dscovr iss" },
-  mars: { name: "Mars", query: "perseverance curiosity mars surface" },
-  jupiter: { name: "Jupiter", query: "juno jupiter great red spot" },
-  saturn: { name: "Saturn", query: "cassini saturn rings" },
-  uranus: { name: "Uranus", query: "voyager uranus planet" },
-  neptune: { name: "Neptune", query: "voyager neptune planet" },
-  "dwarf-planets": { name: "Dwarf Planets", query: "new horizons pluto ceres" },
-  "small-bodies": { name: "Asteroids & Comets", query: "bennu osiris-rex asteroid comet" },
-  universe: { name: "The Universe", query: "hubble webb nebula galaxy universe" },
-  spacecraft: { name: "Spacecraft & Telescopes", query: "spacecraft telescope james webb iss" },
-  animation: { name: "Animations & Motion", query: "space animation simulation" },
-  anaglyph: { name: "3D Anaglyphs", query: "mars 3d stereo anaglyph" },
-  concepts: { name: "Artists' Concepts", query: "artist concept exoplanet future space" }
+const CURRENT_YEAR = new Date().getFullYear();
+
+const PLANETARY_TOPICS = {
+  latest: {
+    name: "Latest Discoveries",
+    query: "James Webb Hubble space discovery",
+    yearStart: CURRENT_YEAR - 1, // Focuses on latest 2025-2026 captures
+    type: "active"
+  },
+  sun: {
+    name: "The Sun",
+    query: "Solar Dynamics Observatory SDO solar flare corona",
+    yearStart: CURRENT_YEAR - 2,
+    type: "active"
+  },
+  mercury: {
+    name: "Mercury",
+    query: "MESSENGER BepiColombo Mercury planet surface",
+    yearStart: null,
+    type: "archive"
+  },
+  venus: {
+    name: "Venus",
+    query: "Magellan Venus planet surface atmosphere",
+    yearStart: null,
+    type: "archive"
+  },
+  earth: {
+    name: "Earth",
+    query: "Earth DSCOVR EPIC ISS observation",
+    yearStart: CURRENT_YEAR - 1,
+    type: "active"
+  },
+  mars: {
+    name: "Mars",
+    query: "Perseverance Curiosity rover Jezero Gale surface",
+    yearStart: CURRENT_YEAR - 1,
+    type: "active"
+  },
+  jupiter: {
+    name: "Jupiter",
+    query: "Juno spacecraft Jupiter Great Red Spot atmosphere",
+    yearStart: CURRENT_YEAR - 2,
+    type: "active"
+  },
+  saturn: {
+    name: "Saturn",
+    query: "Cassini spacecraft Saturn rings Titan Enceladus",
+    yearStart: null,
+    type: "archive"
+  },
+  uranus: {
+    name: "Uranus",
+    query: "Voyager 2 Uranus planet rings moons",
+    yearStart: null,
+    type: "archive"
+  },
+  neptune: {
+    name: "Neptune",
+    query: "Voyager 2 Neptune planet storm Triton",
+    yearStart: null,
+    type: "archive"
+  },
+  "dwarf-planets": {
+    name: "Dwarf Planets",
+    query: "New Horizons Pluto Charon Dawn Ceres",
+    yearStart: null,
+    type: "archive"
+  },
+  "small-bodies": {
+    name: "Asteroids & Comets",
+    query: "OSIRIS-REx Bennu asteroid DART Dimorphos comet",
+    yearStart: CURRENT_YEAR - 3,
+    type: "active"
+  },
+  universe: {
+    name: "The Universe",
+    query: "James Webb Space Telescope nebula deep field galaxy",
+    yearStart: CURRENT_YEAR - 1,
+    type: "active"
+  },
+  spacecraft: {
+    name: "Spacecraft & Telescopes",
+    query: "International Space Station Orion spacecraft Artemis",
+    yearStart: CURRENT_YEAR - 2,
+    type: "active"
+  },
+  animation: {
+    name: "Simulations & Motion",
+    query: "astronomy scientific visualization simulation orbit",
+    yearStart: CURRENT_YEAR - 3,
+    type: "active"
+  },
+  anaglyph: {
+    name: "3D Anaglyphs",
+    query: "Mars anaglyph stereo 3d surface",
+    yearStart: null,
+    type: "archive"
+  },
+  concepts: {
+    name: "Artists' Concepts",
+    query: "exoplanet artist concept future space exploration",
+    yearStart: CURRENT_YEAR - 3,
+    type: "active"
+  }
 };
 
 let planetaryExplorerLoaded = false;
@@ -673,56 +760,81 @@ async function fetchPlanetaryFeed(topicKey) {
   const container = document.getElementById('planetary-gallery-container');
   const label = document.getElementById('planetary-current-topic-label');
   const timestamp = document.getElementById('planetary-feed-timestamp');
-  const topicObj = NASA_TOPIC_QUERIES[topicKey] || NASA_TOPIC_QUERIES.latest;
+  const topicObj = PLANETARY_TOPICS[topicKey] || PLANETARY_TOPICS.latest;
 
   if (label) label.textContent = `${topicObj.name} Feed`;
-  if (timestamp) timestamp.textContent = 'Streaming live NASA imagery…';
+  if (timestamp) timestamp.textContent = 'Streaming live NASA observatory…';
 
   if (container) {
     container.innerHTML = `
       <div class="loading-state">
         <div class="apple-spinner large"></div>
-        <p style="margin-top:10px;">Retrieving genuine captures of ${topicObj.name}…</p>
+        <p style="margin-top:10px;">Connecting to NASA database for ${topicObj.name}…</p>
       </div>
     `;
   }
 
   try {
-    // NASA's Official Image & Video Library API (Direct, 100% Free, No CORS issue, Real Photos)
-    const apiUrl = `https://images-api.nasa.gov/search?q=${encodeURIComponent(topicObj.query)}&media_type=image`;
-    const res = await fetch(apiUrl);
-    if (!res.ok) throw new Error("API stream busy");
-
-    const data = await res.json();
-    const items = data.collection?.items?.slice(0, 15) || [];
-
-    if (!items || items.length === 0) {
-      throw new Error("No items found");
+    // 1. Build query with year constraints for active missions (to force newest photos)
+    let apiUrl = `https://images-api.nasa.gov/search?q=${encodeURIComponent(topicObj.query)}&media_type=image`;
+    if (topicObj.yearStart) {
+      apiUrl += `&year_start=${topicObj.yearStart}`;
     }
 
-    planetaryExplorerLoaded = true;
-    if (timestamp) timestamp.textContent = `Live Feed · ${items.length} real captures available`;
+    let res = await fetch(apiUrl);
+    let data = null;
 
-    container.innerHTML = items.map((item, index) => {
+    if (res.ok) {
+      data = await res.json();
+    }
+
+    // Fallback: If strict recent year returned zero records, search full historical catalog
+    if (!data?.collection?.items?.length && topicObj.yearStart) {
+      const fallbackUrl = `https://images-api.nasa.gov/search?q=${encodeURIComponent(topicObj.query)}&media_type=image`;
+      const fallbackRes = await fetch(fallbackUrl);
+      if (fallbackRes.ok) {
+        data = await fallbackRes.json();
+      }
+    }
+
+    const items = data?.collection?.items || [];
+    if (!items.length) throw new Error("No imagery found");
+
+    // 2. Sort items chronologically (newest date created first)
+    items.sort((a, b) => {
+      const dateA = new Date(a.data?.[0]?.date_created || 0);
+      const dateB = new Date(b.data?.[0]?.date_created || 0);
+      return dateB - dateA;
+    });
+
+    const displayItems = items.slice(0, 15);
+    planetaryExplorerLoaded = true;
+
+    const statusBadge = topicObj.type === "active" ? "🟢 Active Mission Feed" : "🏛️ Historic Mission Archive";
+    if (timestamp) timestamp.textContent = `${statusBadge} · ${displayItems.length} captures`;
+
+    // 3. Render cards with genuine images and exact capture dates
+    container.innerHTML = displayItems.map((item, index) => {
       const info = item.data?.[0] || {};
       const links = item.links || [];
 
-      // Extract high-res and preview thumbnails
-      const imgSrc = links.find(l => l.render === 'image' || l.href)?.href || '';
+      // Find genuine image URL
+      const imgSrc = links.find(l => l.href && (l.render === 'image' || l.href.endsWith('.jpg') || l.href.endsWith('.png')))?.href || links[0]?.href || '';
       if (!imgSrc) return '';
 
       const title = (info.title || `NASA ${topicObj.name}`).replace(/"/g, '&quot;');
       let desc = (info.description || info.secondary_creator || 'Official NASA planetary observation.').replace(/<[^>]*>/g, '').trim();
       if (desc.length > 130) desc = desc.slice(0, 130) + '…';
 
-      const dateStr = info.date_created ? new Date(info.date_created).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Verified Archive';
+      const rawDate = info.date_created;
+      const dateStr = rawDate ? new Date(rawDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Archive Record';
       const filename = `NASA_${topicObj.name.replace(/[^a-zA-Z0-9]/g, '_')}_${index + 1}.jpg`;
 
       return `
         <article class="planetary-card" data-url="${imgSrc}" data-title="${title}" data-time="${dateStr}" data-filename="${filename}">
           <div class="planetary-card-media">
             <img src="${imgSrc}" alt="${title}" loading="lazy">
-            <span class="planetary-tag">${topicObj.name}</span>
+            <span class="planetary-tag">${topicObj.type === "active" ? "🟢 " : ""}${topicObj.name}</span>
           </div>
           <div class="planetary-card-body">
             <small class="planetary-date">${dateStr}</small>
@@ -736,7 +848,7 @@ async function fetchPlanetaryFeed(topicKey) {
       `;
     }).join('');
 
-    // Attach lightbox click handlers
+    // 4. Attach universal lightbox click handlers
     container.querySelectorAll('.planetary-card').forEach(card => {
       card.addEventListener('click', () => {
         const url = card.getAttribute('data-url');
@@ -751,11 +863,11 @@ async function fetchPlanetaryFeed(topicKey) {
     if (container) {
       container.innerHTML = `
         <div class="loading-state">
-          <p>NASA imagery feed synchronizing. Tap another topic above to explore.</p>
+          <p>NASA planetary imagery synchronizing. Tap another topic above to explore.</p>
         </div>
       `;
     }
-    if (timestamp) timestamp.textContent = 'Syncing…';
+    if (timestamp) timestamp.textContent = 'Synchronizing…';
   }
 }
 
