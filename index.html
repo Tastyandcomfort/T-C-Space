@@ -219,63 +219,65 @@
           </div>
         </section>
 
-        <!-- PLANETARY EXPLORER (RAW PHOTOS, 4K VIDEOS & AUDIO) -->
+        <!-- COSMIC & PLANETARY EXPLORER (UNIVERSE-WIDE RAW INSTRUMENT DATA) -->
         <section class="section-block" id="planetary-explorer">
           <div class="section-title">
             <div>
-              <div class="eyebrow">SOLAR SYSTEM &amp; DEEP SPACE OBSERVATIONS</div>
-              <h2>Planetary Explorer (100% Raw Photos, 4K Videos &amp; Audio)</h2>
-              <p>Explore genuine camera sensor downlinks, 4K mission videos, and space audio recordings directly from NASA spacecraft. Tap any item to inspect or download the original uncompressed master file.</p>
+              <div class="eyebrow">UNIVERSE-WIDE OBSERVATORIES &amp; DEEP SPACE INSTRUMENTS</div>
+              <h2>Cosmic Explorer (100% Raw Telescope Downlinks)</h2>
+              <p>Untouched, direct instrument downlinks across the entire Universe: Deep Field galaxies, star-forming nebulae, supermassive black holes, supernovae, and planetary systems as captured by JWST, Hubble, Chandra X-Ray, and deep space probes without human colorization.</p>
             </div>
           </div>
 
           <article class="surface planetary-panel">
             <!-- Media Format Selector -->
             <div class="planetary-media-bar">
-              <span class="media-type-lbl">FORMAT:</span>
+              <span class="media-type-lbl">INSTRUMENT FORMAT:</span>
               <div class="planetary-media-chips" id="planetary-media-chips">
-                <button class="media-chip active" data-media="image,video,audio"> All Formats</button>
-                <button class="media-chip" data-media="image">100% Raw Photos</button>
-                <button class="media-chip" data-media="video"> 4K / HD Videos</button>
-                <button class="media-chip" data-media="audio"> Space Audio</button>
+                <button class="media-chip active" data-media="image,video,audio"> All Data</button>
+                <button class="media-chip" data-media="image"> Raw Detector Frames</button>
+                <button class="media-chip" data-media="video"> 4K Time-Lapses &amp; Motion</button>
+                <button class="media-chip" data-media="audio"> Space Radio Audio</button>
               </div>
             </div>
 
-            <!-- 17 NASA Topic Filter Chips -->
+            <!-- Universe-Wide Celestial Target Chips -->
             <div class="planetary-chips-scroll" id="planetary-topic-chips">
-              <button class="planetary-chip active" data-topic="latest"> Latest</button>
-              <button class="planetary-chip" data-topic="sun"> Sun</button>
-              <button class="planetary-chip" data-topic="mercury"> Mercury</button>
-              <button class="planetary-chip" data-topic="venus"> Venus</button>
-              <button class="planetary-chip" data-topic="earth"> Earth</button>
-              <button class="planetary-chip" data-topic="mars"> Mars</button>
-              <button class="planetary-chip" data-topic="jupiter"> Jupiter</button>
-              <button class="planetary-chip" data-topic="saturn"> Saturn</button>
-              <button class="planetary-chip" data-topic="uranus"> Uranus</button>
-              <button class="planetary-chip" data-topic="neptune"> Neptune</button>
-              <button class="planetary-chip" data-topic="dwarf-planets"> Dwarf Planets</button>
-              <button class="planetary-chip" data-topic="small-bodies"> Asteroids &amp; Comets</button>
-              <button class="planetary-chip" data-topic="universe"> The Universe</button>
-              <button class="planetary-chip" data-topic="spacecraft"> Spacecraft &amp; Telescopes</button>
-              <button class="planetary-chip" data-topic="animation"> Animations</button>
-              <button class="planetary-chip" data-topic="anaglyph"> 3D Anaglyphs</button>
-              <button class="planetary-chip" data-topic="concepts"> Artist Concepts</button>
+              <!-- Deep Universe & Cosmos -->
+              <button class="planetary-chip active" data-topic="deep-field"> Deep Field &amp; First Galaxies</button>
+              <button class="planetary-chip" data-topic="jwst-raw"> JWST Raw Science (Webb)</button>
+              <button class="planetary-chip" data-topic="hubble-raw"> Hubble Raw Detector (HST)</button>
+              <button class="planetary-chip" data-topic="nebulae"> Nebulae &amp; Stellar Nurseries</button>
+              <button class="planetary-chip" data-topic="galaxies"> Spiral &amp; Colliding Galaxies</button>
+              <button class="planetary-chip" data-topic="black-holes"> Black Holes &amp; X-Ray Jets</button>
+              <button class="planetary-chip" data-topic="supernovae"> Supernovae &amp; Remnants</button>
+              <button class="planetary-chip" data-topic="pulsars"> Pulsars &amp; Neutron Stars</button>
+              <button class="planetary-chip" data-topic="exoplanets"> Exoplanet Systems</button>
+              <button class="planetary-chip" data-topic="gravitational"> Gravitational Lenses</button>
+              
+              <!-- Solar System & Local Instruments -->
+              <button class="planetary-chip" data-topic="sun"> Solar SDO Direct Telemetry</button>
+              <button class="planetary-chip" data-topic="mars-raw"> Mars Rover Raw Downlinks</button>
+              <button class="planetary-chip" data-topic="jupiter"> Jupiter JunoCam Raw Buffer</button>
+              <button class="planetary-chip" data-topic="saturn"> Saturn Cassini Archives</button>
+              <button class="planetary-chip" data-topic="interstellar"> Comets &amp; Interstellar Objects</button>
+              <button class="planetary-chip" data-topic="earth"> Earth Orbital Radiometers</button>
             </div>
 
-            <!-- Header Status -->
+            <!-- Live Status Row -->
             <div class="planetary-status-row">
               <div>
                 <span class="live-dot pulse-dot"></span>
-                <b id="planetary-current-topic-label">Latest Discoveries</b>
+                <b id="planetary-current-topic-label">Deep Field &amp; First Galaxies</b>
               </div>
-              <small id="planetary-feed-timestamp" class="mono muted">Streaming NASA Observatory…</small>
+              <small id="planetary-feed-timestamp" class="mono muted">Connecting to Deep Space Telemetry…</small>
             </div>
 
-            <!-- Dynamic Media Grid -->
+            <!-- Dynamic Raw Media Grid -->
             <div class="planetary-gallery-grid" id="planetary-gallery-container">
               <div class="loading-state">
                 <div class="apple-spinner large"></div>
-                <p style="margin-top:10px;">Connecting to NASA Raw Imagery Archive…</p>
+                <p style="margin-top:10px;">Streaming deep space telescope detector array…</p>
               </div>
             </div>
           </article>
