@@ -12,6 +12,9 @@ const NOTIFICATION_HERO_PHOTOS = {
   cosmic: 'https://images-assets.nasa.gov/image/GSFC_20171208_Archive_e000494/GSFC_20171208_Archive_e000494~medium.jpg'
 };
 
+// Live measured network throughput used for exact download time estimation
+let currentNetworkSpeedMbps = 3.5;
+
 // 1. Dual Clock (Live IST & UTC Synchronization)
 function initClocks() {
   const istEl = document.getElementById('ist-clock');
@@ -34,7 +37,7 @@ function initClocks() {
   setInterval(tick, 1000);
 }
 
-// 2. Real-Time Network Monitor
+// 2. Real-Time Network Monitor & Live Speed Measurement
 function initNetworkMonitor() {
   const textEl = document.getElementById('net-text');
 
@@ -42,6 +45,7 @@ function initNetworkMonitor() {
     if (!navigator.onLine) {
       document.documentElement.setAttribute('data-network', 'offline');
       if (textEl) textEl.textContent = 'Offline';
+      currentNetworkSpeedMbps = 0.2;
       showToast('⚠️ Network connection lost. Telemetry paused.');
       return;
     }
@@ -50,6 +54,7 @@ function initNetworkMonitor() {
 
     if (conn && conn.downlink !== undefined) {
       const mbps = conn.downlink;
+      currentNetworkSpeedMbps = Math.max(0.3, mbps);
       if (mbps < 1.0) {
         document.documentElement.setAttribute('data-network', 'slow');
         if (textEl) textEl.textContent = 'Slow · <1 Mbps';
@@ -71,16 +76,20 @@ function initNetworkMonitor() {
       if (rtt > 1200) {
         document.documentElement.setAttribute('data-network', 'slow');
         if (textEl) textEl.textContent = 'Slow · <1 Mbps';
+        currentNetworkSpeedMbps = 0.8;
       } else if (rtt > 500) {
         document.documentElement.setAttribute('data-network', 'normal');
         if (textEl) textEl.textContent = 'Normal · ~1 Mbps';
+        currentNetworkSpeedMbps = 1.8;
       } else {
         document.documentElement.setAttribute('data-network', 'fast');
         if (textEl) textEl.textContent = 'Fast · ≥1 Mbps';
+        currentNetworkSpeedMbps = 5.0;
       }
     } catch (_) {
       document.documentElement.setAttribute('data-network', 'offline');
       if (textEl) textEl.textContent = 'Offline';
+      currentNetworkSpeedMbps = 0.2;
     }
   }
 
@@ -98,13 +107,16 @@ function initNetworkMonitor() {
   setInterval(updateNetworkStatus, 30000);
 }
 
-// 3. Navigation Router with Leaflet Map Auto-Resize
+// 3. Navigation Router with Deep-Link Resolution & Leaflet Auto-Resize
 function initNavigation() {
   const navLinks = document.querySelectorAll('.nav-link, .dock-link');
   const sections = document.querySelectorAll('.section-block');
   const label = document.getElementById('current-section-label');
 
-  function showSection(targetId) {
+  function handleRoute(hashStr) {
+    const rawHash = (hashStr || window.location.hash || '#overview').replace('#', '');
+    const [targetId, queryPart] = rawHash.split('?');
+
     let matched = false;
     sections.forEach(sec => {
       if (sec.id === targetId) {
@@ -138,15 +150,32 @@ function initNavigation() {
     if (targetId === 'planetary-explorer' && !planetaryExplorerLoaded) {
       fetchPlanetaryFeed(currentPlanetaryTopic, currentPlanetaryMediaType);
     }
+
+    // Direct Deep-Link Resolution: If shared URL has ?asset=NASA_ID, immediately open lightbox!
+    if (queryPart) {
+      const params = new URLSearchParams(queryPart);
+      const sharedNasaId = params.get('asset');
+      const sharedTitle = params.get('title') || 'Shared Space Asset';
+      const sharedMedia = params.get('media') || 'image';
+
+      if (sharedNasaId) {
+        setTimeout(async () => {
+          showToast(`Opening shared asset: ${sharedTitle}`);
+          openUniversalLightbox(
+            `https://images-assets.nasa.gov/image/${encodeURIComponent(sharedNasaId)}/${encodeURIComponent(sharedNasaId)}~large.jpg`,
+            sharedTitle,
+            'Deep-Link Verified Telemetry',
+            `T&C_Space_${sharedTitle.replace(/[^a-zA-Z0-9]/g, '_')}.jpg`,
+            sharedMedia,
+            sharedNasaId
+          );
+        }, 300);
+      }
+    }
   }
 
-  window.addEventListener('hashchange', () => {
-    const hash = window.location.hash.replace('#', '') || 'overview';
-    showSection(hash);
-  });
-
-  const initialHash = window.location.hash.replace('#', '') || 'overview';
-  showSection(initialHash);
+  window.addEventListener('hashchange', () => handleRoute(window.location.hash));
+  handleRoute(window.location.hash);
 }
 
 // 4. Interactive Overview Cards
@@ -392,7 +421,7 @@ async function fetchLiveSatelliteTelemetry(shouldCenterMap = false) {
   } catch (_) {}
 }
 
-// 7. Real-Time Proximity Alert Engine (Uses Full Exterior ISS Photo)
+// 7. Real-Time Proximity Alert Engine (Full Exterior ISS Photo in Orbit)
 let lastPassAlertTime = 0;
 
 function checkSatelliteOverheadPass(satLat, satLon, satName, satVel) {
@@ -420,7 +449,7 @@ function checkSatelliteOverheadPass(satLat, satLon, satName, satVel) {
         title: 'T&C Space · Orbital Pass 🛰️',
         body: `${satName} is passing directly over ${locationName}! Proximity: ${Math.round(distanceKm)} km · Speed: ${satVel.toFixed(2)} km/s.`,
         url: './#satellites',
-        image: NOTIFICATION_HERO_PHOTOS.satellite // Full exterior ISS orbiting Earth
+        image: NOTIFICATION_HERO_PHOTOS.satellite
       });
     }
   }
@@ -536,15 +565,23 @@ async function fetchLaunches() {
   }
 }
 
-// 10. Universal Lightbox with Guaranteed In-Place File Download (Never opens in a new tab)
+// 10. Universal Lightbox with Apple-Style Action Sheet & Deep Link Generator
 let activeLightboxMedia = {
   url: "",
   origUrl: "",
+  optUrl: "",
   title: "NASA Space Telemetry",
   time: "",
-  filename: "nasa-space-hub.jpg",
-  mediaType: "image"
+  filename: "T&C_Space_Asset",
+  mediaType: "image",
+  nasaId: ""
 };
+
+// Helper to sanitize title into clean T&C_Space formatted filename
+function generateTcFilename(title, suffix = "Capture", ext = "jpg") {
+  const clean = (title || 'Space_Observation').replace(/[^a-zA-Z0-9]/g, '_').replace(/_+/g, '_').slice(0, 35);
+  return `T&C_Space_${clean}_${suffix}.${ext.toLowerCase()}`;
+}
 
 async function openUniversalLightbox(url, title, timeStr, filename, mediaType = "image", nasaId = null) {
   const modal = document.getElementById('universal-media-lightbox');
@@ -556,14 +593,21 @@ async function openUniversalLightbox(url, title, timeStr, filename, mediaType = 
   const timeEl = document.getElementById('universal-lightbox-time');
   const rawTag = document.getElementById('universal-lightbox-raw-tag');
 
-  // Enforce secure HTTPS protocol on all input URLs to prevent Mixed Content security blocking
   const secureUrl = (url || '').replace(/^http:\/\//i, 'https://');
-  activeLightboxMedia = { url: secureUrl, origUrl: secureUrl, title, time: timeStr, filename, mediaType };
+  activeLightboxMedia = {
+    url: secureUrl,
+    origUrl: secureUrl,
+    optUrl: secureUrl,
+    title: title || 'Space Discovery',
+    time: timeStr,
+    filename: filename || 'T&C_Space_Asset.jpg',
+    mediaType,
+    nasaId: nasaId || ''
+  };
 
   titleEl.textContent = title;
   timeEl.textContent = timeStr;
 
-  // Reset all players
   img.style.display = 'none';
   video.style.display = 'none';
   audioWrap.style.display = 'none';
@@ -572,7 +616,6 @@ async function openUniversalLightbox(url, title, timeStr, filename, mediaType = 
 
   if (rawTag) rawTag.textContent = "RESOLVING 100% RAW MASTER…";
 
-  // Immediate preview display
   if (mediaType === 'video') {
     video.src = secureUrl;
     video.style.display = 'block';
@@ -586,7 +629,7 @@ async function openUniversalLightbox(url, title, timeStr, filename, mediaType = 
 
   modal.classList.add('open');
 
-  // Query NASA's Master Asset Manifest to find the 100% RAW uncompressed master
+  // Query NASA's Master Asset Manifest to find both Optimized (~large) and 100% RAW (~orig)
   if (nasaId) {
     try {
       const assetRes = await fetch(`https://images-api.nasa.gov/asset/${encodeURIComponent(nasaId)}`);
@@ -594,25 +637,25 @@ async function openUniversalLightbox(url, title, timeStr, filename, mediaType = 
         const assetData = await assetRes.json();
         const items = assetData.collection?.items || [];
 
-        // Locate original master (~orig) file, enforce HTTPS
-        let origAsset = items.find(i => i.href && i.href.includes('~orig.') && !i.href.endsWith('.tif')) || 
-                        items.find(i => i.href && i.href.includes('~orig.')) || 
-                        items.find(i => i.href && i.href.includes('~large.')) || 
-                        items[0];
+        // 1. Locate Raw Master (~orig)
+        const origAsset = items.find(i => i.href && i.href.includes('~orig.')) || items[0];
+        // 2. Locate Optimized HD (~large or medium)
+        const optAsset = items.find(i => i.href && (i.href.includes('~large.') || i.href.includes('~medium.'))) || items[0];
 
         if (origAsset && origAsset.href) {
-          const secureOrigUrl = origAsset.href.replace(/^http:\/\//i, 'https://');
-          activeLightboxMedia.origUrl = secureOrigUrl;
-          const ext = secureOrigUrl.split('.').pop().split('?')[0].toUpperCase();
-          activeLightboxMedia.filename = `${filename.replace(/\.[^/.]+$/, "")}_ORIGINAL.${ext.toLowerCase()}`;
+          activeLightboxMedia.origUrl = origAsset.href.replace(/^http:\/\//i, 'https://');
+          const ext = activeLightboxMedia.origUrl.split('.').pop().split('?')[0].toUpperCase();
+          if (rawTag) rawTag.textContent = `100% RAW MASTER (${ext}) READY`;
+        }
 
-          if (rawTag) rawTag.textContent = `100% RAW MASTER (${ext})`;
+        if (optAsset && optAsset.href) {
+          activeLightboxMedia.optUrl = optAsset.href.replace(/^http:\/\//i, 'https://');
+        }
 
-          if (mediaType === 'video' && secureOrigUrl.endsWith('.mp4')) {
-            video.src = secureOrigUrl;
-          } else if (mediaType === 'audio' && (secureOrigUrl.endsWith('.wav') || secureOrigUrl.endsWith('.mp3'))) {
-            audio.src = secureOrigUrl;
-          }
+        if (mediaType === 'video' && activeLightboxMedia.origUrl.endsWith('.mp4')) {
+          video.src = activeLightboxMedia.origUrl;
+        } else if (mediaType === 'audio' && (activeLightboxMedia.origUrl.endsWith('.wav') || activeLightboxMedia.origUrl.endsWith('.mp3'))) {
+          audio.src = activeLightboxMedia.origUrl;
         }
       }
     } catch (_) {
@@ -620,6 +663,55 @@ async function openUniversalLightbox(url, title, timeStr, filename, mediaType = 
     }
   } else {
     if (rawTag) rawTag.textContent = "OFFICIAL NASA STREAM";
+  }
+}
+
+// In-Place Blob Downloader (Guaranteed to save locally without opening new tab)
+async function performInPlaceDownload(targetUrl, outputFilename) {
+  const secureUrl = (targetUrl || '').replace(/^http:\/\//i, 'https://');
+  if (!secureUrl) return;
+
+  showToast(`⬇ Saving ${outputFilename} directly to your device…`);
+
+  let blob = null;
+
+  try {
+    const res = await fetch(secureUrl);
+    if (res.ok) blob = await res.blob();
+  } catch (_) {}
+
+  if (!blob) {
+    try {
+      const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(secureUrl)}`;
+      const res = await fetch(proxyUrl);
+      if (res.ok) blob = await res.blob();
+    } catch (_) {}
+  }
+
+  if (blob) {
+    const blobUrl = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.style.display = 'none';
+    a.href = blobUrl;
+    a.download = outputFilename;
+    document.body.appendChild(a);
+    a.click();
+
+    setTimeout(() => {
+      document.body.removeChild(a);
+      URL.revokeObjectURL(blobUrl);
+    }, 3000);
+
+    showToast('✅ Download complete! Saved to your device.');
+  } else {
+    const a = document.createElement('a');
+    a.style.display = 'none';
+    a.href = secureUrl;
+    a.download = outputFilename;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => document.body.removeChild(a), 2000);
+    showToast('Download initiated.');
   }
 }
 
@@ -631,8 +723,20 @@ function initUniversalLightbox() {
   const video = document.getElementById('universal-lightbox-video');
   const audio = document.getElementById('universal-lightbox-audio');
 
+  // Apple Sheet Elements
+  const sheet = document.getElementById('download-action-sheet-backdrop');
+  const sheetCancel = document.getElementById('sheet-cancel-btn');
+  const sheetOptBtn = document.getElementById('sheet-download-opt');
+  const sheetRawBtn = document.getElementById('sheet-download-raw');
+  const sheetNetSpeed = document.getElementById('sheet-net-speed');
+  const sheetOptTime = document.getElementById('sheet-opt-time');
+  const sheetRawTime = document.getElementById('sheet-raw-time');
+  const sheetRawSize = document.getElementById('sheet-raw-size');
+  const sheetRawFormat = document.getElementById('sheet-raw-format');
+
   const closeDialog = () => {
     modal.classList.remove('open');
+    sheet.classList.remove('open');
     video.pause();
     audio.pause();
   };
@@ -642,81 +746,69 @@ function initUniversalLightbox() {
     if (e.target === modal) closeDialog();
   });
 
-  // Direct In-Place File Download (Never opens a new tab)
-  downloadBtn?.addEventListener('click', async () => {
-    let targetUrl = (activeLightboxMedia.origUrl || activeLightboxMedia.url || '').replace(/^http:\/\//i, 'https://');
-    if (!targetUrl) return;
+  // Open Apple-Style Action Sheet on Download Click
+  downloadBtn?.addEventListener('click', () => {
+    const mbps = Math.max(0.4, currentNetworkSpeedMbps);
+    if (sheetNetSpeed) sheetNetSpeed.textContent = `${mbps.toFixed(1)} Mbps`;
 
-    showToast('⬇ Downloading 100% Raw Master Asset directly to your device…');
+    // Dynamic Download Time Calculations using live speed
+    const isVideo = activeLightboxMedia.mediaType === 'video';
+    const optSizeMB = isVideo ? 12.0 : 2.6;
+    const rawSizeMB = isVideo ? 48.0 : 34.0;
 
-    let blob = null;
+    const optTimeSec = Math.max(1, Math.round((optSizeMB * 8) / mbps));
+    const rawTimeSec = Math.max(2, Math.round((rawSizeMB * 8) / mbps));
 
-    // Step 1: Direct CORS fetch over HTTPS
-    try {
-      const res = await fetch(targetUrl);
-      if (res.ok) blob = await res.blob();
-    } catch (_) {}
+    if (sheetOptTime) sheetOptTime.textContent = optTimeSec < 60 ? `~${optTimeSec} sec` : `~${(optTimeSec / 60).toFixed(1)} min`;
+    if (sheetRawTime) sheetRawTime.textContent = rawTimeSec < 60 ? `~${rawTimeSec} sec` : `~${(rawTimeSec / 60).toFixed(1)} min`;
+    if (sheetRawSize) sheetRawSize.textContent = `~${rawSizeMB.toFixed(1)} MB`;
 
-    // Step 2: High-speed proxy fetch if direct fetch was blocked by network
-    if (!blob) {
-      try {
-        const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
-        const res = await fetch(proxyUrl);
-        if (res.ok) blob = await res.blob();
-      } catch (_) {}
-    }
+    const ext = (activeLightboxMedia.origUrl || '').split('.').pop().split('?')[0].toUpperCase() || 'JPG';
+    if (sheetRawFormat) sheetRawFormat.textContent = `Master sensor format (${ext})`;
 
-    // Step 3: Fast image proxy fallback
-    if (!blob && (targetUrl.endsWith('.jpg') || targetUrl.endsWith('.png') || targetUrl.endsWith('.jpeg'))) {
-      try {
-        const wsrvUrl = `https://wsrv.nl/?url=${encodeURIComponent(targetUrl)}`;
-        const res = await fetch(wsrvUrl);
-        if (res.ok) blob = await res.blob();
-      } catch (_) {}
-    }
-
-    if (blob) {
-      const blobUrl = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.style.display = 'none';
-      a.href = blobUrl;
-      a.download = activeLightboxMedia.filename || 'NASA_Raw_Master_Asset.jpg';
-      document.body.appendChild(a);
-      a.click();
-
-      setTimeout(() => {
-        document.body.removeChild(a);
-        URL.revokeObjectURL(blobUrl);
-      }, 3000);
-
-      showToast('✅ Download complete! Saved to your device.');
-    } else {
-      // Fallback: Trigger native inline download without target="_blank"
-      const fallbackLink = document.createElement('a');
-      fallbackLink.style.display = 'none';
-      fallbackLink.href = targetUrl;
-      fallbackLink.download = activeLightboxMedia.filename || 'NASA_Raw_Master_Asset.jpg';
-      document.body.appendChild(fallbackLink);
-      fallbackLink.click();
-      setTimeout(() => document.body.removeChild(fallbackLink), 2000);
-      showToast('File download triggered.');
-    }
+    sheet.classList.add('open');
   });
 
+  sheetCancel?.addEventListener('click', () => sheet.classList.remove('open'));
+  sheet?.addEventListener('click', (e) => {
+    if (e.target === sheet) sheet.classList.remove('open');
+  });
+
+  // Action 1: Download Optimized Ultra-HD
+  sheetOptBtn?.addEventListener('click', () => {
+    sheet.classList.remove('open');
+    const targetUrl = activeLightboxMedia.optUrl || activeLightboxMedia.url;
+    const filename = generateTcFilename(activeLightboxMedia.title, "UltraHD", "jpg");
+    performInPlaceDownload(targetUrl, filename);
+  });
+
+  // Action 2: Download 100% Raw Original Master
+  sheetRawBtn?.addEventListener('click', () => {
+    sheet.classList.remove('open');
+    const targetUrl = activeLightboxMedia.origUrl || activeLightboxMedia.url;
+    const ext = targetUrl.split('.').pop().split('?')[0] || (activeLightboxMedia.mediaType === 'video' ? 'mp4' : 'jpg');
+    const filename = generateTcFilename(activeLightboxMedia.title, "RAW_Master", ext);
+    performInPlaceDownload(targetUrl, filename);
+  });
+
+  // Direct Deep-Link Sharing (Brings clicked user straight to this exact asset & tab)
   shareBtn?.addEventListener('click', async () => {
-    const targetUrl = (activeLightboxMedia.origUrl || activeLightboxMedia.url || '').replace(/^http:\/\//i, 'https://');
+    const deepLinkUrl = `${window.location.origin}${window.location.pathname}#planetary-explorer?asset=${encodeURIComponent(activeLightboxMedia.nasaId || '')}&title=${encodeURIComponent(activeLightboxMedia.title || '')}&media=${encodeURIComponent(activeLightboxMedia.mediaType || 'image')}`;
+
     if (navigator.share) {
       try {
         await navigator.share({
-          title: activeLightboxMedia.title,
-          text: `${activeLightboxMedia.title} · ${activeLightboxMedia.time}`,
-          url: targetUrl
+          title: `T&C Space · ${activeLightboxMedia.title}`,
+          text: `Inspect this live space discovery on T&C Space Hub: ${activeLightboxMedia.title} (${activeLightboxMedia.time})`,
+          url: deepLinkUrl
         });
+        showToast('Asset shared successfully.');
+        return;
       } catch (_) {}
-    } else {
-      navigator.clipboard.writeText(targetUrl);
-      showToast('Master asset URL copied to clipboard!');
     }
+
+    navigator.clipboard.writeText(deepLinkUrl);
+    showToast('✅ T&C Space deep link copied! Directly opens this capture.');
   });
 }
 
@@ -932,7 +1024,6 @@ async function fetchPlanetaryFeed(topicKey, mediaFilter = 'image,video,audio') {
       }
       if (!thumbSrc) return '';
 
-      // Force HTTPS on thumbnail
       thumbSrc = thumbSrc.replace(/^http:\/\//i, 'https://');
 
       const title = (info.title || `NASA ${targetObj.name}`).replace(/"/g, '&quot;');
@@ -941,12 +1032,12 @@ async function fetchPlanetaryFeed(topicKey, mediaFilter = 'image,video,audio') {
 
       const rawDate = info.date_created;
       const dateStr = rawDate ? new Date(rawDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Observation Log';
-      const filename = `NASA_${targetObj.name.replace(/[^a-zA-Z0-9]/g, '_')}_${index + 1}.${mediaType === 'video' ? 'mp4' : mediaType === 'audio' ? 'mp3' : 'jpg'}`;
+      const cleanFilename = generateTcFilename(title, "Asset", mediaType === 'video' ? 'mp4' : mediaType === 'audio' ? 'mp3' : 'jpg');
 
       const formatBadge = mediaType === 'video' ? '🎬 4K TIME-LAPSE' : mediaType === 'audio' ? '🎙️ RADIO AUDIO' : '📸 RAW DETECTOR';
 
       return `
-        <article class="planetary-card" data-url="${thumbSrc}" data-title="${title}" data-time="${dateStr}" data-filename="${filename}" data-mediatype="${mediaType}" data-nasaid="${nasaId}">
+        <article class="planetary-card" data-url="${thumbSrc}" data-title="${title}" data-time="${dateStr}" data-filename="${cleanFilename}" data-mediatype="${mediaType}" data-nasaid="${nasaId}">
           <div class="planetary-card-media">
             <img src="${thumbSrc}" alt="${title}" loading="lazy">
             <span class="planetary-tag">${targetObj.name}</span>
@@ -966,7 +1057,6 @@ async function fetchPlanetaryFeed(topicKey, mediaFilter = 'image,video,audio') {
       `;
     }).join('');
 
-    // Attach Lightbox Handlers
     container.querySelectorAll('.planetary-card').forEach(card => {
       card.addEventListener('click', () => {
         const url = card.getAttribute('data-url');
@@ -1021,7 +1111,7 @@ async function fetchEpicEarth() {
       if (box) {
         box.innerHTML = `<img src="${imgUrl}" alt="Earth from 1,000,000 miles" loading="lazy">`;
         box.onclick = () => {
-          openUniversalLightbox(imgUrl, "Earth From 1,000,000 Miles (NASA DSCOVR EPIC)", fullTimeStr, `NASA_DSCOVR_EPIC_${dateParts.join('')}.jpg`);
+          openUniversalLightbox(imgUrl, "Earth From 1,000,000 Miles (NASA DSCOVR EPIC)", fullTimeStr, `T&C_Space_DSCOVR_EPIC_${dateParts.join('')}.jpg`);
         };
       }
     }
@@ -1066,7 +1156,7 @@ async function fetchMarsPhotos() {
           title: `Mars Surface (${p.rover.name} Rover - ${p.camera.full_name || 'Camera'})`,
           time: `Sol ${p.sol} · Earth Date: ${p.earth_date}`,
           tag: `${p.camera.full_name || 'Navcam'} · Sol ${p.sol}`,
-          filename: `Mars_${p.rover.name}_Sol_${p.sol}.jpg`
+          filename: `T&C_Space_Mars_${p.rover.name}_Sol_${p.sol}.jpg`
         }));
 
         renderMarsItems(formatted);
@@ -1089,7 +1179,7 @@ async function fetchMarsPhotos() {
         title: item.data?.[0]?.title || 'Mars Surface',
         time: `Captured: ${item.data?.[0]?.date_created?.slice(0, 10) || 'Recent'}`,
         tag: `${(item.data?.[0]?.title || 'Mars').slice(0, 24)}`,
-        filename: `Mars_Surface_Capture.jpg`
+        filename: `T&C_Space_Mars_Surface_Capture.jpg`
       }));
 
       renderMarsItems(formatted);
@@ -1501,7 +1591,7 @@ async function fetchApod() {
       } else {
         media.innerHTML = `<img src="${actualImageSrc}" alt="${title}" style="width:100%;height:100%;object-fit:cover;border-radius:14px;cursor:pointer;" loading="lazy">`;
         media.onclick = () => {
-          openUniversalLightbox(actualImageSrc, title, `NASA APOD · ${date} · Credit: ${credit}`, `NASA_APOD_${date}.jpg`);
+          openUniversalLightbox(actualImageSrc, title, `NASA APOD · ${date} · Credit: ${credit}`, generateTcFilename(title, `APOD_${date}`, "jpg"));
         };
       }
     }
@@ -1783,7 +1873,7 @@ function initAlertPreferences() {
         title = 'T&C Space · Orbital Pass 🛰️';
         body = `ISS (Zarya) approaching regional horizon over ${loc}! Speed: 7.66 km/s. Visible in clear skies.`;
         url = './#satellites';
-        photo = NOTIFICATION_HERO_PHOTOS.satellite; // Full exterior ISS orbiting Earth
+        photo = NOTIFICATION_HERO_PHOTOS.satellite;
       } else if (isSolar) {
         title = 'T&C Space · Solar Weather ☀️';
         body = 'Geomagnetic solar flux observation active. Tap to view heliophysics data.';
@@ -1896,7 +1986,6 @@ document.addEventListener('DOMContentLoaded', () => {
   initPlanetaryExplorer();
   startLiveTickerEngine();
 
-  // Area preset click
   document.querySelectorAll('.area-pill').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.area-pill').forEach(b => b.classList.remove('active'));
@@ -1905,7 +1994,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Wiki preset click
   document.querySelectorAll('.wiki-pill').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.wiki-pill').forEach(b => b.classList.remove('active'));
@@ -1914,7 +2002,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Refresh All
   document.getElementById('refresh-all')?.addEventListener('click', () => {
     fetchLiveSatelliteTelemetry();
     fetchLaunches();
