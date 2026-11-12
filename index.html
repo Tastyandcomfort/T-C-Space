@@ -219,57 +219,68 @@
           </div>
         </section>
 
-        <!-- NEW: PLANETARY EXPLORER (NASA PHOTOJOURNAL FEEDS) -->
+        <!-- PLANETARY EXPLORER (RAW PHOTOS, 4K VIDEOS & AUDIO) -->
         <section class="section-block" id="planetary-explorer">
           <div class="section-title">
             <div>
               <div class="eyebrow">SOLAR SYSTEM &amp; DEEP SPACE OBSERVATIONS</div>
-              <h2>Planetary Explorer (NASA Photojournal)</h2>
-              <p>Live mission photography streamed directly from NASA's official planetary photojournal. Tap any category to explore celestial bodies, and tap any photo to inspect, download, or share.</p>
+              <h2>Planetary Explorer (100% Raw Photos, 4K Videos &amp; Audio)</h2>
+              <p>Explore genuine camera sensor downlinks, 4K mission videos, and space audio recordings directly from NASA spacecraft. Tap any item to inspect or download the original uncompressed master file.</p>
             </div>
           </div>
 
           <article class="surface planetary-panel">
+            <!-- Media Format Selector -->
+            <div class="planetary-media-bar">
+              <span class="media-type-lbl">FORMAT:</span>
+              <div class="planetary-media-chips" id="planetary-media-chips">
+                <button class="media-chip active" data-media="image,video,audio"> All Formats</button>
+                <button class="media-chip" data-media="image">100% Raw Photos</button>
+                <button class="media-chip" data-media="video"> 4K / HD Videos</button>
+                <button class="media-chip" data-media="audio"> Space Audio</button>
+              </div>
+            </div>
+
             <!-- 17 NASA Topic Filter Chips -->
             <div class="planetary-chips-scroll" id="planetary-topic-chips">
-              <button class="planetary-chip active" data-topic="latest">🌟 Latest</button>
-              <button class="planetary-chip" data-topic="sun">☀️ Sun</button>
-              <button class="planetary-chip" data-topic="mercury">☿ Mercury</button>
-              <button class="planetary-chip" data-topic="venus">♀ Venus</button>
-              <button class="planetary-chip" data-topic="earth">🌍 Earth</button>
-              <button class="planetary-chip" data-topic="mars">♂ Mars</button>
-              <button class="planetary-chip" data-topic="jupiter">♃ Jupiter</button>
-              <button class="planetary-chip" data-topic="saturn">♄ Saturn</button>
-              <button class="planetary-chip" data-topic="uranus">♅ Uranus</button>
-              <button class="planetary-chip" data-topic="neptune">♆ Neptune</button>
-              <button class="planetary-chip" data-topic="dwarf-planets">🪐 Dwarf Planets</button>
-              <button class="planetary-chip" data-topic="small-bodies">☄️ Asteroids &amp; Comets</button>
-              <button class="planetary-chip" data-topic="universe">🌌 The Universe</button>
-              <button class="planetary-chip" data-topic="spacecraft">🛰️ Spacecraft &amp; Telescopes</button>
-              <button class="planetary-chip" data-topic="animation">🎬 Animations</button>
-              <button class="planetary-chip" data-topic="anaglyph">👓 3D Anaglyphs</button>
-              <button class="planetary-chip" data-topic="concepts">🎨 Artist Concepts</button>
+              <button class="planetary-chip active" data-topic="latest"> Latest</button>
+              <button class="planetary-chip" data-topic="sun"> Sun</button>
+              <button class="planetary-chip" data-topic="mercury"> Mercury</button>
+              <button class="planetary-chip" data-topic="venus"> Venus</button>
+              <button class="planetary-chip" data-topic="earth"> Earth</button>
+              <button class="planetary-chip" data-topic="mars"> Mars</button>
+              <button class="planetary-chip" data-topic="jupiter"> Jupiter</button>
+              <button class="planetary-chip" data-topic="saturn"> Saturn</button>
+              <button class="planetary-chip" data-topic="uranus"> Uranus</button>
+              <button class="planetary-chip" data-topic="neptune"> Neptune</button>
+              <button class="planetary-chip" data-topic="dwarf-planets"> Dwarf Planets</button>
+              <button class="planetary-chip" data-topic="small-bodies"> Asteroids &amp; Comets</button>
+              <button class="planetary-chip" data-topic="universe"> The Universe</button>
+              <button class="planetary-chip" data-topic="spacecraft"> Spacecraft &amp; Telescopes</button>
+              <button class="planetary-chip" data-topic="animation"> Animations</button>
+              <button class="planetary-chip" data-topic="anaglyph"> 3D Anaglyphs</button>
+              <button class="planetary-chip" data-topic="concepts"> Artist Concepts</button>
             </div>
 
             <!-- Header Status -->
             <div class="planetary-status-row">
               <div>
                 <span class="live-dot pulse-dot"></span>
-                <b id="planetary-current-topic-label">Latest Content Feed</b>
+                <b id="planetary-current-topic-label">Latest Discoveries</b>
               </div>
-              <small id="planetary-feed-timestamp" class="mono muted">Streaming NASA Science…</small>
+              <small id="planetary-feed-timestamp" class="mono muted">Streaming NASA Observatory…</small>
             </div>
 
-            <!-- Dynamic Image Grid -->
+            <!-- Dynamic Media Grid -->
             <div class="planetary-gallery-grid" id="planetary-gallery-container">
               <div class="loading-state">
                 <div class="apple-spinner large"></div>
-                <p style="margin-top:10px;">Connecting to NASA Photojournal RSS…</p>
+                <p style="margin-top:10px;">Connecting to NASA Raw Imagery Archive…</p>
               </div>
             </div>
           </article>
         </section>
-
+        
         <!-- 2. SATELLITES & MULTI-LAYER MAP -->
         <section class="section-block" id="satellites">
           <div class="section-title">
@@ -303,9 +314,9 @@
             <!-- Layer Toggles -->
             <div class="map-toolbar-row">
               <div class="map-layer-chips">
-                <button class="layer-chip active" id="toggle-layer-iss">🛰️ Satellite Active</button>
-                <button class="layer-chip active" id="toggle-layer-quakes">🌍 Quakes (USGS)</button>
-                <button class="layer-chip active" id="toggle-layer-hazards">🌋 Hazards (EONET)</button>
+                <button class="layer-chip active" id="toggle-layer-iss"> Satellite Active</button>
+                <button class="layer-chip active" id="toggle-layer-quakes"> Quakes (USGS)</button>
+                <button class="layer-chip active" id="toggle-layer-hazards"> Hazards (EONET)</button>
                 <button class="layer-chip active" id="toggle-layer-track">⌖ Ground Track</button>
               </div>
             </div>
