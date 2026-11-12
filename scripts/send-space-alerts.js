@@ -33,7 +33,7 @@ async function getAPOD() {
       return {
         topic: 'apod',
         category: 'apod',
-        title: `🌌 APOD: ${data.title}`,
+        title: ` Astronomy pic of the day: ${data.title}`,
         body: data.explanation.slice(0, 130) + '...',
         image: data.hdurl || data.url || '',
         url: 'https://tastyandcomfort.github.io/T-C-Space/#astronomy'
@@ -56,7 +56,7 @@ async function getSolarStormAlert() {
         return {
           topic: 'solar',
           category: 'solar',
-          title: `☀️ Severe Solar Storm Alert (Kp ${maxKp})`,
+          title: ` Severe Solar Storm (Kp ${maxKp})`,
           body: `Live geomagnetic disturbance active today. Reported by NASA DONKI.`,
           image: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?q=80&w=1000&auto=format&fit=crop',
           url: 'https://tastyandcomfort.github.io/T-C-Space/#space-weather',
@@ -87,7 +87,7 @@ async function getAsteroidAlert() {
       return {
         topic: 'asteroid',
         category: 'asteroid',
-        title: `${isHaz ? '⚠️ HAZARDOUS' : '☄️'} Asteroid Flyby: ${candidate.name}`,
+        title: `${isHaz ? ' HAZARDOUS' : ''} Asteroid Flyby: ${candidate.name}`,
         body: `Flyby Distance: ${lunar} LD (${(missDist/1e6).toFixed(2)}M km) | Relative Speed: ${speed} km/h`,
         image: 'https://images.unsplash.com/photo-1614728894747-a83421e2b9c9?q=80&w=1000&auto=format&fit=crop',
         url: 'https://tastyandcomfort.github.io/T-C-Space/#astronomy'
@@ -118,7 +118,7 @@ async function getMarsRoverAlert() {
       return {
         topic: 'mars',
         category: 'mars',
-        title: `🔴 Mars Rover Surface Cam (${roverName})`,
+        title: ` Mars Rover Surface Cam (${roverName})`,
         body: `Raw surface frame received from Sol ${p.sol} (${p.camera?.name || 'Camera'}).`,
         image: secureImg,
         url: 'https://tastyandcomfort.github.io/T-C-Space/#deep-labs'
@@ -143,7 +143,7 @@ async function getRocketLaunch() {
       return {
         topic: 'launch',
         category: 'launch',
-        title: `🚀 Next Flight Countdown: ${nextLaunch.name}`,
+        title: ` Next Rocket Countdown: ${nextLaunch.name}`,
         body: `T-Minus ~${Math.max(1, Math.round(diffHours))} hrs. Pad: ${nextLaunch.pad?.name || 'Spaceport'}.`,
         image: nextLaunch.image || 'https://images.unsplash.com/photo-1517976487502-d7102d84d12b?q=80&w=1000&auto=format&fit=crop',
         url: 'https://tastyandcomfort.github.io/T-C-Space/#launches',
@@ -165,7 +165,7 @@ async function getSatelliteIntel() {
     return {
       topic: 'satellite',
       category: 'satellite',
-      title: '🛰️ ISS Orbital Pass Telemetry',
+      title: ' ISS Fly-Over',
       body: `International Space Station cruising at ${speed} km/h (${alt} km altitude).`,
       image: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1000&auto=format&fit=crop',
       url: 'https://tastyandcomfort.github.io/T-C-Space/#satellites'
@@ -185,7 +185,7 @@ async function getEarthquakeAlert() {
       return {
         topic: 'earthquake',
         category: 'earthquake',
-        title: `🌐 USGS Seismic Alert: M ${q.properties.mag.toFixed(1)}`,
+        title: ` Earthquake Radar: M ${q.properties.mag.toFixed(1)}`,
         body: `Seismic event recorded near ${q.properties.place}. Depth: ${q.geometry.coordinates[2]} km.`,
         image: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?q=80&w=1000&auto=format&fit=crop',
         url: 'https://tastyandcomfort.github.io/T-C-Space/#earth-monitor'
