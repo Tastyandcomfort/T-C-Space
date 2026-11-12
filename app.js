@@ -107,11 +107,43 @@ function initNetworkMonitor() {
   setInterval(updateNetworkStatus, 30000);
 }
 
-// 3. Navigation Router with Deep-Link Resolution & Leaflet Auto-Resize
+// 3. Navigation Router with "More •••" Sheet, Deep-Link Resolution & Leaflet Auto-Resize
 function initNavigation() {
-  const navLinks = document.querySelectorAll('.nav-link, .dock-link');
+  const navLinks = document.querySelectorAll('.nav-link, .dock-link, .more-sheet-item');
   const sections = document.querySelectorAll('.section-block');
   const label = document.getElementById('current-section-label');
+
+  // "More •••" Bottom Sheet Controls
+  const moreDockBtn = document.getElementById('more-dock-btn');
+  const moreSheet = document.getElementById('more-sheet-backdrop');
+  const moreSheetClose = document.getElementById('more-sheet-close-btn');
+
+  function openMoreSheet() {
+    if (moreSheet) moreSheet.classList.add('open');
+  }
+  function closeMoreSheet() {
+    if (moreSheet) moreSheet.classList.remove('open');
+  }
+
+  moreDockBtn?.addEventListener('click', (e) => {
+    e.preventDefault();
+    if (moreSheet?.classList.contains('open')) {
+      closeMoreSheet();
+    } else {
+      openMoreSheet();
+    }
+  });
+
+  moreSheetClose?.addEventListener('click', closeMoreSheet);
+  moreSheet?.addEventListener('click', (e) => {
+    if (e.target === moreSheet) closeMoreSheet();
+  });
+
+  document.querySelectorAll('.more-sheet-item').forEach(item => {
+    item.addEventListener('click', () => {
+      closeMoreSheet();
+    });
+  });
 
   function handleRoute(hashStr) {
     const rawHash = (hashStr || window.location.hash || '#overview').replace('#', '');
@@ -131,6 +163,7 @@ function initNavigation() {
       sections[0].classList.add('active-view');
     }
 
+    // Active state highlighting across sidebar, dock, and more-sheet items
     navLinks.forEach(link => {
       if (link.getAttribute('data-nav') === targetId) {
         link.classList.add('active');
@@ -138,6 +171,16 @@ function initNavigation() {
         link.classList.remove('active');
       }
     });
+
+    // Highlight "More" dock button if one of the extended sections is active
+    const extendedSections = ['interplanetary', 'space-weather', 'cosmos-hazards', 'intel-brief', 'wiki', 'settings', 'about'];
+    if (moreDockBtn) {
+      if (extendedSections.includes(targetId)) {
+        moreDockBtn.classList.add('active');
+      } else {
+        moreDockBtn.classList.remove('active');
+      }
+    }
 
     if (label) {
       label.textContent = targetId.charAt(0).toUpperCase() + targetId.slice(1).replace('-', ' ');
@@ -151,7 +194,7 @@ function initNavigation() {
       fetchPlanetaryFeed(currentPlanetaryTopic, currentPlanetaryMediaType);
     }
 
-    // Direct Deep-Link Resolution: If shared URL has ?asset=NASA_ID, immediately open lightbox!
+    // Direct Deep-Link Resolution
     if (queryPart) {
       const params = new URLSearchParams(queryPart);
       const sharedNasaId = params.get('asset');
@@ -177,6 +220,7 @@ function initNavigation() {
   window.addEventListener('hashchange', () => handleRoute(window.location.hash));
   handleRoute(window.location.hash);
 }
+
 
 // 4. Interactive Overview Cards
 function initOverviewClickableCards() {
