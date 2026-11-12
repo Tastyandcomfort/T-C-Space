@@ -940,26 +940,37 @@
     </a>
   </nav>
 
-  <!-- Universal In-App Apple Media Lightbox -->
+  <!-- Universal In-App Apple Media Lightbox (Supports Raw Photos, 4K Videos & Space Audio) -->
   <div class="epic-lightbox-backdrop" id="universal-media-lightbox" aria-hidden="true">
     <div class="epic-lightbox-dialog" role="dialog" aria-label="Media Preview">
       <button class="lightbox-close-btn" id="close-universal-lightbox-btn" aria-label="Close Lightbox">✕</button>
-      <div class="lightbox-img-wrap">
+      
+      <div class="lightbox-img-wrap" id="universal-lightbox-container">
+        <!-- Photo Player -->
         <img id="universal-lightbox-img" src="" alt="Full Space Media Preview">
+        <!-- 4K / HD Video Player -->
+        <video id="universal-lightbox-video" controls playsinline style="display:none; width:100%; max-height:65vh;"></video>
+        <!-- Space Audio Player -->
+        <div id="universal-lightbox-audio-wrap" style="display:none; text-align:center; padding:30px 20px;">
+          <div style="font-size:42px; margin-bottom:12px;">🎙️</div>
+          <audio id="universal-lightbox-audio" controls style="width:100%; max-width:400px;"></audio>
+        </div>
       </div>
+
       <div class="lightbox-footer">
         <div class="lightbox-meta">
           <b id="universal-lightbox-title">Space Telemetry Capture</b>
           <span id="universal-lightbox-time">Timestamp: —</span>
+          <span id="universal-lightbox-raw-tag" class="small-chip blue" style="margin-top:4px; display:inline-block;">RESOLVING 100% RAW MASTER...</span>
         </div>
         <div class="lightbox-actions">
-          <button id="universal-download-btn" class="apple-btn-secondary">⬇ Download High-Res</button>
-          <button id="universal-share-btn" class="primary-button">↗ Share Photo</button>
+          <button id="universal-download-btn" class="apple-btn-secondary">⬇ Download Raw Master</button>
+          <button id="universal-share-btn" class="primary-button">↗ Share Asset</button>
         </div>
       </div>
     </div>
   </div>
-
+  
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
