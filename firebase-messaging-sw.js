@@ -19,7 +19,8 @@ const NOTIFICATION_PHOTOS = {
   launch: 'https://images-assets.nasa.gov/image/KSC-20221116-PH-KLS01_0003/KSC-20221116-PH-KLS01_0003~medium.jpg', // Rocket liftoff
   solar: 'https://images-assets.nasa.gov/image/GSFC_20171208_Archive_e001435/GSFC_20171208_Archive_e001435~medium.jpg', // SDO solar flare
   quake: 'https://images-assets.nasa.gov/image/iss065e094294/iss065e094294~medium.jpg', // Earth atmospheric horizon
-  asteroid: 'https://images-assets.nasa.gov/image/PIA24430/PIA24430~medium.jpg' // Asteroid surface
+  asteroid: 'https://images-assets.nasa.gov/image/PIA24430/PIA24430~medium.jpg', // Asteroid surface
+  cosmic: 'https://images-assets.nasa.gov/image/GSFC_20171208_Archive_e000494/GSFC_20171208_Archive_e000494~medium.jpg' // High-res deep space nebula capture
 };
 
 messaging.onBackgroundMessage((payload) => {
@@ -40,6 +41,10 @@ messaging.onBackgroundMessage((payload) => {
       bannerPhoto = NOTIFICATION_PHOTOS.solar;
     } else if (catLower.includes('seismic') || catLower.includes('quake') || catLower.includes('earth')) {
       bannerPhoto = NOTIFICATION_PHOTOS.quake;
+    } else if (catLower.includes('asteroid') || catLower.includes('comet') || catLower.includes('neo')) {
+      bannerPhoto = NOTIFICATION_PHOTOS.asteroid;
+    } else if (catLower.includes('cosmic') || catLower.includes('planet') || catLower.includes('photo') || catLower.includes('telescope') || catLower.includes('jwst') || catLower.includes('hubble') || catLower.includes('explorer')) {
+      bannerPhoto = NOTIFICATION_PHOTOS.cosmic;
     } else {
       bannerPhoto = NOTIFICATION_PHOTOS.satellite;
     }
