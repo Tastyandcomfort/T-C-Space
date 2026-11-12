@@ -1212,3 +1212,82 @@ html[data-theme="dark"] .leaflet-tile {
     height: 180px;
   }
 }
+
+/* --- Planetary Explorer: Raw Media Filters & Video Badges --- */
+.planetary-media-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+.media-type-lbl {
+  font-size: 9px;
+  font-weight: 750;
+  letter-spacing: 0.9px;
+  color: var(--dim);
+}
+.planetary-media-chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.media-chip {
+  padding: 5px 12px;
+  border-radius: 99px;
+  border: 1px solid var(--line);
+  background: var(--surface-solid);
+  color: var(--muted);
+  font: inherit;
+  font-size: 10.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.media-chip:hover {
+  color: var(--text);
+  border-color: var(--blue);
+}
+.media-chip.active {
+  background: var(--green);
+  color: #fff;
+  border-color: var(--green);
+}
+
+/* 4K Video Play Overlay */
+.planetary-play-badge {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-size: 18px;
+  border: 1.5px solid rgba(255, 255, 255, 0.4);
+  pointer-events: none;
+  transition: transform 0.18s ease, background 0.18s ease;
+}
+.planetary-card:hover .planetary-play-badge {
+  background: var(--blue);
+  transform: translate(-50%, -50%) scale(1.1);
+}
+
+.planetary-media-type-tag {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.75);
+  color: #fff;
+  font: 700 8.5px var(--mono);
+  padding: 3px 7px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
