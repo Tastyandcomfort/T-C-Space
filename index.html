@@ -18,7 +18,7 @@
 <body>
   <div class="app-shell">
 
-    <!-- Desktop Sidebar Rail -->
+    <!-- Desktop Sidebar Rail (Visible on screens > 900px) -->
     <aside class="sidebar" id="sidebar">
       <a class="brand" href="#overview">
         <div class="brand-icon-box">
@@ -231,31 +231,31 @@
             <div class="planetary-media-bar">
               <span class="media-type-lbl">INSTRUMENT FORMAT:</span>
               <div class="planetary-media-chips" id="planetary-media-chips">
-                <button class="media-chip active" data-media="image,video,audio"> All Data</button>
-                <button class="media-chip" data-media="image"> Raw Detector Frames</button>
-                <button class="media-chip" data-media="video"> 4K Time-Lapses &amp; Motion</button>
-                <button class="media-chip" data-media="audio"> Space Radio Audio</button>
+                <button class="media-chip active" data-media="image,video,audio">🌐 All Data</button>
+                <button class="media-chip" data-media="image">📸 Raw Detector Frames</button>
+                <button class="media-chip" data-media="video">🎬 4K Time-Lapses &amp; Motion</button>
+                <button class="media-chip" data-media="audio">🎙️ Space Radio Audio</button>
               </div>
             </div>
 
             <!-- Universe-Wide Celestial Target Chips -->
             <div class="planetary-chips-scroll" id="planetary-topic-chips">
-              <button class="planetary-chip active" data-topic="deep-field"> Deep Field &amp; First Galaxies</button>
-              <button class="planetary-chip" data-topic="jwst-raw"> JWST Raw Science (Webb)</button>
-              <button class="planetary-chip" data-topic="hubble-raw"> Hubble Raw Detector (HST)</button>
-              <button class="planetary-chip" data-topic="nebulae"> Nebulae &amp; Stellar Nurseries</button>
-              <button class="planetary-chip" data-topic="galaxies"> Spiral &amp; Colliding Galaxies</button>
-              <button class="planetary-chip" data-topic="black-holes"> Black Holes &amp; X-Ray Jets</button>
-              <button class="planetary-chip" data-topic="supernovae"> Supernovae &amp; Remnants</button>
-              <button class="planetary-chip" data-topic="pulsars"> Pulsars &amp; Neutron Stars</button>
-              <button class="planetary-chip" data-topic="exoplanets"> Exoplanet Systems</button>
-              <button class="planetary-chip" data-topic="gravitational"> Gravitational Lenses</button>
-              <button class="planetary-chip" data-topic="sun"> Solar SDO Direct Telemetry</button>
-              <button class="planetary-chip" data-topic="mars-raw"> Mars Rover Raw Downlinks</button>
-              <button class="planetary-chip" data-topic="jupiter"> Jupiter JunoCam Raw Buffer</button>
-              <button class="planetary-chip" data-topic="saturn"> Saturn Cassini Archives</button>
-              <button class="planetary-chip" data-topic="interstellar"> Comets &amp; Interstellar Objects</button>
-              <button class="planetary-chip" data-topic="earth"> Earth Orbital Radiometers</button>
+              <button class="planetary-chip active" data-topic="deep-field">🌌 Deep Field &amp; First Galaxies</button>
+              <button class="planetary-chip" data-topic="jwst-raw">🔭 JWST Raw Science (Webb)</button>
+              <button class="planetary-chip" data-topic="hubble-raw">🔭 Hubble Raw Detector (HST)</button>
+              <button class="planetary-chip" data-topic="nebulae">✨ Nebulae &amp; Stellar Nurseries</button>
+              <button class="planetary-chip" data-topic="galaxies">🌀 Spiral &amp; Colliding Galaxies</button>
+              <button class="planetary-chip" data-topic="black-holes">🕳️ Black Holes &amp; X-Ray Jets</button>
+              <button class="planetary-chip" data-topic="supernovae">💥 Supernovae &amp; Remnants</button>
+              <button class="planetary-chip" data-topic="pulsars">⚡ Pulsars &amp; Neutron Stars</button>
+              <button class="planetary-chip" data-topic="exoplanets">🪐 Exoplanet Systems</button>
+              <button class="planetary-chip" data-topic="gravitational">🌀 Gravitational Lenses</button>
+              <button class="planetary-chip" data-topic="sun">☀️ Solar SDO Direct Telemetry</button>
+              <button class="planetary-chip" data-topic="mars-raw">♂ Mars Rover Raw Downlinks</button>
+              <button class="planetary-chip" data-topic="jupiter">♃ Jupiter JunoCam Raw Buffer</button>
+              <button class="planetary-chip" data-topic="saturn">♄ Saturn Cassini Archives</button>
+              <button class="planetary-chip" data-topic="interstellar">☄️ Comets &amp; Interstellar Objects</button>
+              <button class="planetary-chip" data-topic="earth">🌍 Earth Orbital Radiometers</button>
             </div>
 
             <!-- Live Status Row -->
@@ -307,10 +307,10 @@
 
             <div class="map-toolbar-row">
               <div class="map-layer-chips">
-                <button class="layer-chip active" id="toggle-layer-iss"> Satellite Active</button>
-                <button class="layer-chip active" id="toggle-layer-quakes"> Quakes (USGS)</button>
-                <button class="layer-chip active" id="toggle-layer-hazards"> Hazards (EONET)</button>
-                <button class="layer-chip active" id="toggle-layer-track"> Ground Track</button>
+                <button class="layer-chip active" id="toggle-layer-iss">🛰️ Satellite Active</button>
+                <button class="layer-chip active" id="toggle-layer-quakes">🌍 Quakes (USGS)</button>
+                <button class="layer-chip active" id="toggle-layer-hazards">🌋 Hazards (EONET)</button>
+                <button class="layer-chip active" id="toggle-layer-track">⌖ Ground Track</button>
               </div>
             </div>
 
@@ -899,7 +899,7 @@
     </main>
   </div>
 
-  <!-- Mobile Bottom Frosted Navigation Dock -->
+  <!-- Mobile Bottom Frosted Navigation Dock (5 Clean Touch Targets) -->
   <nav class="mobile-dock" aria-label="Mobile Navigation">
     <a class="dock-link active" href="#overview" data-nav="overview">
       <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
@@ -917,17 +917,105 @@
       <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/></svg>
       <span>Launches</span>
     </a>
-    <a class="dock-link" href="#cosmos-hazards" data-nav="cosmos-hazards">
-      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-      <span>Cosmos</span>
-    </a>
-    <a class="dock-link" href="#settings" data-nav="settings">
-      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83-2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-      <span>Alerts</span>
-    </a>
+    <button type="button" class="dock-link" id="more-dock-btn" aria-label="More Space Hub Sections">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/><circle cx="5" cy="12" r="1.5"/></svg>
+      <span>More</span>
+    </button>
   </nav>
 
-  <!-- Universal In-App Apple Media Lightbox -->
+  <!-- Apple-Style "More •••" Mobile Menu Sheet (Full Access to Remaining Sections) -->
+  <div class="more-sheet-backdrop" id="more-sheet-backdrop" aria-hidden="true">
+    <div class="more-sheet-dialog" role="dialog" aria-label="More Space Hub Sections">
+      <div class="more-sheet-handle-bar">
+        <div class="more-sheet-pill-bar"></div>
+      </div>
+      <div class="more-sheet-header">
+        <h4>All Space Hub Modules</h4>
+        <small class="muted">Live telemetry, scientific instruments &amp; settings</small>
+      </div>
+      <div class="more-sheet-grid">
+        <a class="more-sheet-item" href="#interplanetary" data-nav="interplanetary">
+          <span class="more-item-icon blue">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="8" cy="9" r="1.5"/><circle cx="15" cy="14" r="2"/></svg>
+          </span>
+          <div>
+            <b>Earth &amp; Mars</b>
+            <small>DSCOVR 1M Miles &amp; Rovers</small>
+          </div>
+          <span class="more-item-arrow">›</span>
+        </a>
+
+        <a class="more-sheet-item" href="#space-weather" data-nav="space-weather">
+          <span class="more-item-icon orange">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/></svg>
+          </span>
+          <div>
+            <b>Space Weather</b>
+            <small>Solar Flares &amp; Kp Index</small>
+          </div>
+          <span class="more-item-arrow">›</span>
+        </a>
+
+        <a class="more-sheet-item" href="#cosmos-hazards" data-nav="cosmos-hazards">
+          <span class="more-item-icon purple">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          </span>
+          <div>
+            <b>Cosmos &amp; Hazards</b>
+            <small>NASA APOD, JPL &amp; Quakes</small>
+          </div>
+          <span class="more-item-arrow">›</span>
+        </a>
+
+        <a class="more-sheet-item" href="#intel-brief" data-nav="intel-brief">
+          <span class="more-item-icon teal">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          </span>
+          <div>
+            <b>Area Intel Brief</b>
+            <small>Global AQI &amp; Solar Flux</small>
+          </div>
+          <span class="more-item-arrow">›</span>
+        </a>
+
+        <a class="more-sheet-item" href="#wiki" data-nav="wiki">
+          <span class="more-item-icon green">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+          </span>
+          <div>
+            <b>Space Wiki</b>
+            <small>Live Wikimedia Explorer</small>
+          </div>
+          <span class="more-item-arrow">›</span>
+        </a>
+
+        <a class="more-sheet-item" href="#settings" data-nav="settings">
+          <span class="more-item-icon blue">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83-2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          </span>
+          <div>
+            <b>Preferences &amp; Alerts</b>
+            <small>Push Notifications &amp; Passes</small>
+          </div>
+          <span class="more-item-arrow">›</span>
+        </a>
+
+        <a class="more-sheet-item" href="#about" data-nav="about">
+          <span class="more-item-icon purple">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+          </span>
+          <div>
+            <b>About T&amp;C Space</b>
+            <small>Manifest, Ecosystem &amp; Credits</small>
+          </div>
+          <span class="more-item-arrow">›</span>
+        </a>
+      </div>
+      <button type="button" class="more-sheet-close-btn" id="more-sheet-close-btn">Close Menu</button>
+    </div>
+  </div>
+
+  <!-- Universal In-App Apple Media Lightbox (With Standalone PWA Video Containment) -->
   <div class="epic-lightbox-backdrop" id="universal-media-lightbox" aria-hidden="true">
     <div class="epic-lightbox-dialog" role="dialog" aria-label="Media Preview">
       <button class="lightbox-close-btn" id="close-universal-lightbox-btn" aria-label="Close Lightbox">✕</button>
@@ -973,9 +1061,9 @@
       <div class="apple-sheet-options">
         <button type="button" class="apple-sheet-option-btn primary" id="sheet-download-opt">
           <div class="sheet-opt-left">
-            <span class="sheet-opt-icon"></span>
+            <span class="sheet-opt-icon">⚡</span>
             <div>
-              <b class="sheet-opt-title">Optimized File</b>
+              <b class="sheet-opt-title">Optimized Ultra-HD</b>
               <small class="sheet-opt-meta">Instant saving · Pristine screen clarity</small>
             </div>
           </div>
@@ -987,9 +1075,9 @@
 
         <button type="button" class="apple-sheet-option-btn" id="sheet-download-raw">
           <div class="sheet-opt-left">
-            <span class="sheet-opt-icon"></span>
+            <span class="sheet-opt-icon">📸</span>
             <div>
-              <b class="sheet-opt-title">Raw File</b>
+              <b class="sheet-opt-title">100% Raw Original Master</b>
               <small class="sheet-opt-meta" id="sheet-raw-format">Uncompressed camera sensor capture</small>
             </div>
           </div>
