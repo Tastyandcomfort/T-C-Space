@@ -631,26 +631,26 @@ function initUniversalLightbox() {
 }
 
 // ============================================================================
-// 11. PLANETARY EXPLORER (NASA PHOTOJOURNAL RSS ENGINE)
+// 11. PLANETARY EXPLORER (ROBUST LIVE NASA FETCHER WITH REAL PLANETARY IMAGES)
 // ============================================================================
-const NASA_FEEDS = {
-  latest: { name: "Latest Content", url: "https://science.nasa.gov/feed/photojournal/latest-content/" },
-  sun: { name: "The Sun", url: "https://science.nasa.gov/feed/photojournal/gallery/sun/" },
-  mercury: { name: "Mercury", url: "https://science.nasa.gov/feed/photojournal/gallery/mercury/" },
-  venus: { name: "Venus", url: "https://science.nasa.gov/feed/photojournal/gallery/venus/" },
-  earth: { name: "Earth", url: "https://science.nasa.gov/feed/photojournal/gallery/earth/" },
-  mars: { name: "Mars", url: "https://science.nasa.gov/feed/photojournal/gallery/mars/" },
-  jupiter: { name: "Jupiter", url: "https://science.nasa.gov/feed/photojournal/gallery/jupiter/" },
-  saturn: { name: "Saturn", url: "https://science.nasa.gov/feed/photojournal/gallery/saturn/" },
-  uranus: { name: "Uranus", url: "https://science.nasa.gov/feed/photojournal/gallery/uranus/" },
-  neptune: { name: "Neptune", url: "https://science.nasa.gov/feed/photojournal/gallery/neptune/" },
-  "dwarf-planets": { name: "Dwarf Planets", url: "https://science.nasa.gov/feed/photojournal/gallery/dwarf-planets/" },
-  "small-bodies": { name: "Asteroids & Comets", url: "https://science.nasa.gov/feed/photojournal/gallery/small-bodies/" },
-  universe: { name: "The Universe", url: "https://science.nasa.gov/feed/photojournal/gallery/universe/" },
-  spacecraft: { name: "Spacecraft & Telescopes", url: "https://science.nasa.gov/feed/photojournal/gallery/spacecraft-technology/" },
-  animation: { name: "Animations", url: "https://science.nasa.gov/feed/photojournal/gallery/animation/" },
-  anaglyph: { name: "3D Anaglyphs", url: "https://science.nasa.gov/feed/photojournal/gallery/anaglyph/" },
-  concepts: { name: "Artists' Concepts", url: "https://science.nasa.gov/feed/photojournal/gallery/artists-concepts/" }
+const NASA_TOPIC_QUERIES = {
+  latest: { name: "Latest Discoveries", query: "space discovery 2026" },
+  sun: { name: "The Sun", query: "solar dynamics observatory sun flare" },
+  mercury: { name: "Mercury", query: "messenger mercury planet" },
+  venus: { name: "Venus", query: "magellan venus planet surface" },
+  earth: { name: "Earth", query: "earth from space dscovr iss" },
+  mars: { name: "Mars", query: "perseverance curiosity mars surface" },
+  jupiter: { name: "Jupiter", query: "juno jupiter great red spot" },
+  saturn: { name: "Saturn", query: "cassini saturn rings" },
+  uranus: { name: "Uranus", query: "voyager uranus planet" },
+  neptune: { name: "Neptune", query: "voyager neptune planet" },
+  "dwarf-planets": { name: "Dwarf Planets", query: "new horizons pluto ceres" },
+  "small-bodies": { name: "Asteroids & Comets", query: "bennu osiris-rex asteroid comet" },
+  universe: { name: "The Universe", query: "hubble webb nebula galaxy universe" },
+  spacecraft: { name: "Spacecraft & Telescopes", query: "spacecraft telescope james webb iss" },
+  animation: { name: "Animations & Motion", query: "space animation simulation" },
+  anaglyph: { name: "3D Anaglyphs", query: "mars 3d stereo anaglyph" },
+  concepts: { name: "Artists' Concepts", query: "artist concept exoplanet future space" }
 };
 
 let planetaryExplorerLoaded = false;
@@ -673,115 +673,61 @@ async function fetchPlanetaryFeed(topicKey) {
   const container = document.getElementById('planetary-gallery-container');
   const label = document.getElementById('planetary-current-topic-label');
   const timestamp = document.getElementById('planetary-feed-timestamp');
-  const feedObj = NASA_FEEDS[topicKey] || NASA_FEEDS.latest;
+  const topicObj = NASA_TOPIC_QUERIES[topicKey] || NASA_TOPIC_QUERIES.latest;
 
-  if (label) label.textContent = `${feedObj.name} Feed`;
-  if (timestamp) timestamp.textContent = 'Querying live NASA RSS…';
+  if (label) label.textContent = `${topicObj.name} Feed`;
+  if (timestamp) timestamp.textContent = 'Streaming live NASA imagery…';
 
   if (container) {
     container.innerHTML = `
       <div class="loading-state">
         <div class="apple-spinner large"></div>
-        <p style="margin-top:10px;">Connecting to NASA Photojournal RSS (${feedObj.name})…</p>
+        <p style="margin-top:10px;">Retrieving genuine captures of ${topicObj.name}…</p>
       </div>
     `;
   }
 
-  // Dual-tier CORS-safe RSS Parser Pipeline
-  const primaryApi = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feedObj.url)}&api_key=`;
-  let items = [];
-
   try {
-    const res = await fetch(primaryApi);
-    if (res.ok) {
-      const data = await res.json();
-      if (data.status === 'ok' && data.items) {
-        items = data.items;
-      }
-    }
-  } catch (_) {}
+    // NASA's Official Image & Video Library API (Direct, 100% Free, No CORS issue, Real Photos)
+    const apiUrl = `https://images-api.nasa.gov/search?q=${encodeURIComponent(topicObj.query)}&media_type=image`;
+    const res = await fetch(apiUrl);
+    if (!res.ok) throw new Error("API stream busy");
 
-  // Fallback CORS Proxy Parser if rss2json is busy
-  if (!items || items.length === 0) {
-    try {
-      const fallbackUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(feedObj.url)}`;
-      const res = await fetch(fallbackUrl);
-      if (res.ok) {
-        const raw = await res.json();
-        const parser = new DOMParser();
-        const xml = parser.parseFromString(raw.contents, "application/xml");
-        const xmlItems = Array.from(xml.querySelectorAll("item"));
+    const data = await res.json();
+    const items = data.collection?.items?.slice(0, 15) || [];
 
-        items = xmlItems.map(item => {
-          const title = item.querySelector("title")?.textContent || "NASA Space Exploration";
-          const desc = item.querySelector("description")?.textContent || "";
-          const link = item.querySelector("link")?.textContent || "";
-          const pubDate = item.querySelector("pubDate")?.textContent || "";
-
-          // Extract image from enclosure or content
-          let imgUrl = item.querySelector("enclosure")?.getAttribute("url") || "";
-          if (!imgUrl) {
-            const match = desc.match(/src="([^"]+)"/);
-            if (match) imgUrl = match[1];
-          }
-
-          return {
-            title,
-            description: desc.replace(/<[^>]*>/g, '').trim(),
-            enclosure: { link: imgUrl },
-            pubDate,
-            link
-          };
-        });
-      }
-    } catch (_) {}
-  }
-
-  if (container) {
     if (!items || items.length === 0) {
-      container.innerHTML = `
-        <div class="loading-state">
-          <p>Unable to stream ${feedObj.name} right now. Please try another category or check your network.</p>
-        </div>
-      `;
-      if (timestamp) timestamp.textContent = 'Stream timeout';
-      return;
+      throw new Error("No items found");
     }
 
     planetaryExplorerLoaded = true;
-    if (timestamp) timestamp.textContent = `Live Feed · ${items.length} captures available`;
+    if (timestamp) timestamp.textContent = `Live Feed · ${items.length} real captures available`;
 
     container.innerHTML = items.map((item, index) => {
-      // Find clean image URL
-      let imgSrc = item.thumbnail || item.enclosure?.link || '';
-      if (!imgSrc && item.description) {
-        const match = item.description.match(/<img[^>]+src="([^">]+)"/i);
-        if (match) imgSrc = match[1];
-      }
+      const info = item.data?.[0] || {};
+      const links = item.links || [];
 
-      if (!imgSrc) {
-        imgSrc = NOTIFICATION_HERO_PHOTOS.satellite;
-      }
+      // Extract high-res and preview thumbnails
+      const imgSrc = links.find(l => l.render === 'image' || l.href)?.href || '';
+      if (!imgSrc) return '';
 
-      // Clean caption text
-      let cleanDesc = item.description || '';
-      cleanDesc = cleanDesc.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim();
-      if (cleanDesc.length > 140) cleanDesc = cleanDesc.slice(0, 140) + '…';
+      const title = (info.title || `NASA ${topicObj.name}`).replace(/"/g, '&quot;');
+      let desc = (info.description || info.secondary_creator || 'Official NASA planetary observation.').replace(/<[^>]*>/g, '').trim();
+      if (desc.length > 130) desc = desc.slice(0, 130) + '…';
 
-      const dateStr = item.pubDate ? new Date(item.pubDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Recent Discovery';
-      const cleanTitle = (item.title || 'NASA Exploration').replace(/"/g, '&quot;');
-      const filename = `NASA_${feedObj.name.replace(/\s+/g, '_')}_${index + 1}.jpg`;
+      const dateStr = info.date_created ? new Date(info.date_created).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Verified Archive';
+      const filename = `NASA_${topicObj.name.replace(/[^a-zA-Z0-9]/g, '_')}_${index + 1}.jpg`;
 
       return `
-        <article class="planetary-card" data-url="${imgSrc}" data-title="${cleanTitle}" data-time="${dateStr}" data-filename="${filename}">
+        <article class="planetary-card" data-url="${imgSrc}" data-title="${title}" data-time="${dateStr}" data-filename="${filename}">
           <div class="planetary-card-media">
-            <img src="${imgSrc}" alt="${cleanTitle}" loading="lazy" onerror="this.src='${NOTIFICATION_HERO_PHOTOS.satellite}'">
-            <span class="planetary-tag">${feedObj.name}</span>
+            <img src="${imgSrc}" alt="${title}" loading="lazy">
+            <span class="planetary-tag">${topicObj.name}</span>
           </div>
           <div class="planetary-card-body">
             <small class="planetary-date">${dateStr}</small>
-            <h4>${item.title || 'NASA Mission Observation'}</h4>
-            <p>${cleanDesc || 'Explore high-resolution telemetry and photographic imagery.'}</p>
+            <h4>${info.title || 'Observation'}</h4>
+            <p>${desc}</p>
             <div class="planetary-card-action">
               <span>Inspect Photo ↗</span>
             </div>
@@ -790,16 +736,26 @@ async function fetchPlanetaryFeed(topicKey) {
       `;
     }).join('');
 
-    // Attach Lightbox Handlers
+    // Attach lightbox click handlers
     container.querySelectorAll('.planetary-card').forEach(card => {
       card.addEventListener('click', () => {
         const url = card.getAttribute('data-url');
         const title = card.getAttribute('data-title');
         const timeStr = card.getAttribute('data-time');
         const filename = card.getAttribute('data-filename');
-        openUniversalLightbox(url, title, `NASA Photojournal · ${timeStr}`, filename);
+        openUniversalLightbox(url, title, `NASA ${topicObj.name} · ${timeStr}`, filename);
       });
     });
+
+  } catch (err) {
+    if (container) {
+      container.innerHTML = `
+        <div class="loading-state">
+          <p>NASA imagery feed synchronizing. Tap another topic above to explore.</p>
+        </div>
+      `;
+    }
+    if (timestamp) timestamp.textContent = 'Syncing…';
   }
 }
 
