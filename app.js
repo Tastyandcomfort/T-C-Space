@@ -4,11 +4,11 @@ const NASA_API_KEY = "fLRTKjpmtJGRWqzFKG8NrtmwbbkwBnPnWKNzn8Gd";
 
 // Verified NASA & Space Contextual Photography for Notification Banners (No Logo Duplication)
 const NOTIFICATION_HERO_PHOTOS = {
-  satellite: 'https://images-assets.nasa.gov/image/iss064e007861/iss064e007861~medium.jpg', // High-res ISS orbiting above Earth
-  launch: 'https://images-assets.nasa.gov/image/KSC-20221116-PH-KLS01_0003/KSC-20221116-PH-KLS01_0003~medium.jpg', // Rocket liftoff
-  solar: 'https://images-assets.nasa.gov/image/GSFC_20171208_Archive_e001435/GSFC_20171208_Archive_e001435~medium.jpg', // Solar flare disk
-  quake: 'https://images-assets.nasa.gov/image/iss065e094294/iss065e094294~medium.jpg', // Earth horizon
-  asteroid: 'https://images-assets.nasa.gov/image/PIA24430/PIA24430~medium.jpg' // Asteroid surface
+  satellite: 'https://images-assets.nasa.gov/image/iss064e007861/iss064e007861~medium.jpg',
+  launch: 'https://images-assets.nasa.gov/image/KSC-20221116-PH-KLS01_0003/KSC-20221116-PH-KLS01_0003~medium.jpg',
+  solar: 'https://images-assets.nasa.gov/image/GSFC_20171208_Archive_e001435/GSFC_20171208_Archive_e001435~medium.jpg',
+  quake: 'https://images-assets.nasa.gov/image/iss065e094294/iss065e094294~medium.jpg',
+  asteroid: 'https://images-assets.nasa.gov/image/PIA24430/PIA24430~medium.jpg'
 };
 
 // 1. Dual Clock (Live IST & UTC Synchronization)
@@ -33,7 +33,7 @@ function initClocks() {
   setInterval(tick, 1000);
 }
 
-// 2. Real-Time Network Monitor (Speed Tiers & Site-Wide Pulsing Dot Synchronization)
+// 2. Real-Time Network Monitor
 function initNetworkMonitor() {
   const textEl = document.getElementById('net-text');
 
@@ -133,6 +133,10 @@ function initNavigation() {
     if (targetId === 'satellites' && satMap) {
       setTimeout(() => satMap.invalidateSize(), 200);
     }
+
+    if (targetId === 'planetary-explorer' && !planetaryExplorerLoaded) {
+      fetchPlanetaryFeed('latest');
+    }
   }
 
   window.addEventListener('hashchange', () => {
@@ -144,7 +148,7 @@ function initNavigation() {
   showSection(initialHash);
 }
 
-// 4. Interactive Overview Cards (Clicking Navigates to Target Section)
+// 4. Interactive Overview Cards
 function initOverviewClickableCards() {
   document.querySelectorAll('.clickable-card[data-goto]').forEach(card => {
     card.addEventListener('click', () => {
@@ -154,7 +158,7 @@ function initOverviewClickableCards() {
   });
 }
 
-// 5. Multi-Layer Leaflet Map with Authentic Keplerian Orbital Database
+// 5. Multi-Layer Leaflet Map
 let satMap = null;
 let issMarker = null;
 let issTrackLine = null;
@@ -308,7 +312,7 @@ function initSatelliteSearch() {
   });
 }
 
-// 6. Live Satellite Telemetry Stream & Proximity Detection
+// 6. Live Satellite Telemetry Stream
 let lastSatData = null;
 
 async function fetchLiveSatelliteTelemetry(shouldCenterMap = false) {
@@ -387,7 +391,7 @@ async function fetchLiveSatelliteTelemetry(shouldCenterMap = false) {
   } catch (_) {}
 }
 
-// 7. Real-Time Proximity & Overhead Pass Alert Engine
+// 7. Real-Time Proximity Alert Engine
 let lastPassAlertTime = 0;
 
 function checkSatelliteOverheadPass(satLat, satLon, satName, satVel) {
@@ -415,13 +419,13 @@ function checkSatelliteOverheadPass(satLat, satLon, satName, satVel) {
         title: 'T&C Space · Orbital Pass 🛰️',
         body: `${satName} is passing directly over ${locationName}! Proximity: ${Math.round(distanceKm)} km · Speed: ${satVel.toFixed(2)} km/s.`,
         url: './#satellites',
-        image: NOTIFICATION_HERO_PHOTOS.satellite // Real astronaut ISS photo
+        image: NOTIFICATION_HERO_PHOTOS.satellite
       });
     }
   }
 }
 
-// 8. Live Sensors Ticker Engine
+// 8. Live Sensors Ticker
 let tickerCycleIndex = 0;
 let lastNextLaunchText = 'Streaming upcoming flights…';
 let lastEarthquakeText = 'USGS seismic sensors active.';
@@ -448,7 +452,7 @@ function startLiveTickerEngine() {
   setInterval(updateTicker, 4500);
 }
 
-// 9. Verified Launch Manifest with Ticking Countdown Timer
+// 9. Verified Launch Manifest
 let countdownInterval = null;
 
 async function fetchLaunches() {
@@ -531,7 +535,7 @@ async function fetchLaunches() {
   }
 }
 
-// 10. Universal Lightbox with Real Binary Download & Native Share
+// 10. Universal Lightbox
 let activeLightboxMedia = {
   url: "",
   title: "NASA Space Telemetry",
@@ -626,7 +630,180 @@ function initUniversalLightbox() {
   });
 }
 
-// 11. Earth From 1,000,000 Miles Away (NASA DSCOVR EPIC)
+// ============================================================================
+// 11. PLANETARY EXPLORER (NASA PHOTOJOURNAL RSS ENGINE)
+// ============================================================================
+const NASA_FEEDS = {
+  latest: { name: "Latest Content", url: "https://science.nasa.gov/feed/photojournal/latest-content/" },
+  sun: { name: "The Sun", url: "https://science.nasa.gov/feed/photojournal/gallery/sun/" },
+  mercury: { name: "Mercury", url: "https://science.nasa.gov/feed/photojournal/gallery/mercury/" },
+  venus: { name: "Venus", url: "https://science.nasa.gov/feed/photojournal/gallery/venus/" },
+  earth: { name: "Earth", url: "https://science.nasa.gov/feed/photojournal/gallery/earth/" },
+  mars: { name: "Mars", url: "https://science.nasa.gov/feed/photojournal/gallery/mars/" },
+  jupiter: { name: "Jupiter", url: "https://science.nasa.gov/feed/photojournal/gallery/jupiter/" },
+  saturn: { name: "Saturn", url: "https://science.nasa.gov/feed/photojournal/gallery/saturn/" },
+  uranus: { name: "Uranus", url: "https://science.nasa.gov/feed/photojournal/gallery/uranus/" },
+  neptune: { name: "Neptune", url: "https://science.nasa.gov/feed/photojournal/gallery/neptune/" },
+  "dwarf-planets": { name: "Dwarf Planets", url: "https://science.nasa.gov/feed/photojournal/gallery/dwarf-planets/" },
+  "small-bodies": { name: "Asteroids & Comets", url: "https://science.nasa.gov/feed/photojournal/gallery/small-bodies/" },
+  universe: { name: "The Universe", url: "https://science.nasa.gov/feed/photojournal/gallery/universe/" },
+  spacecraft: { name: "Spacecraft & Telescopes", url: "https://science.nasa.gov/feed/photojournal/gallery/spacecraft-technology/" },
+  animation: { name: "Animations", url: "https://science.nasa.gov/feed/photojournal/gallery/animation/" },
+  anaglyph: { name: "3D Anaglyphs", url: "https://science.nasa.gov/feed/photojournal/gallery/anaglyph/" },
+  concepts: { name: "Artists' Concepts", url: "https://science.nasa.gov/feed/photojournal/gallery/artists-concepts/" }
+};
+
+let planetaryExplorerLoaded = false;
+let currentPlanetaryTopic = 'latest';
+
+function initPlanetaryExplorer() {
+  const chips = document.querySelectorAll('.planetary-chip');
+  chips.forEach(chip => {
+    chip.addEventListener('click', () => {
+      chips.forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      const topic = chip.getAttribute('data-topic');
+      currentPlanetaryTopic = topic;
+      fetchPlanetaryFeed(topic);
+    });
+  });
+}
+
+async function fetchPlanetaryFeed(topicKey) {
+  const container = document.getElementById('planetary-gallery-container');
+  const label = document.getElementById('planetary-current-topic-label');
+  const timestamp = document.getElementById('planetary-feed-timestamp');
+  const feedObj = NASA_FEEDS[topicKey] || NASA_FEEDS.latest;
+
+  if (label) label.textContent = `${feedObj.name} Feed`;
+  if (timestamp) timestamp.textContent = 'Querying live NASA RSS…';
+
+  if (container) {
+    container.innerHTML = `
+      <div class="loading-state">
+        <div class="apple-spinner large"></div>
+        <p style="margin-top:10px;">Connecting to NASA Photojournal RSS (${feedObj.name})…</p>
+      </div>
+    `;
+  }
+
+  // Dual-tier CORS-safe RSS Parser Pipeline
+  const primaryApi = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feedObj.url)}&api_key=`;
+  let items = [];
+
+  try {
+    const res = await fetch(primaryApi);
+    if (res.ok) {
+      const data = await res.json();
+      if (data.status === 'ok' && data.items) {
+        items = data.items;
+      }
+    }
+  } catch (_) {}
+
+  // Fallback CORS Proxy Parser if rss2json is busy
+  if (!items || items.length === 0) {
+    try {
+      const fallbackUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(feedObj.url)}`;
+      const res = await fetch(fallbackUrl);
+      if (res.ok) {
+        const raw = await res.json();
+        const parser = new DOMParser();
+        const xml = parser.parseFromString(raw.contents, "application/xml");
+        const xmlItems = Array.from(xml.querySelectorAll("item"));
+
+        items = xmlItems.map(item => {
+          const title = item.querySelector("title")?.textContent || "NASA Space Exploration";
+          const desc = item.querySelector("description")?.textContent || "";
+          const link = item.querySelector("link")?.textContent || "";
+          const pubDate = item.querySelector("pubDate")?.textContent || "";
+
+          // Extract image from enclosure or content
+          let imgUrl = item.querySelector("enclosure")?.getAttribute("url") || "";
+          if (!imgUrl) {
+            const match = desc.match(/src="([^"]+)"/);
+            if (match) imgUrl = match[1];
+          }
+
+          return {
+            title,
+            description: desc.replace(/<[^>]*>/g, '').trim(),
+            enclosure: { link: imgUrl },
+            pubDate,
+            link
+          };
+        });
+      }
+    } catch (_) {}
+  }
+
+  if (container) {
+    if (!items || items.length === 0) {
+      container.innerHTML = `
+        <div class="loading-state">
+          <p>Unable to stream ${feedObj.name} right now. Please try another category or check your network.</p>
+        </div>
+      `;
+      if (timestamp) timestamp.textContent = 'Stream timeout';
+      return;
+    }
+
+    planetaryExplorerLoaded = true;
+    if (timestamp) timestamp.textContent = `Live Feed · ${items.length} captures available`;
+
+    container.innerHTML = items.map((item, index) => {
+      // Find clean image URL
+      let imgSrc = item.thumbnail || item.enclosure?.link || '';
+      if (!imgSrc && item.description) {
+        const match = item.description.match(/<img[^>]+src="([^">]+)"/i);
+        if (match) imgSrc = match[1];
+      }
+
+      if (!imgSrc) {
+        imgSrc = NOTIFICATION_HERO_PHOTOS.satellite;
+      }
+
+      // Clean caption text
+      let cleanDesc = item.description || '';
+      cleanDesc = cleanDesc.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim();
+      if (cleanDesc.length > 140) cleanDesc = cleanDesc.slice(0, 140) + '…';
+
+      const dateStr = item.pubDate ? new Date(item.pubDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Recent Discovery';
+      const cleanTitle = (item.title || 'NASA Exploration').replace(/"/g, '&quot;');
+      const filename = `NASA_${feedObj.name.replace(/\s+/g, '_')}_${index + 1}.jpg`;
+
+      return `
+        <article class="planetary-card" data-url="${imgSrc}" data-title="${cleanTitle}" data-time="${dateStr}" data-filename="${filename}">
+          <div class="planetary-card-media">
+            <img src="${imgSrc}" alt="${cleanTitle}" loading="lazy" onerror="this.src='${NOTIFICATION_HERO_PHOTOS.satellite}'">
+            <span class="planetary-tag">${feedObj.name}</span>
+          </div>
+          <div class="planetary-card-body">
+            <small class="planetary-date">${dateStr}</small>
+            <h4>${item.title || 'NASA Mission Observation'}</h4>
+            <p>${cleanDesc || 'Explore high-resolution telemetry and photographic imagery.'}</p>
+            <div class="planetary-card-action">
+              <span>Inspect Photo ↗</span>
+            </div>
+          </div>
+        </article>
+      `;
+    }).join('');
+
+    // Attach Lightbox Handlers
+    container.querySelectorAll('.planetary-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const url = card.getAttribute('data-url');
+        const title = card.getAttribute('data-title');
+        const timeStr = card.getAttribute('data-time');
+        const filename = card.getAttribute('data-filename');
+        openUniversalLightbox(url, title, `NASA Photojournal · ${timeStr}`, filename);
+      });
+    });
+  }
+}
+
+// 12. Earth From 1,000,000 Miles Away (NASA DSCOVR EPIC)
 async function fetchEpicEarth() {
   const box = document.getElementById('epic-media-box');
   try {
@@ -667,7 +844,7 @@ async function fetchEpicEarth() {
   }
 }
 
-// 12. Mars Exploration: Curiosity Live + Official NASA Image Library
+// 13. Mars Exploration
 async function fetchMarsPhotos() {
   const container = document.getElementById('mars-photos-container');
   if (!container) return;
@@ -736,7 +913,7 @@ async function fetchMarsPhotos() {
   }
 }
 
-// 13. Space Weather (DONKI with Personal Key & 60s Auto-Poll)
+// 14. Space Weather
 async function fetchSpaceWeather() {
   const list = document.getElementById('weather-events');
   try {
@@ -796,7 +973,7 @@ async function fetchSpaceWeather() {
   }
 }
 
-// 14. NASA NeoWs Asteroids with Direct JPL Verification Link
+// 15. NASA NeoWs Asteroids
 async function fetchAsteroids() {
   const container = document.getElementById('neo-list');
   try {
@@ -840,7 +1017,7 @@ async function fetchAsteroids() {
   }
 }
 
-// 15. USGS Earthquakes Plotted as Circles on Map with Info Popups
+// 16. USGS Earthquakes
 async function fetchEarthquakes() {
   const list = document.getElementById('earthquake-list');
   try {
@@ -907,7 +1084,7 @@ async function fetchEarthquakes() {
   }
 }
 
-// 16. NASA EONET Hazards Plotted on Map
+// 17. NASA EONET Hazards
 async function fetchEonetHazards() {
   const list = document.getElementById('hazard-list');
   try {
@@ -958,7 +1135,7 @@ async function fetchEonetHazards() {
   } catch (_) {}
 }
 
-// 17. Worldwide Area Search with Autocomplete & Plain-English Ratings
+// 18. Worldwide Area Search
 async function fetchAreaIntel(lat, lon, locationName) {
   try {
     const res = await fetch(`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=us_aqi,pm2_5,pm10,nitrogen_dioxide,direct_normal_irradiance`);
@@ -1085,7 +1262,7 @@ function initAreaSearch() {
   });
 }
 
-// 18. NASA APOD (Direct science.nasa.gov Endpoint with In-App Lightbox)
+// 19. NASA APOD
 async function fetchApod() {
   const media = document.getElementById('apod-media');
   try {
@@ -1145,7 +1322,7 @@ async function fetchApod() {
   }
 }
 
-// 19. Wikipedia Explorer with Autocomplete & Presets
+// 20. Wikipedia Explorer
 async function searchWiki(query) {
   try {
     const enc = encodeURIComponent(query.trim().replace(/ /g, '_'));
@@ -1214,15 +1391,15 @@ function initWikiSearch() {
   });
 }
 
-// 20. Rich Notification Dispatcher (Real Space Photos Banner - Never Logo)
+// 21. Rich Notification Dispatcher
 function dispatchRichNotification({ title, body, url, image }) {
   if ('Notification' in window && Notification.permission === 'granted') {
     if (swRegistration) {
       swRegistration.showNotification(title, {
         body: body,
-        icon: 'assets/space-hub-icon-192.png?v=1', // Logo strictly in avatar icon
+        icon: 'assets/space-hub-icon-192.png?v=1',
         badge: 'assets/space-hub-icon-192.png?v=1',
-        image: image || NOTIFICATION_HERO_PHOTOS.satellite, // Real space photography hero banner
+        image: image || NOTIFICATION_HERO_PHOTOS.satellite,
         vibrate: [200, 100, 200],
         requireInteraction: true,
         data: { url: url || './#overview' }
@@ -1237,7 +1414,7 @@ function dispatchRichNotification({ title, body, url, image }) {
   }
 }
 
-// 21. Firebase Initialization, User Pass Location & Interactive Test Alert
+// 22. Firebase Configuration
 const firebaseConfig = {
   apiKey: "AIzaSyAOn8eFL_CMGuYVeEa9hfpdkHRxZpjacqU",
   authDomain: "news-61e62.firebaseapp.com",
@@ -1431,7 +1608,7 @@ function initAlertPreferences() {
   });
 }
 
-// 22. Automatic System Theme Detection
+// 23. Automatic System Theme Detection
 function initTheme() {
   const themeSelect = document.getElementById('theme-select');
   const saved = localStorage.getItem('app_theme') || 'system';
@@ -1461,7 +1638,7 @@ function initTheme() {
   apply(saved);
 }
 
-// 23. Dynamic PWA 1-Tap Install Button
+// 24. Dynamic PWA 1-Tap Install Button
 let deferredInstallPrompt = null;
 
 function initPwaInstall() {
@@ -1517,6 +1694,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initWikiSearch();
   initFirebase();
   initAlertPreferences();
+  initPlanetaryExplorer();
   startLiveTickerEngine();
 
   // Area preset click
@@ -1541,6 +1719,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('refresh-all')?.addEventListener('click', () => {
     fetchLiveSatelliteTelemetry();
     fetchLaunches();
+    fetchPlanetaryFeed(currentPlanetaryTopic);
     fetchEpicEarth();
     fetchMarsPhotos();
     fetchSpaceWeather();
@@ -1565,7 +1744,7 @@ document.addEventListener('DOMContentLoaded', () => {
   fetchAreaIntel('17.3850', '78.4867', 'Hyderabad, Telangana, India');
   searchWiki('Chandrayaan-3');
 
-  // Polling Intervals: 3s for Satellite Telemetry & Pass Detection, 60s for Space Weather Auto-Sync
+  // Polling Intervals
   setInterval(fetchLiveSatelliteTelemetry, 3000);
   setInterval(fetchSpaceWeather, 60000);
 });
