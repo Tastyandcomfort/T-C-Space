@@ -25,7 +25,7 @@ const NOTIFICATION_PHOTOS = {
 
 messaging.onBackgroundMessage((payload) => {
   const category = payload.data?.category || 'Space Alert';
-  const emoji = payload.data?.emoji || '🚀';
+  const emoji = payload.data?.emoji || '';     //🚀
   const title = payload.notification?.title || payload.data?.title || `T&C Space · ${category} ${emoji}`;
   const targetUrl = payload.data?.url || payload.data?.click_action || './#overview';
   
