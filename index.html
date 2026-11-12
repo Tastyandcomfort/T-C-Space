@@ -211,15 +211,15 @@
             </div>
 
             <div class="apple-card card-accent-blue clickable-card" data-goto="planetary-explorer" title="Click to open Planetary Explorer">
-              <div class="card-eyebrow">NASA PHOTOJOURNAL</div>
-              <h3 class="card-heading">Planetary Explorer</h3>
-              <p class="card-text">Explore live feeds of the Solar System from the Sun to deep space.</p>
-              <button class="apple-btn-secondary" style="margin-top:8px;">Open Planetary Gallery ↗</button>
+              <div class="card-eyebrow">COSMIC OBSERVATORY</div>
+              <h3 class="card-heading">Planetary &amp; Cosmic Explorer</h3>
+              <p class="card-text">Explore raw detector downlinks and 4K mission videos from deep space.</p>
+              <button class="apple-btn-secondary" style="margin-top:8px;">Open Cosmic Gallery ↗</button>
             </div>
           </div>
         </section>
 
-        <!-- COSMIC & PLANETARY EXPLORER (UNIVERSE-WIDE RAW INSTRUMENT DATA) -->
+        <!-- NEW: PLANETARY EXPLORER (RAW PHOTOS, 4K VIDEOS & AUDIO) -->
         <section class="section-block" id="planetary-explorer">
           <div class="section-title">
             <div>
@@ -234,34 +234,31 @@
             <div class="planetary-media-bar">
               <span class="media-type-lbl">INSTRUMENT FORMAT:</span>
               <div class="planetary-media-chips" id="planetary-media-chips">
-                <button class="media-chip active" data-media="image,video,audio"> All Data</button>
-                <button class="media-chip" data-media="image"> Raw Detector Frames</button>
-                <button class="media-chip" data-media="video"> 4K Time-Lapses &amp; Motion</button>
-                <button class="media-chip" data-media="audio"> Space Radio Audio</button>
+                <button class="media-chip active" data-media="image,video,audio">🌐 All Data</button>
+                <button class="media-chip" data-media="image">📸 Raw Detector Frames</button>
+                <button class="media-chip" data-media="video">🎬 4K Time-Lapses &amp; Motion</button>
+                <button class="media-chip" data-media="audio">🎙️ Space Radio Audio</button>
               </div>
             </div>
 
             <!-- Universe-Wide Celestial Target Chips -->
             <div class="planetary-chips-scroll" id="planetary-topic-chips">
-              <!-- Deep Universe & Cosmos -->
-              <button class="planetary-chip active" data-topic="deep-field"> Deep Field &amp; First Galaxies</button>
-              <button class="planetary-chip" data-topic="jwst-raw"> JWST Raw Science (Webb)</button>
-              <button class="planetary-chip" data-topic="hubble-raw"> Hubble Raw Detector (HST)</button>
-              <button class="planetary-chip" data-topic="nebulae"> Nebulae &amp; Stellar Nurseries</button>
-              <button class="planetary-chip" data-topic="galaxies"> Spiral &amp; Colliding Galaxies</button>
-              <button class="planetary-chip" data-topic="black-holes"> Black Holes &amp; X-Ray Jets</button>
-              <button class="planetary-chip" data-topic="supernovae"> Supernovae &amp; Remnants</button>
-              <button class="planetary-chip" data-topic="pulsars"> Pulsars &amp; Neutron Stars</button>
-              <button class="planetary-chip" data-topic="exoplanets"> Exoplanet Systems</button>
-              <button class="planetary-chip" data-topic="gravitational"> Gravitational Lenses</button>
-              
-              <!-- Solar System & Local Instruments -->
-              <button class="planetary-chip" data-topic="sun"> Solar SDO Direct Telemetry</button>
-              <button class="planetary-chip" data-topic="mars-raw"> Mars Rover Raw Downlinks</button>
-              <button class="planetary-chip" data-topic="jupiter"> Jupiter JunoCam Raw Buffer</button>
-              <button class="planetary-chip" data-topic="saturn"> Saturn Cassini Archives</button>
-              <button class="planetary-chip" data-topic="interstellar"> Comets &amp; Interstellar Objects</button>
-              <button class="planetary-chip" data-topic="earth"> Earth Orbital Radiometers</button>
+              <button class="planetary-chip active" data-topic="deep-field">🌌 Deep Field &amp; First Galaxies</button>
+              <button class="planetary-chip" data-topic="jwst-raw">🔭 JWST Raw Science (Webb)</button>
+              <button class="planetary-chip" data-topic="hubble-raw">🔭 Hubble Raw Detector (HST)</button>
+              <button class="planetary-chip" data-topic="nebulae">✨ Nebulae &amp; Stellar Nurseries</button>
+              <button class="planetary-chip" data-topic="galaxies">🌀 Spiral &amp; Colliding Galaxies</button>
+              <button class="planetary-chip" data-topic="black-holes">🕳️ Black Holes &amp; X-Ray Jets</button>
+              <button class="planetary-chip" data-topic="supernovae">💥 Supernovae &amp; Remnants</button>
+              <button class="planetary-chip" data-topic="pulsars">⚡ Pulsars &amp; Neutron Stars</button>
+              <button class="planetary-chip" data-topic="exoplanets">🪐 Exoplanet Systems</button>
+              <button class="planetary-chip" data-topic="gravitational">🌀 Gravitational Lenses</button>
+              <button class="planetary-chip" data-topic="sun">☀️ Solar SDO Direct Telemetry</button>
+              <button class="planetary-chip" data-topic="mars-raw">♂ Mars Rover Raw Downlinks</button>
+              <button class="planetary-chip" data-topic="jupiter">♃ Jupiter JunoCam Raw Buffer</button>
+              <button class="planetary-chip" data-topic="saturn">♄ Saturn Cassini Archives</button>
+              <button class="planetary-chip" data-topic="interstellar">☄️ Comets &amp; Interstellar Objects</button>
+              <button class="planetary-chip" data-topic="earth">🌍 Earth Orbital Radiometers</button>
             </div>
 
             <!-- Live Status Row -->
@@ -282,7 +279,7 @@
             </div>
           </article>
         </section>
-        
+
         <!-- 2. SATELLITES & MULTI-LAYER MAP -->
         <section class="section-block" id="satellites">
           <div class="section-title">
@@ -316,9 +313,9 @@
             <!-- Layer Toggles -->
             <div class="map-toolbar-row">
               <div class="map-layer-chips">
-                <button class="layer-chip active" id="toggle-layer-iss"> Satellite Active</button>
-                <button class="layer-chip active" id="toggle-layer-quakes"> Quakes (USGS)</button>
-                <button class="layer-chip active" id="toggle-layer-hazards"> Hazards (EONET)</button>
+                <button class="layer-chip active" id="toggle-layer-iss">🛰️ Satellite Active</button>
+                <button class="layer-chip active" id="toggle-layer-quakes">🌍 Quakes (USGS)</button>
+                <button class="layer-chip active" id="toggle-layer-hazards">🌋 Hazards (EONET)</button>
                 <button class="layer-chip active" id="toggle-layer-track">⌖ Ground Track</button>
               </div>
             </div>
@@ -327,7 +324,7 @@
             <div class="map-viewport-wrapper">
               <div id="sat-map" class="map"></div>
 
-              <!-- Live HUD Telemetry Chip (Theme-Adaptive) -->
+              <!-- Live HUD Telemetry Chip -->
               <div class="map-hud-chip" id="map-hud-overlay">
                 <span class="live-dot pulse-dot"></span>
                 <div>
@@ -753,6 +750,15 @@
             </div>
 
             <div class="toggle-list">
+              <!-- NEW COSMIC / RAW PHOTOS TOGGLE -->
+              <label class="toggle-row">
+                <div>
+                  <b>Raw Cosmic &amp; Deep Space Discoveries</b>
+                  <small>Notify on new raw telescope captures from JWST, Hubble &amp; Mars rovers</small>
+                </div>
+                <input type="checkbox" checked class="apple-toggle alert-checkbox" id="toggle-cosmic">
+              </label>
+
               <label class="toggle-row">
                 <div>
                   <b>Satellite Overhead Pass Alert</b>
@@ -896,7 +902,7 @@
               </div>
               <div class="sources-pill-grid">
                 <a class="source-link-chip" href="https://api.nasa.gov/" target="_blank" rel="noopener">NASA ↗</a>
-                <a class="source-link-chip" href="https://science.nasa.gov/feed/photojournal/" target="_blank" rel="noopener">NASA Photojournal RSS ↗</a>
+                <a class="source-link-chip" href="https://images-api.nasa.gov/" target="_blank" rel="noopener">NASA Image &amp; Raw Video Library ↗</a>
                 <a class="source-link-chip" href="https://science.nasa.gov/apod/" target="_blank" rel="noopener">NASA Science ↗</a>
                 <a class="source-link-chip" href="https://epic.gsfc.nasa.gov/" target="_blank" rel="noopener">NASA DSCOVR EPIC ↗</a>
                 <a class="source-link-chip" href="https://wheretheiss.at/" target="_blank" rel="noopener">The ISS ↗</a>
@@ -942,7 +948,7 @@
     </a>
   </nav>
 
-  <!-- Universal In-App Apple Media Lightbox (Supports Raw Photos, 4K Videos & Space Audio) -->
+  <!-- Universal In-App Apple Media Lightbox (With In-Place Download & Standalone PWA Video Containment) -->
   <div class="epic-lightbox-backdrop" id="universal-media-lightbox" aria-hidden="true">
     <div class="epic-lightbox-dialog" role="dialog" aria-label="Media Preview">
       <button class="lightbox-close-btn" id="close-universal-lightbox-btn" aria-label="Close Lightbox">✕</button>
@@ -950,8 +956,17 @@
       <div class="lightbox-img-wrap" id="universal-lightbox-container">
         <!-- Photo Player -->
         <img id="universal-lightbox-img" src="" alt="Full Space Media Preview">
-        <!-- 4K / HD Video Player -->
-        <video id="universal-lightbox-video" controls playsinline style="display:none; width:100%; max-height:65vh;"></video>
+        
+        <!-- 4K / HD Video Player strictly contained to prevent PWA URL bar popup -->
+        <video id="universal-lightbox-video" 
+               playsinline 
+               webkit-playsinline 
+               x5-playsinline 
+               controls 
+               controlsList="nodownload noplaybackrate" 
+               disablePictureInPicture 
+               style="display:none; width:100%; max-height:65vh; object-fit:contain; border-radius:12px;"></video>
+        
         <!-- Space Audio Player -->
         <div id="universal-lightbox-audio-wrap" style="display:none; text-align:center; padding:30px 20px;">
           <div style="font-size:42px; margin-bottom:12px;">🎙️</div>
@@ -972,7 +987,7 @@
       </div>
     </div>
   </div>
-  
+
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
