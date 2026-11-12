@@ -1291,3 +1291,156 @@ html[data-theme="dark"] .leaflet-tile {
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
+/* ============================================================================
+   Apple-Style Frosted Download Action Sheet & Popover System
+   ============================================================================ */
+
+.apple-sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  z-index: 2200;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.22s ease;
+  padding: 16px;
+}
+
+.apple-sheet-backdrop.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.apple-sheet-dialog {
+  background: var(--surface-solid);
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  width: 100%;
+  max-width: 480px;
+  overflow: hidden;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+  transform: translateY(20px);
+  transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+  margin-bottom: max(10px, env(safe-area-inset-bottom));
+}
+
+.apple-sheet-backdrop.open .apple-sheet-dialog {
+  transform: translateY(0);
+}
+
+.apple-sheet-header {
+  padding: 18px 20px 14px;
+  text-align: center;
+  border-bottom: 1px solid var(--line);
+}
+
+.apple-sheet-header h4 {
+  font-size: 15px;
+  margin-bottom: 4px;
+  letter-spacing: -0.3px;
+}
+
+.apple-sheet-header p {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.apple-sheet-options {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.apple-sheet-option-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.16s ease;
+}
+
+.apple-sheet-option-btn:hover {
+  background: var(--blue-soft);
+  border-color: var(--blue);
+  transform: translateY(-1px);
+}
+
+.sheet-opt-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.sheet-opt-icon {
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.sheet-opt-title {
+  font-size: 13.5px;
+  display: block;
+}
+
+.sheet-opt-meta {
+  font-size: 10px;
+  color: var(--muted);
+  display: block;
+}
+
+.sheet-opt-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  flex-shrink: 0;
+  margin-left: 12px;
+}
+
+.sheet-opt-size {
+  font: 700 12px var(--mono);
+  color: var(--text);
+}
+
+.sheet-opt-time {
+  font: 700 10.5px var(--mono);
+  color: var(--green);
+}
+
+.apple-sheet-cancel-btn {
+  width: 100%;
+  padding: 14px;
+  background: transparent;
+  border: 0;
+  border-top: 1px solid var(--line);
+  font: 600 13px var(--sans);
+  color: var(--blue);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.apple-sheet-cancel-btn:hover {
+  background: var(--line);
+}
+
+@media (min-width: 768px) {
+  .apple-sheet-backdrop {
+    align-items: center;
+  }
+  .apple-sheet-dialog {
+    margin-bottom: 0;
+  }
+}
