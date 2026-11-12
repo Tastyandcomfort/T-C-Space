@@ -1444,3 +1444,149 @@ html[data-theme="dark"] .leaflet-tile {
     margin-bottom: 0;
   }
 }
+
+/* ============================================================================
+   Apple-Style "More •••" Mobile Bottom Sheet Dialog
+   ============================================================================ */
+
+.more-sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  z-index: 2150;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.22s ease;
+  padding: 0;
+}
+
+.more-sheet-backdrop.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.more-sheet-dialog {
+  background: var(--surface-solid);
+  border: 1px solid var(--line);
+  border-radius: 24px 24px 0 0;
+  width: 100%;
+  max-width: 580px;
+  max-height: 82vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 -12px 48px rgba(0, 0, 0, 0.55);
+  transform: translateY(100%);
+  transition: transform 0.26s cubic-bezier(0.16, 1, 0.3, 1);
+  padding-bottom: max(14px, env(safe-area-inset-bottom));
+}
+
+.more-sheet-backdrop.open .more-sheet-dialog {
+  transform: translateY(0);
+}
+
+.more-sheet-handle-bar {
+  display: flex;
+  justify-content: center;
+  padding: 10px 0 4px;
+}
+
+.more-sheet-pill-bar {
+  width: 38px;
+  height: 4.5px;
+  border-radius: 99px;
+  background: var(--line);
+}
+
+.more-sheet-header {
+  padding: 8px 20px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--line);
+}
+
+.more-sheet-header h4 {
+  font-size: 16px;
+  margin-bottom: 2px;
+  letter-spacing: -0.3px;
+}
+
+.more-sheet-grid {
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+  max-height: 60vh;
+}
+
+.more-sheet-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  color: var(--text);
+  text-decoration: none;
+  transition: background 0.16s ease, border-color 0.16s ease;
+}
+
+.more-sheet-item:hover, .more-sheet-item.active {
+  background: var(--blue-soft);
+  border-color: var(--blue);
+}
+
+.more-item-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.more-item-icon.blue { background: rgba(41, 151, 255, 0.18); color: var(--blue); }
+.more-item-icon.orange { background: rgba(255, 180, 84, 0.18); color: var(--orange); }
+.more-item-icon.purple { background: rgba(191, 156, 255, 0.18); color: var(--purple); }
+.more-item-icon.teal { background: rgba(100, 217, 229, 0.18); color: var(--teal); }
+.more-item-icon.green { background: rgba(48, 209, 88, 0.18); color: var(--green); }
+
+.more-sheet-item b {
+  font-size: 13.5px;
+  display: block;
+}
+
+.more-sheet-item small {
+  font-size: 10.5px;
+  color: var(--muted);
+  display: block;
+}
+
+.more-item-arrow {
+  margin-left: auto;
+  font-size: 18px;
+  color: var(--muted);
+}
+
+.more-sheet-close-btn {
+  width: calc(100% - 28px);
+  margin: 6px 14px 4px;
+  padding: 13px;
+  border-radius: 14px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  color: var(--blue);
+  font: 600 13px var(--sans);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.more-sheet-close-btn:hover {
+  background: var(--line);
+}
