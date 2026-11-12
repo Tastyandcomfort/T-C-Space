@@ -19,7 +19,7 @@ self.addEventListener('activate', (e) => e.waitUntil(self.clients.claim()));
 // 2. Display incoming space alerts (Guarantees 1 single notification)
 messaging.onBackgroundMessage((payload) => {
   const data = payload.data || {};
-  const title = data.title || payload.notification?.title || 'T&C Space Alert 🚀';
+  const title = data.title || payload.notification?.title || 'T&C Space Alert ';
   
   const options = {
     body: data.body || payload.notification?.body || 'New space telemetry available.',
