@@ -110,19 +110,16 @@
         </div>
 
         <div class="top-actions">
-          <!-- Real-Time Network Speed & Status Pill -->
           <div class="network-status-pill" id="network-status-pill" title="Real-Time Network Speed &amp; Telemetry Status">
             <span class="status-dot pulse-dot"></span>
             <span id="net-text">Checking…</span>
           </div>
 
-          <!-- Dynamic PWA Install Button -->
           <button id="pwa-install-btn" class="install-pill-btn" style="display: none;" title="Install Space Hub App">
             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             <span>Install App</span>
           </button>
 
-          <!-- Dual IST & UTC Clocks -->
           <div class="utc-clock" title="Indian Standard Time &amp; UTC">
             <span class="live-dot pulse-dot"></span>
             <div class="clock-duo">
@@ -167,7 +164,7 @@
             <div class="ticker-time">all-time progress</div>
           </div>
 
-          <!-- Interactive Metrics Grid with Color Accents -->
+          <!-- Interactive Metrics Grid -->
           <div class="metrics-grid">
             <article class="metric-card card-accent-blue clickable-card" data-goto="satellites" title="Click to view full Satellite Tracker &amp; Map">
               <div class="metric-top"><span>ACTIVE SAT ALTITUDE</span><span class="metric-symbol blue">◎</span></div>
@@ -219,7 +216,7 @@
           </div>
         </section>
 
-        <!-- NEW: PLANETARY EXPLORER (RAW PHOTOS, 4K VIDEOS & AUDIO) -->
+        <!-- PLANETARY EXPLORER (RAW PHOTOS, 4K VIDEOS & AUDIO) -->
         <section class="section-block" id="planetary-explorer">
           <div class="section-title">
             <div>
@@ -290,7 +287,6 @@
           </div>
 
           <article class="surface map-card">
-            <!-- Satellite Search with Live Autocomplete -->
             <div class="sat-search-container">
               <div class="sat-search-input-box">
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -299,7 +295,6 @@
               <div id="sat-search-dropdown" class="autocomplete-dropdown" hidden></div>
             </div>
 
-            <!-- Multi-Satellite Presets Toolbar -->
             <div class="sat-presets-bar">
               <span class="sat-select-lbl">FLEET PRESETS:</span>
               <button class="sat-chip active" data-sat-id="25544" data-sat-name="ISS (ZARYA)">ISS (Zarya)</button>
@@ -310,7 +305,6 @@
               <button class="sat-chip" data-sat-id="43013" data-sat-name="NOAA 20">NOAA-20</button>
             </div>
 
-            <!-- Layer Toggles -->
             <div class="map-toolbar-row">
               <div class="map-layer-chips">
                 <button class="layer-chip active" id="toggle-layer-iss">🛰️ Satellite Active</button>
@@ -320,11 +314,9 @@
               </div>
             </div>
 
-            <!-- Leaflet Map Container with Adaptive HUD & Legend -->
             <div class="map-viewport-wrapper">
               <div id="sat-map" class="map"></div>
 
-              <!-- Live HUD Telemetry Chip -->
               <div class="map-hud-chip" id="map-hud-overlay">
                 <span class="live-dot pulse-dot"></span>
                 <div>
@@ -333,7 +325,6 @@
                 </div>
               </div>
 
-              <!-- Map Legend -->
               <div class="map-legend-overlay">
                 <div><span class="legend-color-dot blue"></span> Satellite</div>
                 <div><span class="legend-color-dot red"></span> Quake M5.0+</div>
@@ -360,7 +351,6 @@
             </div>
           </div>
 
-          <!-- Spotlight Card with Ticking Countdown -->
           <article class="surface launch-spotlight-card">
             <div class="spotlight-left">
               <div class="spotlight-tags">
@@ -385,7 +375,6 @@
             </div>
           </article>
 
-          <!-- Upcoming Launch Manifest Stack -->
           <div class="launches-grid" id="launches-list">
             <div class="surface loading-box"><div class="apple-spinner"></div><p>Streaming verified manifests…</p></div>
           </div>
@@ -401,7 +390,6 @@
             </div>
           </div>
 
-          <!-- Earth From 1,000,000 Miles Away (DSCOVR EPIC) -->
           <article class="surface epic-card">
             <div class="card-heading">
               <div>
@@ -423,7 +411,6 @@
             </div>
           </article>
 
-          <!-- Mars Surface Status & Rover Photos -->
           <article class="surface mars-showcase-card" style="margin-top: 24px;">
             <div class="card-heading">
               <div>
@@ -520,7 +507,6 @@
             </div>
           </div>
 
-          <!-- APOD Showcase -->
           <article class="surface apod-layout">
             <div id="apod-media" class="apod-media clickable-image-box" title="Tap photo to open full view, direct download &amp; share">
               <div class="apple-spinner large"></div>
@@ -537,7 +523,6 @@
             </div>
           </article>
 
-          <!-- NASA NeoWs Asteroid Radar -->
           <article class="surface neo-panel">
             <div class="card-heading">
               <div>
@@ -550,7 +535,6 @@
             </div>
           </article>
 
-          <!-- Earth Hazards & Earthquakes (USGS & EONET) -->
           <div class="dual-grid" style="margin-top: 20px;">
             <article class="surface earth-card">
               <div class="card-heading">
@@ -598,7 +582,6 @@
               <div id="intel-suggestions" class="autocomplete-dropdown" hidden></div>
             </div>
 
-            <!-- Quick Presets -->
             <div class="intel-preset-chips" id="intel-presets">
               <button class="area-pill active" data-lat="17.3850" data-lon="78.4867" data-name="Hyderabad, Telangana, India">Hyderabad</button>
               <button class="area-pill" data-lat="28.6139" data-lon="77.2090" data-name="New Delhi, India">New Delhi</button>
@@ -618,7 +601,6 @@
               </div>
             </div>
 
-            <!-- Metric Cards with Badges -->
             <div class="intel-metrics-grid">
               <div class="intel-metric-card">
                 <div class="metric-top"><span>AIR QUALITY (US AQI)</span><span class="metric-symbol green">🌬️</span></div>
@@ -686,7 +668,6 @@
               <div id="wiki-suggestions" class="autocomplete-dropdown" hidden></div>
             </div>
 
-            <!-- Preset Quick Tiles -->
             <div class="wiki-pills" id="wiki-presets">
               <button class="wiki-pill active" data-topic="Chandrayaan-3">Chandrayaan-3</button>
               <button class="wiki-pill" data-topic="Indian Space Research Organisation">ISRO</button>
@@ -721,7 +702,6 @@
           </div>
 
           <article class="surface settings-card">
-            <!-- Satellite Overhead Pass User Location Selector -->
             <div class="user-location-setting-box">
               <div class="eyebrow">OVERHEAD PASS LOCATION</div>
               <h4 style="margin:4px 0 6px;">Satellite Flyby Proximity Target</h4>
@@ -750,7 +730,6 @@
             </div>
 
             <div class="toggle-list">
-              <!-- NEW COSMIC / RAW PHOTOS TOGGLE -->
               <label class="toggle-row">
                 <div>
                   <b>Raw Cosmic &amp; Deep Space Discoveries</b>
@@ -948,16 +927,13 @@
     </a>
   </nav>
 
-  <!-- Universal In-App Apple Media Lightbox (With In-Place Download & Standalone PWA Video Containment) -->
+  <!-- Universal In-App Apple Media Lightbox -->
   <div class="epic-lightbox-backdrop" id="universal-media-lightbox" aria-hidden="true">
     <div class="epic-lightbox-dialog" role="dialog" aria-label="Media Preview">
       <button class="lightbox-close-btn" id="close-universal-lightbox-btn" aria-label="Close Lightbox">✕</button>
       
       <div class="lightbox-img-wrap" id="universal-lightbox-container">
-        <!-- Photo Player -->
         <img id="universal-lightbox-img" src="" alt="Full Space Media Preview">
-        
-        <!-- 4K / HD Video Player strictly contained to prevent PWA URL bar popup -->
         <video id="universal-lightbox-video" 
                playsinline 
                webkit-playsinline 
@@ -967,7 +943,6 @@
                disablePictureInPicture 
                style="display:none; width:100%; max-height:65vh; object-fit:contain; border-radius:12px;"></video>
         
-        <!-- Space Audio Player -->
         <div id="universal-lightbox-audio-wrap" style="display:none; text-align:center; padding:30px 20px;">
           <div style="font-size:42px; margin-bottom:12px;">🎙️</div>
           <audio id="universal-lightbox-audio" controls style="width:100%; max-width:400px;"></audio>
@@ -981,10 +956,50 @@
           <span id="universal-lightbox-raw-tag" class="small-chip blue" style="margin-top:4px; display:inline-block;">RESOLVING 100% RAW MASTER...</span>
         </div>
         <div class="lightbox-actions">
-          <button id="universal-download-btn" class="apple-btn-secondary">⬇ Download Raw Master</button>
+          <button id="universal-download-btn" class="apple-btn-secondary">⬇ Download Asset</button>
           <button id="universal-share-btn" class="primary-button">↗ Share Asset</button>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- Apple-Style Frosted Download Action Sheet Modal -->
+  <div class="apple-sheet-backdrop" id="download-action-sheet-backdrop" aria-hidden="true">
+    <div class="apple-sheet-dialog" role="dialog" aria-label="Choose Download Format">
+      <div class="apple-sheet-header">
+        <h4>Download Space Asset</h4>
+        <p>Estimated using your live connection: <b id="sheet-net-speed" style="color:var(--blue);">-- Mbps</b></p>
+      </div>
+      <div class="apple-sheet-options">
+        <button type="button" class="apple-sheet-option-btn primary" id="sheet-download-opt">
+          <div class="sheet-opt-left">
+            <span class="sheet-opt-icon">⚡</span>
+            <div>
+              <b class="sheet-opt-title">Optimized Ultra-HD</b>
+              <small class="sheet-opt-meta">Instant saving · Pristine screen clarity</small>
+            </div>
+          </div>
+          <div class="sheet-opt-right">
+            <span class="sheet-opt-size" id="sheet-opt-size">~2.8 MB</span>
+            <span class="sheet-opt-time" id="sheet-opt-time">~2 sec</span>
+          </div>
+        </button>
+
+        <button type="button" class="apple-sheet-option-btn" id="sheet-download-raw">
+          <div class="sheet-opt-left">
+            <span class="sheet-opt-icon">📸</span>
+            <div>
+              <b class="sheet-opt-title">100% Raw Original Master</b>
+              <small class="sheet-opt-meta" id="sheet-raw-format">Uncompressed camera sensor capture</small>
+            </div>
+          </div>
+          <div class="sheet-opt-right">
+            <span class="sheet-opt-size" id="sheet-raw-size">~34.0 MB</span>
+            <span class="sheet-opt-time" id="sheet-raw-time">~18 sec</span>
+          </div>
+        </button>
+      </div>
+      <button type="button" class="apple-sheet-cancel-btn" id="sheet-cancel-btn">Cancel</button>
     </div>
   </div>
 
