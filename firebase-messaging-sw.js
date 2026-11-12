@@ -15,12 +15,12 @@ const messaging = firebase.messaging();
 
 // Contextual NASA space photography for notification banners (Never your app icon)
 const NOTIFICATION_PHOTOS = {
-  satellite: 'https://images-assets.nasa.gov/image/iss064e007861/iss064e007861~medium.jpg', // ISS orbiting Earth
+  satellite: 'https://images-assets.nasa.gov/image/s130e012111/s130e012111~medium.jpg', // Full exterior ISS orbiting Earth with solar arrays
   launch: 'https://images-assets.nasa.gov/image/KSC-20221116-PH-KLS01_0003/KSC-20221116-PH-KLS01_0003~medium.jpg', // Rocket liftoff
   solar: 'https://images-assets.nasa.gov/image/GSFC_20171208_Archive_e001435/GSFC_20171208_Archive_e001435~medium.jpg', // SDO solar flare
   quake: 'https://images-assets.nasa.gov/image/iss065e094294/iss065e094294~medium.jpg', // Earth atmospheric horizon
   asteroid: 'https://images-assets.nasa.gov/image/PIA24430/PIA24430~medium.jpg', // Asteroid surface
-  cosmic: 'https://images-assets.nasa.gov/image/GSFC_20171208_Archive_e000494/GSFC_20171208_Archive_e000494~medium.jpg' // High-res deep space nebula capture
+  cosmic: 'https://images-assets.nasa.gov/image/GSFC_20171208_Archive_e000494/GSFC_20171208_Archive_e000494~medium.jpg' // Deep space nebula
 };
 
 messaging.onBackgroundMessage((payload) => {
@@ -52,9 +52,9 @@ messaging.onBackgroundMessage((payload) => {
 
   const options = {
     body: payload.notification?.body || payload.data?.body || 'New live telemetry update available.',
-    icon: 'assets/space-hub-icon-192.png?v=1', // Logo stays ONLY as the small avatar on the left
+    icon: 'assets/space-hub-icon-192.png?v=1',
     badge: 'assets/space-hub-icon-192.png?v=1',
-    image: bannerPhoto, // Real NASA space photograph across top banner
+    image: bannerPhoto,
     vibrate: [200, 100, 200],
     requireInteraction: true,
     data: { url: targetUrl }
