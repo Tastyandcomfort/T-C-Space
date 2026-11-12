@@ -8,7 +8,8 @@ const NOTIFICATION_HERO_PHOTOS = {
   launch: 'https://images-assets.nasa.gov/image/KSC-20221116-PH-KLS01_0003/KSC-20221116-PH-KLS01_0003~medium.jpg',
   solar: 'https://images-assets.nasa.gov/image/GSFC_20171208_Archive_e001435/GSFC_20171208_Archive_e001435~medium.jpg',
   quake: 'https://images-assets.nasa.gov/image/iss065e094294/iss065e094294~medium.jpg',
-  asteroid: 'https://images-assets.nasa.gov/image/PIA24430/PIA24430~medium.jpg'
+  asteroid: 'https://images-assets.nasa.gov/image/PIA24430/PIA24430~medium.jpg',
+  cosmic: 'https://images-assets.nasa.gov/image/GSFC_20171208_Archive_e000494/GSFC_20171208_Archive_e000494~medium.jpg' // High-res deep space nebula capture
 };
 
 // 1. Dual Clock (Live IST & UTC Synchronization)
@@ -135,7 +136,7 @@ function initNavigation() {
     }
 
     if (targetId === 'planetary-explorer' && !planetaryExplorerLoaded) {
-      fetchPlanetaryFeed('latest');
+      fetchPlanetaryFeed(currentPlanetaryTopic, currentPlanetaryMediaType);
     }
   }
 
@@ -535,7 +536,7 @@ async function fetchLaunches() {
   }
 }
 
-// 10. Universal Lightbox with Real 100% Raw Master Asset Resolver
+// 10. Universal Lightbox with In-Place Direct File Download & Standalone PWA Containment
 let activeLightboxMedia = {
   url: "",
   origUrl: "",
@@ -560,7 +561,7 @@ async function openUniversalLightbox(url, title, timeStr, filename, mediaType = 
   titleEl.textContent = title;
   timeEl.textContent = timeStr;
 
-  // Reset all players
+  // Reset players
   img.style.display = 'none';
   video.style.display = 'none';
   audioWrap.style.display = 'none';
@@ -600,7 +601,6 @@ async function openUniversalLightbox(url, title, timeStr, filename, mediaType = 
 
           if (rawTag) rawTag.textContent = `100% RAW MASTER (${ext})`;
 
-          // Upgrade video player stream to master resolution if available
           if (mediaType === 'video' && origAsset.href.endsWith('.mp4')) {
             video.src = origAsset.href;
           } else if (mediaType === 'audio' && (origAsset.href.endsWith('.wav') || origAsset.href.endsWith('.mp3'))) {
@@ -635,20 +635,70 @@ function initUniversalLightbox() {
     if (e.target === modal) closeDialog();
   });
 
-  // Direct download of the 100% Raw Original Master file
-  downloadBtn?.addEventListener('click', () => {
+  // Direct In-Place File Download (Fetches as Blob to save directly without opening a new tab)
+  downloadBtn?.addEventListener('click', async () => {
     const targetUrl = activeLightboxMedia.origUrl || activeLightboxMedia.url;
     if (!targetUrl) return;
 
-    showToast('⬇ Initiating download of 100% Raw Master Asset…');
-    const a = document.createElement('a');
-    a.style.display = 'none';
-    a.href = targetUrl;
-    a.target = '_blank';
-    a.download = activeLightboxMedia.filename || 'NASA_Raw_Master_Asset';
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(() => document.body.removeChild(a), 2000);
+    showToast('⬇ Downloading 100% Raw Master Asset directly to your device…');
+
+    try {
+      // 1. Fetch file as binary Blob so browser saves on same-origin domain
+      const res = await fetch(targetUrl);
+      if (!res.ok) throw new Error();
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = blobUrl;
+      a.download = activeLightboxMedia.filename || 'NASA_Raw_Master_Asset.jpg';
+      document.body.appendChild(a);
+      a.click();
+
+      setTimeout(() => {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(blobUrl);
+      }, 3000);
+
+      showToast('✅ Download complete! Saved to your device.');
+      return;
+    } catch (_) {
+      // 2. Fallback via CORS proxy if direct fetch is blocked
+      try {
+        const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
+        const res = await fetch(proxyUrl);
+        if (res.ok) {
+          const blob = await res.blob();
+          const blobUrl = URL.createObjectURL(blob);
+
+          const a = document.createElement('a');
+          a.style.display = 'none';
+          a.href = blobUrl;
+          a.download = activeLightboxMedia.filename || 'NASA_Raw_Master_Asset.jpg';
+          document.body.appendChild(a);
+          a.click();
+
+          setTimeout(() => {
+            document.body.removeChild(a);
+            URL.revokeObjectURL(blobUrl);
+          }, 3000);
+
+          showToast('✅ Download complete! Saved to your device.');
+          return;
+        }
+      } catch (err) {}
+    }
+
+    // 3. Native inline trigger fallback without target="_blank"
+    const fallbackLink = document.createElement('a');
+    fallbackLink.style.display = 'none';
+    fallbackLink.href = targetUrl;
+    fallbackLink.download = activeLightboxMedia.filename || 'NASA_Raw_Master_Asset.jpg';
+    document.body.appendChild(fallbackLink);
+    fallbackLink.click();
+    setTimeout(() => document.body.removeChild(fallbackLink), 2000);
+    showToast('File download triggered.');
   });
 
   shareBtn?.addEventListener('click', async () => {
@@ -672,7 +722,6 @@ function initUniversalLightbox() {
 // 11. COSMIC & PLANETARY EXPLORER (UNIVERSE-WIDE RAW DATA DOWNLINKS)
 // ============================================================================
 const COSMIC_TARGETS = {
-  // --- DEEP UNIVERSE & COSMOS ---
   "deep-field": {
     name: "Deep Field & First Galaxies",
     query: "Deep Field Webb Hubble ultra deep field distant galaxy",
@@ -743,8 +792,6 @@ const COSMIC_TARGETS = {
     instrument: "Deep Space Cosmological Sensor",
     type: "deep-space"
   },
-
-  // --- SOLAR SYSTEM & PLANETARY RAW PROBES ---
   "sun": {
     name: "Solar SDO Direct Telemetry",
     query: "Solar Dynamics Observatory AIA extreme ultraviolet flare",
@@ -794,7 +841,6 @@ let currentPlanetaryTopic = 'deep-field';
 let currentPlanetaryMediaType = 'image,video,audio';
 
 function initPlanetaryExplorer() {
-  // Target Category Chips
   const topicChips = document.querySelectorAll('.planetary-chip');
   topicChips.forEach(chip => {
     chip.addEventListener('click', () => {
@@ -805,7 +851,6 @@ function initPlanetaryExplorer() {
     });
   });
 
-  // Media Format Chips (All / Raw Detector Frames / 4K Video / Audio)
   const mediaChips = document.querySelectorAll('.media-chip');
   mediaChips.forEach(chip => {
     chip.addEventListener('click', () => {
@@ -859,7 +904,6 @@ async function fetchPlanetaryFeed(topicKey, mediaFilter = 'image,video,audio') {
 
     if (!items.length) throw new Error("No sensor data returned");
 
-    // Chronological order: newest scientific downlinks first
     items.sort((a, b) => {
       const dateA = new Date(a.data?.[0]?.date_created || 0);
       const dateB = new Date(b.data?.[0]?.date_created || 0);
@@ -879,7 +923,6 @@ async function fetchPlanetaryFeed(topicKey, mediaFilter = 'image,video,audio') {
       const mediaType = info.media_type || 'image';
       const nasaId = info.nasa_id || '';
 
-      // Get clean preview thumbnail
       let thumbSrc = links.find(l => l.href && (l.render === 'image' || l.href.endsWith('.jpg') || l.href.endsWith('.png')))?.href || links[0]?.href || '';
       
       if (!thumbSrc && mediaType === 'audio') {
@@ -895,7 +938,7 @@ async function fetchPlanetaryFeed(topicKey, mediaFilter = 'image,video,audio') {
       const dateStr = rawDate ? new Date(rawDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Observation Log';
       const filename = `NASA_${targetObj.name.replace(/[^a-zA-Z0-9]/g, '_')}_${index + 1}.${mediaType === 'video' ? 'mp4' : mediaType === 'audio' ? 'mp3' : 'jpg'}`;
 
-      const formatBadge = mediaType === 'video' ? ' 4K TIME-LAPSE' : mediaType === 'audio' ? ' RADIO AUDIO' : ' RAW DETECTOR';
+      const formatBadge = mediaType === 'video' ? '🎬 4K TIME-LAPSE' : mediaType === 'audio' ? '🎙️ RADIO AUDIO' : '📸 RAW DETECTOR';
 
       return `
         <article class="planetary-card" data-url="${thumbSrc}" data-title="${title}" data-time="${dateStr}" data-filename="${filename}" data-mediatype="${mediaType}" data-nasaid="${nasaId}">
@@ -1531,7 +1574,7 @@ function initWikiSearch() {
   });
 }
 
-// 21. Rich Notification Dispatcher
+// 21. Rich Notification Dispatcher (Real Space Photos Banner - Never Logo)
 function dispatchRichNotification({ title, body, url, image }) {
   if ('Notification' in window && Notification.permission === 'granted') {
     if (swRegistration) {
@@ -1554,7 +1597,7 @@ function dispatchRichNotification({ title, body, url, image }) {
   }
 }
 
-// 22. Firebase Configuration
+// 22. Firebase Configuration & Push Alerts Engine
 const firebaseConfig = {
   apiKey: "AIzaSyAOn8eFL_CMGuYVeEa9hfpdkHRxZpjacqU",
   authDomain: "news-61e62.firebaseapp.com",
@@ -1584,12 +1627,14 @@ async function initFirebase() {
 }
 
 function initAlertPreferences() {
+  const savedCosmic = localStorage.getItem('alert_cosmic');
   const savedIss = localStorage.getItem('alert_iss');
   const savedSolar = localStorage.getItem('alert_solar');
   const savedLaunch = localStorage.getItem('alert_launch');
   const savedQuake = localStorage.getItem('alert_quake');
   const savedAsteroid = localStorage.getItem('alert_asteroid');
 
+  if (savedCosmic !== null) document.getElementById('toggle-cosmic').checked = (savedCosmic === 'true');
   if (savedIss !== null) document.getElementById('toggle-iss').checked = (savedIss === 'true');
   if (savedSolar !== null) document.getElementById('toggle-solar').checked = (savedSolar === 'true');
   if (savedLaunch !== null) document.getElementById('toggle-launches').checked = (savedLaunch === 'true');
@@ -1639,12 +1684,14 @@ function initAlertPreferences() {
   });
 
   document.getElementById('save-firebase-btn')?.addEventListener('click', async () => {
+    const isCosmic = document.getElementById('toggle-cosmic').checked;
     const isIss = document.getElementById('toggle-iss').checked;
     const isSolar = document.getElementById('toggle-solar').checked;
     const isLaunch = document.getElementById('toggle-launches').checked;
     const isQuake = document.getElementById('toggle-quake').checked;
     const isAsteroid = document.getElementById('toggle-asteroid').checked;
 
+    localStorage.setItem('alert_cosmic', isCosmic);
     localStorage.setItem('alert_iss', isIss);
     localStorage.setItem('alert_solar', isSolar);
     localStorage.setItem('alert_launch', isLaunch);
@@ -1672,6 +1719,7 @@ function initAlertPreferences() {
 
         await db.collection('space_fcm_tokens').doc(token).set({
           token: token,
+          alertCosmic: Boolean(isCosmic),
           alertIss: Boolean(isIss),
           alertSolar: Boolean(isSolar),
           alertLaunches: Boolean(isLaunch),
@@ -1703,6 +1751,7 @@ function initAlertPreferences() {
     }
 
     if ('Notification' in window && Notification.permission === 'granted') {
+      const isCosmic = document.getElementById('toggle-cosmic').checked;
       const isIss = document.getElementById('toggle-iss').checked;
       const isSolar = document.getElementById('toggle-solar').checked;
       const isLaunch = document.getElementById('toggle-launches').checked;
@@ -1714,7 +1763,12 @@ function initAlertPreferences() {
       let url = './#overview';
       let photo = NOTIFICATION_HERO_PHOTOS.satellite;
 
-      if (isLaunch) {
+      if (isCosmic) {
+        title = 'T&C Space · Cosmic Discovery 🔭';
+        body = 'New raw detector observation downlinked from deep space observatories! Tap to explore.';
+        url = './#planetary-explorer';
+        photo = NOTIFICATION_HERO_PHOTOS.cosmic;
+      } else if (isLaunch) {
         title = 'T&C Space · Liftoff Countdown 🚀';
         body = 'Next rocket countdown in final window. Tap to inspect spaceport manifest.';
         url = './#launches';
@@ -1859,7 +1913,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('refresh-all')?.addEventListener('click', () => {
     fetchLiveSatelliteTelemetry();
     fetchLaunches();
-    fetchPlanetaryFeed(currentPlanetaryTopic);
+    fetchPlanetaryFeed(currentPlanetaryTopic, currentPlanetaryMediaType);
     fetchEpicEarth();
     fetchMarsPhotos();
     fetchSpaceWeather();
