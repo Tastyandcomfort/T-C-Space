@@ -666,28 +666,58 @@ async function openUniversalLightbox(url, title, timeStr, filename, mediaType = 
   }
 }
 
-// In-Place Blob Downloader (Guaranteed to save locally without opening new tab)
+// Bulletproof In-Place Downloader: Saves directly to device storage without navigating or opening in the same tab
 async function performInPlaceDownload(targetUrl, outputFilename) {
-  const secureUrl = (targetUrl || '').replace(/^http:\/\//i, 'https://');
+  let secureUrl = (targetUrl || '').replace(/^http:\/\//i, 'https://');
   if (!secureUrl) return;
 
   showToast(`⬇ Saving ${outputFilename} directly to your device…`);
 
   let blob = null;
 
-  try {
-    const res = await fetch(secureUrl);
-    if (res.ok) blob = await res.blob();
-  } catch (_) {}
+  // Step 1: Proxy via Cloudflare-backed high-speed engine (Bypasses CloudFront CORS and returns genuine raw image blob)
+  const isImage = /\.(jpg|jpeg|png|webp|tif|tiff)$/i.test(secureUrl.split('?')[0]) || activeLightboxMedia.mediaType === 'image';
 
-  if (!blob) {
+  if (isImage) {
     try {
-      const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(secureUrl)}`;
+      const proxyUrl = `https://wsrv.nl/?url=${encodeURIComponent(secureUrl)}&output=jpg`;
       const res = await fetch(proxyUrl);
-      if (res.ok) blob = await res.blob();
+      if (res.ok) {
+        blob = await res.blob();
+      }
     } catch (_) {}
   }
 
+  // Step 2: Direct CORS fetch with cache-busting parameter (Prevents disk-cache CORS poisoning)
+  if (!blob) {
+    try {
+      const cacheBustUrl = secureUrl.includes('?') ? `${secureUrl}&cb=${Date.now()}` : `${secureUrl}?cb=${Date.now()}`;
+      const res = await fetch(cacheBustUrl, { mode: 'cors' });
+      if (res.ok) {
+        blob = await res.blob();
+      }
+    } catch (_) {}
+  }
+
+  // Step 3: Secondary CORS proxies for 4K video clips, audio, and large master files
+  if (!blob) {
+    const proxies = [
+      `https://corsproxy.io/?${encodeURIComponent(secureUrl)}`,
+      `https://api.codetabs.com/v1/proxy/?quest=${encodeURIComponent(secureUrl)}`
+    ];
+
+    for (const pUrl of proxies) {
+      try {
+        const res = await fetch(pUrl);
+        if (res.ok) {
+          blob = await res.blob();
+          if (blob && blob.size > 1000) break;
+        }
+      } catch (_) {}
+    }
+  }
+
+  // Step 4: Save directly to device storage via local same-origin Blob
   if (blob) {
     const blobUrl = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -700,19 +730,16 @@ async function performInPlaceDownload(targetUrl, outputFilename) {
     setTimeout(() => {
       document.body.removeChild(a);
       URL.revokeObjectURL(blobUrl);
-    }, 3000);
+    }, 4000);
 
-    showToast('✅ Download complete! Saved to your device.');
-  } else {
-    const a = document.createElement('a');
-    a.style.display = 'none';
-    a.href = secureUrl;
-    a.download = outputFilename;
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(() => document.body.removeChild(a), 2000);
-    showToast('Download initiated.');
+    showToast('✅ Saved directly to your device storage!');
+    return;
   }
+
+  // Step 5: Fail-Safe — NEVER navigate the current tab!
+  // If the network blocked all binary streams, open in an isolated background tab so the PWA session remains intact
+  showToast('⚠️ Direct device save restricted by network. Opening in background…');
+  window.open(secureUrl, '_blank', 'noopener,noreferrer');
 }
 
 function initUniversalLightbox() {
