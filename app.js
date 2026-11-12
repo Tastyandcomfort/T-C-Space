@@ -46,7 +46,7 @@ function initNetworkMonitor() {
       document.documentElement.setAttribute('data-network', 'offline');
       if (textEl) textEl.textContent = 'Offline';
       currentNetworkSpeedMbps = 0.2;
-      showToast('⚠️ Network connection lost. Telemetry paused.');
+      showToast(' Network connection lost. T&C-Space paused.');
       return;
     }
 
@@ -512,11 +512,11 @@ function startLiveTickerEngine() {
     const messages = [];
 
     if (lastSatData) {
-      messages.push(`🛰️ ${currentSatelliteName}: Lat ${lastSatData.latitude.toFixed(2)}°, Lon ${lastSatData.longitude.toFixed(2)}° · Alt ${lastSatData.altitude.toFixed(1)} km · Speed ${lastSatData.velocity.toFixed(2)} km/s`);
+      messages.push(` ${currentSatelliteName}: Lat ${lastSatData.latitude.toFixed(2)}°, Lon ${lastSatData.longitude.toFixed(2)}° · Alt ${lastSatData.altitude.toFixed(1)} km · Speed ${lastSatData.velocity.toFixed(2)} km/s`);
     }
-    messages.push(`🚀 ORBITAL LAUNCH: ${lastNextLaunchText}`);
-    messages.push(`🌍 SEISMIC RADAR: ${lastEarthquakeText}`);
-    messages.push(`☀️ SPACE WEATHER: Solar background wind nominal · Kp < 3 · Geomagnetic flux quiet`);
+    messages.push(` ORBITAL LAUNCH: ${lastNextLaunchText}`);
+    messages.push(` SEISMIC RADAR: ${lastEarthquakeText}`);
+    messages.push(` SPACE WEATHER: Solar background wind nominal · Kp < 3 · Geomagnetic flux quiet`);
 
     tickerEl.textContent = messages[tickerCycleIndex % messages.length];
     tickerCycleIndex++;
@@ -776,13 +776,13 @@ async function performInPlaceDownload(targetUrl, outputFilename) {
       URL.revokeObjectURL(blobUrl);
     }, 4000);
 
-    showToast('✅ Saved directly to your device storage!');
+    showToast('File saved to your device');
     return;
   }
 
   // Step 5: Fail-Safe — NEVER navigate the current tab!
   // If the network blocked all binary streams, open in an isolated background tab so the PWA session remains intact
-  showToast('⚠️ Direct device save restricted by network. Opening in background…');
+  showToast(' Direct device save restricted by network. Opening in background…');
   window.open(secureUrl, '_blank', 'noopener,noreferrer');
 }
 
@@ -879,7 +879,7 @@ function initUniversalLightbox() {
     }
 
     navigator.clipboard.writeText(deepLinkUrl);
-    showToast('✅ T&C Space deep link copied! Directly opens this capture.');
+    showToast('T&C Space deep link copied! Directly opens this capture.');
   });
 }
 
@@ -1079,7 +1079,7 @@ async function fetchPlanetaryFeed(topicKey, mediaFilter = 'image,video,audio') {
     planetaryExplorerLoaded = true;
 
     if (timestamp) {
-      timestamp.textContent = `🛰️ ${targetObj.instrument} · ${displayItems.length} raw observations`;
+      timestamp.textContent = ` ${targetObj.instrument} · ${displayItems.length} raw observations`;
     }
 
     container.innerHTML = displayItems.map((item, index) => {
@@ -1105,7 +1105,7 @@ async function fetchPlanetaryFeed(topicKey, mediaFilter = 'image,video,audio') {
       const dateStr = rawDate ? new Date(rawDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Observation Log';
       const cleanFilename = generateTcFilename(title, "Asset", mediaType === 'video' ? 'mp4' : mediaType === 'audio' ? 'mp3' : 'jpg');
 
-      const formatBadge = mediaType === 'video' ? '🎬 4K TIME-LAPSE' : mediaType === 'audio' ? '🎙️ RADIO AUDIO' : '📸 RAW DETECTOR';
+      const formatBadge = mediaType === 'video' ? ' 4K TIME-LAPSE' : mediaType === 'audio' ? ' RADIO AUDIO' : ' RAW DETECTOR';
 
       return `
         <article class="planetary-card" data-url="${thumbSrc}" data-title="${title}" data-time="${dateStr}" data-filename="${cleanFilename}" data-mediatype="${mediaType}" data-nasaid="${nasaId}">
@@ -1473,7 +1473,7 @@ async function fetchEonetHazards() {
     if (list) {
       list.innerHTML = events.slice(0, 8).map(ev => `
         <div class="quake-row">
-          <div class="mag-box purple">🌋</div>
+          <div class="mag-box purple"></div>
           <div>
             <b>${ev.title}</b>
             <small>${ev.categories?.[0]?.title || 'Hazard'}</small>
@@ -1834,7 +1834,7 @@ function initAlertPreferences() {
           localStorage.setItem('user_target_lon', lon);
           localStorage.setItem('user_target_city', `GPS (${lat}°N, ${lon}°E)`);
           locStatus.textContent = `Current Target: GPS (${lat}°N, ${lon}°E)`;
-          showToast(`📍 GPS Target Locked: ${lat}°N, ${lon}°E`);
+          showToast(` GPS Target Locked: ${lat}°N, ${lon}°E`);
         },
         () => showToast('Could not retrieve GPS location.')
       );
@@ -1896,7 +1896,7 @@ function initAlertPreferences() {
           userAgent: navigator.userAgent
         }, { merge: true });
 
-        showToast('✅ Preferences & Location Synced to Firebase!');
+        showToast(' Preferences & Location Synced');
         return;
       }
 
@@ -1912,7 +1912,7 @@ function initAlertPreferences() {
     }
 
     if ('Notification' in window && Notification.permission === 'denied') {
-      showToast('⚠️ Notifications blocked. Tap lock icon in browser bar to allow.');
+      showToast(' Notifications blocked. Tap lock icon in browser bar to allow.');
       return;
     }
 
@@ -1924,46 +1924,46 @@ function initAlertPreferences() {
       const isQuake = document.getElementById('toggle-quake').checked;
       const isAsteroid = document.getElementById('toggle-asteroid').checked;
 
-      let title = 'T&C Space 🚀';
+      let title = 'T&C Space ';
       let body = 'All live telemetry systems operational.';
       let url = './#overview';
       let photo = NOTIFICATION_HERO_PHOTOS.satellite;
 
       if (isCosmic) {
-        title = 'T&C Space · Cosmic Discovery 🔭';
+        title = 'T&C Space · Discovery ';
         body = 'New raw detector observation downlinked from deep space observatories! Tap to explore.';
         url = './#planetary-explorer';
         photo = NOTIFICATION_HERO_PHOTOS.cosmic;
       } else if (isLaunch) {
-        title = 'T&C Space · Liftoff Countdown 🚀';
+        title = 'T&C Space · Rocket Countdown ';
         body = 'Next rocket countdown in final window. Tap to inspect spaceport manifest.';
         url = './#launches';
         photo = NOTIFICATION_HERO_PHOTOS.launch;
       } else if (isIss) {
         const loc = localStorage.getItem('user_target_city') || 'Hyderabad';
-        title = 'T&C Space · Orbital Pass 🛰️';
+        title = 'T&C Space · ISS Over INDIA ';
         body = `ISS (Zarya) approaching regional horizon over ${loc}! Speed: 7.66 km/s. Visible in clear skies.`;
         url = './#satellites';
         photo = NOTIFICATION_HERO_PHOTOS.satellite;
       } else if (isSolar) {
-        title = 'T&C Space · Solar Weather ☀️';
+        title = 'T&C Space · Solar Weather ';
         body = 'Geomagnetic solar flux observation active. Tap to view heliophysics data.';
         url = './#space-weather';
         photo = NOTIFICATION_HERO_PHOTOS.solar;
       } else if (isQuake) {
-        title = 'T&C Space · Seismic Alert 🌍';
+        title = 'T&C Space · Earthquake Radar ';
         body = 'Recent global earthquake detected. Tap to inspect seismic radar.';
         url = './#cosmos-hazards';
         photo = NOTIFICATION_HERO_PHOTOS.quake;
       } else if (isAsteroid) {
-        title = 'T&C Space · Asteroid Radar ☄️';
+        title = 'T&C Space · Asteroid Radar ';
         body = 'Near-Earth asteroid close approach confirmed. Tap to review trajectory.';
         url = './#cosmos-hazards';
         photo = NOTIFICATION_HERO_PHOTOS.asteroid;
       }
 
       dispatchRichNotification({ title, body, url, image: photo });
-      showToast('🔔 Rich Test Notification Dispatched!');
+      showToast(' T&C Test Notification Dispatched!');
     }
   });
 }
