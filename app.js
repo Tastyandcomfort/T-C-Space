@@ -1473,7 +1473,7 @@ async function fetchEonetHazards() {
     if (list) {
       list.innerHTML = events.slice(0, 8).map(ev => `
         <div class="quake-row">
-          <div class="mag-box purple"></div>
+          <div class="mag-box purple">T&C</div>
           <div>
             <b>${ev.title}</b>
             <small>${ev.categories?.[0]?.title || 'Hazard'}</small>
