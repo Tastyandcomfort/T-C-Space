@@ -95,7 +95,7 @@ function initNetworkMonitor() {
 
   window.addEventListener('online', () => {
     updateNetworkStatus();
-    showToast('🟢 Telemetry connection restored.');
+    showToast('T&C Space connection restored.');
   });
   window.addEventListener('offline', updateNetworkStatus);
 
@@ -490,7 +490,7 @@ function checkSatelliteOverheadPass(satLat, satLon, satName, satVel) {
     if (now - lastPassAlertTime > 45 * 60 * 1000) {
       lastPassAlertTime = now;
       dispatchRichNotification({
-        title: 'T&C Space · Orbital Pass 🛰️',
+        title: 'T&C Space · Orbital Pass ',
         body: `${satName} is passing directly over ${locationName}! Proximity: ${Math.round(distanceKm)} km · Speed: ${satVel.toFixed(2)} km/s.`,
         url: './#satellites',
         image: NOTIFICATION_HERO_PHOTOS.satellite
