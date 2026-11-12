@@ -669,34 +669,132 @@ function initUniversalLightbox() {
 }
 
 // ============================================================================
-// 11. PLANETARY EXPLORER (RAW PHOTOS, 4K VIDEOS & AUDIO ENGINE)
+// 11. COSMIC & PLANETARY EXPLORER (UNIVERSE-WIDE RAW DATA DOWNLINKS)
 // ============================================================================
-const PLANETARY_TOPICS = {
-  latest: { name: "Latest Discoveries", query: "James Webb", fallback: "Hubble", type: "active" },
-  sun: { name: "The Sun", query: "Solar Dynamics Observatory", fallback: "Sun flare", type: "active" },
-  mercury: { name: "Mercury", query: "Mercury planet", fallback: "MESSENGER Mercury", type: "archive" },
-  venus: { name: "Venus", query: "Venus planet", fallback: "Magellan Venus", type: "archive" },
-  earth: { name: "Earth", query: "Earth from space", fallback: "Earth ISS", type: "active" },
-  mars: { name: "Mars", query: "Perseverance rover", fallback: "Mars surface", type: "active" },
-  jupiter: { name: "Jupiter", query: "Juno Jupiter", fallback: "Jupiter planet", type: "active" },
-  saturn: { name: "Saturn", query: "Cassini Saturn", fallback: "Saturn rings", type: "archive" },
-  uranus: { name: "Uranus", query: "Uranus planet", fallback: "Voyager Uranus", type: "archive" },
-  neptune: { name: "Neptune", query: "Neptune planet", fallback: "Voyager Neptune", type: "archive" },
-  "dwarf-planets": { name: "Dwarf Planets", query: "Pluto New Horizons", fallback: "Ceres Dawn", type: "archive" },
-  "small-bodies": { name: "Asteroids & Comets", query: "Bennu asteroid", fallback: "Asteroid", type: "active" },
-  universe: { name: "The Universe", query: "James Webb nebula", fallback: "Galaxy cluster", type: "active" },
-  spacecraft: { name: "Spacecraft & Telescopes", query: "Space Station", fallback: "Spacecraft", type: "active" },
-  animation: { name: "Simulations & Motion", query: "NASA animation simulation", fallback: "Orbit simulation", type: "active" },
-  anaglyph: { name: "3D Anaglyphs", query: "3D anaglyph", fallback: "Mars stereo", type: "archive" },
-  concepts: { name: "Artists' Concepts", query: "Concept exoplanet", fallback: "Artist concept", type: "active" }
+const COSMIC_TARGETS = {
+  // --- DEEP UNIVERSE & COSMOS ---
+  "deep-field": {
+    name: "Deep Field & First Galaxies",
+    query: "Deep Field Webb Hubble ultra deep field distant galaxy",
+    fallback: "Hubble Ultra Deep Field",
+    instrument: "JWST/NIRCam · HST/ACS",
+    type: "deep-space"
+  },
+  "jwst-raw": {
+    name: "JWST Raw Science (Webb)",
+    query: "James Webb Space Telescope NIRCam MIRI uncalibrated",
+    fallback: "James Webb raw image",
+    instrument: "JWST NIRCam/MIRI/NIRSpec",
+    type: "deep-space"
+  },
+  "hubble-raw": {
+    name: "Hubble Raw Detector (HST)",
+    query: "Hubble Space Telescope WFC3 ACS detector exposure",
+    fallback: "Hubble Space Telescope",
+    instrument: "HST WFC3/UVIS · ACS/WFC",
+    type: "deep-space"
+  },
+  "nebulae": {
+    name: "Nebulae & Stellar Nurseries",
+    query: "Carina Nebula Orion Pillars of Creation Webb Hubble",
+    fallback: "Eagle Nebula Pillars of Creation",
+    instrument: "Infrared & Narrowband Photometry",
+    type: "deep-space"
+  },
+  "galaxies": {
+    name: "Spiral & Colliding Galaxies",
+    query: "Andromeda Whirlpool Sombrero Cartwheel galaxy collision",
+    fallback: "Spiral galaxy Webb Hubble",
+    instrument: "Wide-Field Camera Array",
+    type: "deep-space"
+  },
+  "black-holes": {
+    name: "Black Holes & X-Ray Jets",
+    query: "Chandra X-ray Observatory black hole Sagittarius M87 jet",
+    fallback: "Chandra X-ray black hole",
+    instrument: "Chandra ACIS / HRC High-Energy",
+    type: "deep-space"
+  },
+  "supernovae": {
+    name: "Supernovae & Remnants",
+    query: "Cassiopeia A Crab Nebula supernova remnant Chandra Webb",
+    fallback: "Crab Nebula supernova",
+    instrument: "X-Ray & Thermal Infrared",
+    type: "deep-space"
+  },
+  "pulsars": {
+    name: "Pulsars & Neutron Stars",
+    query: "pulsar neutron star magnetar Chandra Fermi",
+    fallback: "Crab pulsar X-ray",
+    instrument: "High-Energy Gamma & X-Ray",
+    type: "deep-space"
+  },
+  "exoplanets": {
+    name: "Exoplanet Systems",
+    query: "exoplanet transit spectroscopy Kepler TESS Webb atmosphere",
+    fallback: "exoplanet transit light curve",
+    instrument: "Transit Photometer & Spectrometer",
+    type: "deep-space"
+  },
+  "gravitational": {
+    name: "Gravitational Lenses",
+    query: "gravitational lensing Einstein ring galaxy cluster Webb",
+    fallback: "gravitational lens galaxy cluster",
+    instrument: "Deep Space Cosmological Sensor",
+    type: "deep-space"
+  },
+
+  // --- SOLAR SYSTEM & PLANETARY RAW PROBES ---
+  "sun": {
+    name: "Solar SDO Direct Telemetry",
+    query: "Solar Dynamics Observatory AIA extreme ultraviolet flare",
+    fallback: "SDO solar flare 193 171",
+    instrument: "SDO AIA / HMI EUV Imagers",
+    type: "solar"
+  },
+  "mars-raw": {
+    name: "Mars Rover Raw Downlinks",
+    query: "Perseverance Curiosity raw image Mastcam Navcam Hazcam Sol",
+    fallback: "Perseverance Mars raw",
+    instrument: "Mastcam-Z / Navcam Raw Detectors",
+    type: "planetary"
+  },
+  "jupiter": {
+    name: "Jupiter JunoCam Raw Buffer",
+    query: "Juno spacecraft JunoCam Jupiter raw Great Red Spot",
+    fallback: "Juno Jupiter atmosphere",
+    instrument: "JunoCam Raw Push-Frame Detector",
+    type: "planetary"
+  },
+  "saturn": {
+    name: "Saturn Cassini Archives",
+    query: "Cassini spacecraft Saturn rings Enceladus Titan raw",
+    fallback: "Cassini Saturn rings",
+    instrument: "Cassini ISS Telemetry (Historic)",
+    type: "planetary"
+  },
+  "interstellar": {
+    name: "Comets & Interstellar Objects",
+    query: "Oumuamua Borisov comet Rosetta OSIRIS-REx Bennu",
+    fallback: "Comet 67P Rosetta",
+    instrument: "Deep Space Navigational Imagers",
+    type: "planetary"
+  },
+  "earth": {
+    name: "Earth Orbital Radiometers",
+    query: "Earth DSCOVR EPIC MODIS VIIRS satellite swath",
+    fallback: "Earth from space DSCOVR",
+    instrument: "DSCOVR EPIC / Terra MODIS",
+    type: "planetary"
+  }
 };
 
 let planetaryExplorerLoaded = false;
-let currentPlanetaryTopic = 'latest';
-let currentPlanetaryMediaType = 'image,video,audio'; // Default: All formats
+let currentPlanetaryTopic = 'deep-field';
+let currentPlanetaryMediaType = 'image,video,audio';
 
 function initPlanetaryExplorer() {
-  // Topic Chips
+  // Target Category Chips
   const topicChips = document.querySelectorAll('.planetary-chip');
   topicChips.forEach(chip => {
     chip.addEventListener('click', () => {
@@ -707,7 +805,7 @@ function initPlanetaryExplorer() {
     });
   });
 
-  // Media Format Chips (All / Raw Photos / 4K Videos / Audio)
+  // Media Format Chips (All / Raw Detector Frames / 4K Video / Audio)
   const mediaChips = document.querySelectorAll('.media-chip');
   mediaChips.forEach(chip => {
     chip.addEventListener('click', () => {
@@ -723,16 +821,16 @@ async function fetchPlanetaryFeed(topicKey, mediaFilter = 'image,video,audio') {
   const container = document.getElementById('planetary-gallery-container');
   const label = document.getElementById('planetary-current-topic-label');
   const timestamp = document.getElementById('planetary-feed-timestamp');
-  const topicObj = PLANETARY_TOPICS[topicKey] || PLANETARY_TOPICS.latest;
+  const targetObj = COSMIC_TARGETS[topicKey] || COSMIC_TARGETS["deep-field"];
 
-  if (label) label.textContent = `${topicObj.name} Feed`;
-  if (timestamp) timestamp.textContent = 'Streaming 100% Raw Observatory Data…';
+  if (label) label.textContent = `${targetObj.name}`;
+  if (timestamp) timestamp.textContent = 'Streaming raw detector telemetry…';
 
   if (container) {
     container.innerHTML = `
       <div class="loading-state">
         <div class="apple-spinner large"></div>
-        <p style="margin-top:10px;">Retrieving raw downlinks for ${topicObj.name}…</p>
+        <p style="margin-top:10px;">Querying NASA Deep Space Telescope Network for ${targetObj.name}…</p>
       </div>
     `;
   }
@@ -750,19 +848,18 @@ async function fetchPlanetaryFeed(topicKey, mediaFilter = 'image,video,audio') {
   }
 
   try {
-    let items = await queryNasaApi(topicObj.query, mediaFilter);
+    let items = await queryNasaApi(targetObj.query, mediaFilter);
 
-    // Fallback if strict media query returned 0 items
-    if (!items.length && topicObj.fallback) {
-      items = await queryNasaApi(topicObj.fallback, mediaFilter);
+    if (!items.length && targetObj.fallback) {
+      items = await queryNasaApi(targetObj.fallback, mediaFilter);
     }
     if (!items.length && mediaFilter !== 'image,video,audio') {
-      items = await queryNasaApi(topicObj.query, 'image,video,audio');
+      items = await queryNasaApi(targetObj.query, 'image,video,audio');
     }
 
-    if (!items.length) throw new Error("No imagery found");
+    if (!items.length) throw new Error("No sensor data returned");
 
-    // Sort chronologically (newest first)
+    // Chronological order: newest scientific downlinks first
     items.sort((a, b) => {
       const dateA = new Date(a.data?.[0]?.date_created || 0);
       const dateB = new Date(b.data?.[0]?.date_created || 0);
@@ -772,8 +869,9 @@ async function fetchPlanetaryFeed(topicKey, mediaFilter = 'image,video,audio') {
     const displayItems = items.slice(0, 18);
     planetaryExplorerLoaded = true;
 
-    const statusBadge = topicObj.type === "active" ? "🟢 Active Mission" : "🏛️ Historic Archive";
-    if (timestamp) timestamp.textContent = `${statusBadge} · ${displayItems.length} raw assets ready`;
+    if (timestamp) {
+      timestamp.textContent = `🛰️ ${targetObj.instrument} · ${displayItems.length} raw observations`;
+    }
 
     container.innerHTML = displayItems.map((item, index) => {
       const info = item.data?.[0] || {};
@@ -781,47 +879,46 @@ async function fetchPlanetaryFeed(topicKey, mediaFilter = 'image,video,audio') {
       const mediaType = info.media_type || 'image';
       const nasaId = info.nasa_id || '';
 
-      // Get thumbnail preview
+      // Get clean preview thumbnail
       let thumbSrc = links.find(l => l.href && (l.render === 'image' || l.href.endsWith('.jpg') || l.href.endsWith('.png')))?.href || links[0]?.href || '';
       
-      // If audio file has no thumbnail, provide dedicated audio badge
       if (!thumbSrc && mediaType === 'audio') {
         thumbSrc = 'https://images-assets.nasa.gov/image/iss064e007861/iss064e007861~medium.jpg';
       }
       if (!thumbSrc) return '';
 
-      const title = (info.title || `NASA ${topicObj.name}`).replace(/"/g, '&quot;');
-      let desc = (info.description || info.secondary_creator || 'Raw scientific observation downlinked from NASA spacecraft.').replace(/<[^>]*>/g, '').trim();
+      const title = (info.title || `NASA ${targetObj.name}`).replace(/"/g, '&quot;');
+      let desc = (info.description || info.secondary_creator || 'Untouched scientific observation as downlinked from space telescope detectors.').replace(/<[^>]*>/g, '').trim();
       if (desc.length > 130) desc = desc.slice(0, 130) + '…';
 
       const rawDate = info.date_created;
-      const dateStr = rawDate ? new Date(rawDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Verified Archive';
-      const filename = `NASA_${topicObj.name.replace(/[^a-zA-Z0-9]/g, '_')}_${index + 1}.${mediaType === 'video' ? 'mp4' : mediaType === 'audio' ? 'mp3' : 'jpg'}`;
+      const dateStr = rawDate ? new Date(rawDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Observation Log';
+      const filename = `NASA_${targetObj.name.replace(/[^a-zA-Z0-9]/g, '_')}_${index + 1}.${mediaType === 'video' ? 'mp4' : mediaType === 'audio' ? 'mp3' : 'jpg'}`;
 
-      const mediaTypeIcon = mediaType === 'video' ? '🎬 4K VIDEO' : mediaType === 'audio' ? '🎙️ AUDIO' : '📸 100% RAW';
+      const formatBadge = mediaType === 'video' ? ' 4K TIME-LAPSE' : mediaType === 'audio' ? ' RADIO AUDIO' : ' RAW DETECTOR';
 
       return `
         <article class="planetary-card" data-url="${thumbSrc}" data-title="${title}" data-time="${dateStr}" data-filename="${filename}" data-mediatype="${mediaType}" data-nasaid="${nasaId}">
           <div class="planetary-card-media">
             <img src="${thumbSrc}" alt="${title}" loading="lazy">
-            <span class="planetary-tag">${topicObj.type === "active" ? "🟢 " : ""}${topicObj.name}</span>
-            <span class="planetary-media-type-tag">${mediaTypeIcon}</span>
+            <span class="planetary-tag">${targetObj.name}</span>
+            <span class="planetary-media-type-tag">${formatBadge}</span>
             ${mediaType === 'video' ? '<div class="planetary-play-badge">▶</div>' : ''}
             ${mediaType === 'audio' ? '<div class="planetary-play-badge">🔊</div>' : ''}
           </div>
           <div class="planetary-card-body">
-            <small class="planetary-date">${dateStr} · ${mediaType.toUpperCase()}</small>
+            <small class="planetary-date">${dateStr} · ${targetObj.instrument}</small>
             <h4>${info.title || 'Observation'}</h4>
             <p>${desc}</p>
             <div class="planetary-card-action">
-              <span>Inspect ${mediaType === 'video' ? 'Video' : mediaType === 'audio' ? 'Audio' : 'Raw Master'} ↗</span>
+              <span>Inspect ${mediaType === 'video' ? '4K Stream' : mediaType === 'audio' ? 'Audio Wave' : 'Raw Sensor Data'} ↗</span>
             </div>
           </div>
         </article>
       `;
     }).join('');
 
-    // Attach Lightbox click handlers
+    // Attach Lightbox Handlers
     container.querySelectorAll('.planetary-card').forEach(card => {
       card.addEventListener('click', () => {
         const url = card.getAttribute('data-url');
@@ -830,7 +927,7 @@ async function fetchPlanetaryFeed(topicKey, mediaFilter = 'image,video,audio') {
         const filename = card.getAttribute('data-filename');
         const mediaType = card.getAttribute('data-mediatype');
         const nasaId = card.getAttribute('data-nasaid');
-        openUniversalLightbox(url, title, `NASA ${topicObj.name} · ${timeStr}`, filename, mediaType, nasaId);
+        openUniversalLightbox(url, title, `${targetObj.instrument} · ${timeStr}`, filename, mediaType, nasaId);
       });
     });
 
@@ -838,7 +935,7 @@ async function fetchPlanetaryFeed(topicKey, mediaFilter = 'image,video,audio') {
     if (container) {
       container.innerHTML = `
         <div class="loading-state">
-          <p>NASA planetary imagery temporarily busy. Please tap another topic above or check your network.</p>
+          <p>Telescope network synchronizing. Tap another cosmic target above to explore.</p>
         </div>
       `;
     }
