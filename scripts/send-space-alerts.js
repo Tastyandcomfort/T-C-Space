@@ -165,7 +165,7 @@ async function getSatelliteIntel() {
     return {
       topic: 'satellite',
       category: 'satellite',
-      title: ' ISS Fly-Over',
+      title: ' ISS Cruising',
       body: `International Space Station cruising at ${speed} km/h (${alt} km altitude).`,
       image: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1000&auto=format&fit=crop',
       url: 'https://tastyandcomfort.github.io/T-C-Space/#satellites'
