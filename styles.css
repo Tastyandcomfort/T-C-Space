@@ -365,14 +365,35 @@ button { font-family: inherit; }
   outline: none;
 }
 
-/* Multi-Satellite Presets Toolbar */
+/* Replace the existing .sat-presets-bar block with this: */
 .sat-presets-bar {
   display: flex;
   align-items: center;
   gap: 8px;
+  overflow-x: auto;
+  white-space: nowrap;
+  flex-wrap: nowrap;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 6px;
   margin-bottom: 12px;
-  flex-wrap: wrap;
 }
+.sat-presets-bar::-webkit-scrollbar {
+  display: none;
+}
+.sat-presets-bar .sat-chip {
+  flex-shrink: 0;
+}
+.sat-presets-bar .sat-select-lbl {
+  flex-shrink: 0;
+}
+
+/* Status chip colors */
+.small-chip.red {
+  background: rgba(255, 69, 58, 0.2);
+  color: var(--red);
+}
+
 .sat-select-lbl { font-size: 9px; font-weight: 750; color: var(--dim); letter-spacing: 0.8px; }
 .sat-chip {
   padding: 6px 14px;
