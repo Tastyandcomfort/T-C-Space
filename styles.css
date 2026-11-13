@@ -418,6 +418,20 @@ html[data-theme="dark"] .leaflet-tile {
   display: flex;
   align-items: center;
   gap: 10px;
+
+
+  
+
+  margin-bottom: 12px;
+  overflow-x: auto;
+  white-space: nowrap;
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 6px;
+
+
+
+  
   pointer-events: none;
 }
 .map-hud-chip b { font-size: 11px; display: block; color: var(--text); }
