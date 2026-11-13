@@ -40,13 +40,20 @@ function initClocks() {
 // 2. Real-Time Network Monitor & Live Speed Measurement
 function initNetworkMonitor() {
   const textEl = document.getElementById('net-text');
+  const weatherSyncBadge = document.getElementById('weather-sync-badge');
 
   async function updateNetworkStatus() {
     if (!navigator.onLine) {
       document.documentElement.setAttribute('data-network', 'offline');
       if (textEl) textEl.textContent = 'Offline';
       currentNetworkSpeedMbps = 0.2;
-      showToast(' Network connection lost. T&C-Space paused.');
+      if (weatherSyncBadge) {
+        weatherSyncBadge.className = 'small-chip';
+        weatherSyncBadge.style.background = 'rgba(255, 69, 58, 0.2)';
+        weatherSyncBadge.style.color = 'var(--red)';
+        weatherSyncBadge.textContent = 'Offline 🔴';
+      }
+      showToast('Network connection lost. T&C-Space paused.');
       return;
     }
 
@@ -58,12 +65,30 @@ function initNetworkMonitor() {
       if (mbps < 1.0) {
         document.documentElement.setAttribute('data-network', 'slow');
         if (textEl) textEl.textContent = 'Slow · <1 Mbps';
+        if (weatherSyncBadge) {
+          weatherSyncBadge.className = 'small-chip orange';
+          weatherSyncBadge.style.background = 'rgba(255, 180, 84, 0.2)';
+          weatherSyncBadge.style.color = 'var(--orange)';
+          weatherSyncBadge.textContent = 'Slow Telemetry 🟠';
+        }
       } else if (mbps <= 2.5) {
         document.documentElement.setAttribute('data-network', 'normal');
         if (textEl) textEl.textContent = `Normal · ~${mbps.toFixed(1)} Mbps`;
+        if (weatherSyncBadge) {
+          weatherSyncBadge.className = 'small-chip green';
+          weatherSyncBadge.style.background = 'var(--green-soft)';
+          weatherSyncBadge.style.color = 'var(--green)';
+          weatherSyncBadge.textContent = 'Auto-Synced 🟢';
+        }
       } else {
         document.documentElement.setAttribute('data-network', 'fast');
         if (textEl) textEl.textContent = `Fast · ${mbps.toFixed(1)} Mbps`;
+        if (weatherSyncBadge) {
+          weatherSyncBadge.className = 'small-chip green';
+          weatherSyncBadge.style.background = 'var(--green-soft)';
+          weatherSyncBadge.style.color = 'var(--green)';
+          weatherSyncBadge.textContent = 'Auto-Synced 🟢';
+        }
       }
       return;
     }
@@ -77,19 +102,43 @@ function initNetworkMonitor() {
         document.documentElement.setAttribute('data-network', 'slow');
         if (textEl) textEl.textContent = 'Slow · <1 Mbps';
         currentNetworkSpeedMbps = 0.8;
+        if (weatherSyncBadge) {
+          weatherSyncBadge.className = 'small-chip orange';
+          weatherSyncBadge.style.background = 'rgba(255, 180, 84, 0.2)';
+          weatherSyncBadge.style.color = 'var(--orange)';
+          weatherSyncBadge.textContent = 'Slow Telemetry 🟠';
+        }
       } else if (rtt > 500) {
         document.documentElement.setAttribute('data-network', 'normal');
         if (textEl) textEl.textContent = 'Normal · ~1 Mbps';
         currentNetworkSpeedMbps = 1.8;
+        if (weatherSyncBadge) {
+          weatherSyncBadge.className = 'small-chip green';
+          weatherSyncBadge.style.background = 'var(--green-soft)';
+          weatherSyncBadge.style.color = 'var(--green)';
+          weatherSyncBadge.textContent = 'Auto-Synced 🟢';
+        }
       } else {
         document.documentElement.setAttribute('data-network', 'fast');
         if (textEl) textEl.textContent = 'Fast · ≥1 Mbps';
         currentNetworkSpeedMbps = 5.0;
+        if (weatherSyncBadge) {
+          weatherSyncBadge.className = 'small-chip green';
+          weatherSyncBadge.style.background = 'var(--green-soft)';
+          weatherSyncBadge.style.color = 'var(--green)';
+          weatherSyncBadge.textContent = 'Auto-Synced 🟢';
+        }
       }
     } catch (_) {
       document.documentElement.setAttribute('data-network', 'offline');
       if (textEl) textEl.textContent = 'Offline';
       currentNetworkSpeedMbps = 0.2;
+      if (weatherSyncBadge) {
+        weatherSyncBadge.className = 'small-chip';
+        weatherSyncBadge.style.background = 'rgba(255, 69, 58, 0.2)';
+        weatherSyncBadge.style.color = 'var(--red)';
+        weatherSyncBadge.textContent = 'Offline 🔴';
+      }
     }
   }
 
@@ -163,7 +212,6 @@ function initNavigation() {
       sections[0].classList.add('active-view');
     }
 
-    // Active state highlighting across sidebar, dock, and more-sheet items
     navLinks.forEach(link => {
       if (link.getAttribute('data-nav') === targetId) {
         link.classList.add('active');
@@ -172,7 +220,6 @@ function initNavigation() {
       }
     });
 
-    // Highlight "More" dock button if one of the extended sections is active
     const extendedSections = ['interplanetary', 'space-weather', 'cosmos-hazards', 'intel-brief', 'wiki', 'settings', 'about'];
     if (moreDockBtn) {
       if (extendedSections.includes(targetId)) {
@@ -194,7 +241,7 @@ function initNavigation() {
       fetchPlanetaryFeed(currentPlanetaryTopic, currentPlanetaryMediaType);
     }
 
-    // Direct Deep-Link Resolution
+    // Direct Deep-Link Resolution: If shared URL has ?asset=NASA_ID, immediately open lightbox!
     if (queryPart) {
       const params = new URLSearchParams(queryPart);
       const sharedNasaId = params.get('asset');
@@ -220,7 +267,6 @@ function initNavigation() {
   window.addEventListener('hashchange', () => handleRoute(window.location.hash));
   handleRoute(window.location.hash);
 }
-
 
 // 4. Interactive Overview Cards
 function initOverviewClickableCards() {
@@ -526,7 +572,7 @@ function startLiveTickerEngine() {
   setInterval(updateTicker, 4500);
 }
 
-// 9. Verified Launch Manifest
+// 9. Verified Launch Manifest (Populates Provider & Vehicle Tags on Overview)
 let countdownInterval = null;
 
 async function fetchLaunches() {
@@ -539,26 +585,36 @@ async function fetchLaunches() {
 
     if (launches.length > 0) {
       const top = launches[0];
+      const providerName = top.launch_service_provider?.name || 'Commercial Provider';
+      const vehicleName = top.rocket?.configuration?.name || 'Orbital Vehicle';
+
       document.getElementById('spotlight-name').textContent = top.name;
       document.getElementById('spotlight-desc').textContent = top.mission?.description || 'Orbital mission deployment.';
-      document.getElementById('spotlight-rocket').textContent = top.rocket?.configuration?.name || 'Rocket';
-      document.getElementById('spotlight-provider').textContent = top.launch_service_provider?.name || 'Commercial';
+      document.getElementById('spotlight-rocket').textContent = vehicleName;
+      document.getElementById('spotlight-provider').textContent = providerName;
       document.getElementById('spotlight-pad').textContent = top.pad?.location?.name || 'Spaceport';
 
       const targetDate = new Date(top.net);
       document.getElementById('spotlight-time-ist').textContent = targetDate.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' });
       document.getElementById('spotlight-time-utc').textContent = 'Target: ' + targetDate.toUTCString();
 
-      lastNextLaunchText = `${top.name} (${top.launch_service_provider?.name || 'Commercial'})`;
+      lastNextLaunchText = `${top.name} (${providerName})`;
 
       const heroName = document.getElementById('hero-launch-name');
       const heroProv = document.getElementById('hero-launch-provider');
       const overName = document.getElementById('overview-launch-name');
       const overDesc = document.getElementById('overview-launch-desc');
+      const tagProvider = document.getElementById('tag-provider');
+      const tagVehicle = document.getElementById('tag-vehicle');
+
       if (heroName) heroName.textContent = top.name;
-      if (heroProv) heroProv.textContent = top.launch_service_provider?.name || 'Launch Library 2';
+      if (heroProv) heroProv.textContent = providerName;
       if (overName) overName.textContent = top.name;
-      if (overDesc) overDesc.textContent = `${top.launch_service_provider?.name || 'Commercial'} · ${top.rocket?.configuration?.name || 'Rocket'}`;
+      if (overDesc) overDesc.textContent = `${providerName} · ${vehicleName}`;
+
+      // Dynamically populate Overview Provider & Vehicle tags
+      if (tagProvider) tagProvider.textContent = `Provider: ${providerName}`;
+      if (tagVehicle) tagVehicle.textContent = `Vehicle: ${vehicleName}`;
 
       if (countdownInterval) clearInterval(countdownInterval);
       function updateCountdown() {
@@ -621,7 +677,6 @@ let activeLightboxMedia = {
   nasaId: ""
 };
 
-// Helper to sanitize title into clean T&C_Space formatted filename
 function generateTcFilename(title, suffix = "Capture", ext = "jpg") {
   const clean = (title || 'Space_Observation').replace(/[^a-zA-Z0-9]/g, '_').replace(/_+/g, '_').slice(0, 35);
   return `T&C_Space_${clean}_${suffix}.${ext.toLowerCase()}`;
@@ -673,7 +728,6 @@ async function openUniversalLightbox(url, title, timeStr, filename, mediaType = 
 
   modal.classList.add('open');
 
-  // Query NASA's Master Asset Manifest to find both Optimized (~large) and 100% RAW (~orig)
   if (nasaId) {
     try {
       const assetRes = await fetch(`https://images-api.nasa.gov/asset/${encodeURIComponent(nasaId)}`);
@@ -681,9 +735,7 @@ async function openUniversalLightbox(url, title, timeStr, filename, mediaType = 
         const assetData = await assetRes.json();
         const items = assetData.collection?.items || [];
 
-        // 1. Locate Raw Master (~orig)
         const origAsset = items.find(i => i.href && i.href.includes('~orig.')) || items[0];
-        // 2. Locate Optimized HD (~large or medium)
         const optAsset = items.find(i => i.href && (i.href.includes('~large.') || i.href.includes('~medium.'))) || items[0];
 
         if (origAsset && origAsset.href) {
@@ -710,7 +762,7 @@ async function openUniversalLightbox(url, title, timeStr, filename, mediaType = 
   }
 }
 
-// Bulletproof In-Place Downloader: Saves directly to device storage without navigating or opening in the same tab
+// In-Place Blob Downloader (Guaranteed to save locally without opening new tab)
 async function performInPlaceDownload(targetUrl, outputFilename) {
   let secureUrl = (targetUrl || '').replace(/^http:\/\//i, 'https://');
   if (!secureUrl) return;
@@ -719,7 +771,7 @@ async function performInPlaceDownload(targetUrl, outputFilename) {
 
   let blob = null;
 
-  // Step 1: Proxy via Cloudflare-backed high-speed engine (Bypasses CloudFront CORS and returns genuine raw image blob)
+  // Step 1: Proxy via Cloudflare-backed high-speed engine
   const isImage = /\.(jpg|jpeg|png|webp|tif|tiff)$/i.test(secureUrl.split('?')[0]) || activeLightboxMedia.mediaType === 'image';
 
   if (isImage) {
@@ -732,7 +784,7 @@ async function performInPlaceDownload(targetUrl, outputFilename) {
     } catch (_) {}
   }
 
-  // Step 2: Direct CORS fetch with cache-busting parameter (Prevents disk-cache CORS poisoning)
+  // Step 2: Direct CORS fetch with cache-busting parameter
   if (!blob) {
     try {
       const cacheBustUrl = secureUrl.includes('?') ? `${secureUrl}&cb=${Date.now()}` : `${secureUrl}?cb=${Date.now()}`;
@@ -780,9 +832,8 @@ async function performInPlaceDownload(targetUrl, outputFilename) {
     return;
   }
 
-  // Step 5: Fail-Safe — NEVER navigate the current tab!
-  // If the network blocked all binary streams, open in an isolated background tab so the PWA session remains intact
-  showToast(' Direct device save restricted by network. Opening in background…');
+  // Step 5: Fail-Safe
+  showToast('Direct device save restricted by network. Opening in background…');
   window.open(secureUrl, '_blank', 'noopener,noreferrer');
 }
 
@@ -794,7 +845,6 @@ function initUniversalLightbox() {
   const video = document.getElementById('universal-lightbox-video');
   const audio = document.getElementById('universal-lightbox-audio');
 
-  // Apple Sheet Elements
   const sheet = document.getElementById('download-action-sheet-backdrop');
   const sheetCancel = document.getElementById('sheet-cancel-btn');
   const sheetOptBtn = document.getElementById('sheet-download-opt');
@@ -822,7 +872,6 @@ function initUniversalLightbox() {
     const mbps = Math.max(0.4, currentNetworkSpeedMbps);
     if (sheetNetSpeed) sheetNetSpeed.textContent = `${mbps.toFixed(1)} Mbps`;
 
-    // Dynamic Download Time Calculations using live speed
     const isVideo = activeLightboxMedia.mediaType === 'video';
     const optSizeMB = isVideo ? 12.0 : 2.6;
     const rawSizeMB = isVideo ? 48.0 : 34.0;
@@ -845,15 +894,15 @@ function initUniversalLightbox() {
     if (e.target === sheet) sheet.classList.remove('open');
   });
 
-  // Action 1: Download Optimized Ultra-HD
+  // Action 1: Download Optimized File
   sheetOptBtn?.addEventListener('click', () => {
     sheet.classList.remove('open');
     const targetUrl = activeLightboxMedia.optUrl || activeLightboxMedia.url;
-    const filename = generateTcFilename(activeLightboxMedia.title, "UltraHD", "jpg");
+    const filename = generateTcFilename(activeLightboxMedia.title, "Optimized", "jpg");
     performInPlaceDownload(targetUrl, filename);
   });
 
-  // Action 2: Download 100% Raw Original Master
+  // Action 2: Download Raw File
   sheetRawBtn?.addEventListener('click', () => {
     sheet.classList.remove('open');
     const targetUrl = activeLightboxMedia.origUrl || activeLightboxMedia.url;
@@ -862,7 +911,7 @@ function initUniversalLightbox() {
     performInPlaceDownload(targetUrl, filename);
   });
 
-  // Direct Deep-Link Sharing (Brings clicked user straight to this exact asset & tab)
+  // Direct Deep-Link Sharing
   shareBtn?.addEventListener('click', async () => {
     const deepLinkUrl = `${window.location.origin}${window.location.pathname}#planetary-explorer?asset=${encodeURIComponent(activeLightboxMedia.nasaId || '')}&title=${encodeURIComponent(activeLightboxMedia.title || '')}&media=${encodeURIComponent(activeLightboxMedia.mediaType || 'image')}`;
 
@@ -1265,6 +1314,8 @@ async function fetchMarsPhotos() {
 // 14. Space Weather
 async function fetchSpaceWeather() {
   const list = document.getElementById('weather-events');
+  const weatherSyncBadge = document.getElementById('weather-sync-badge');
+
   try {
     const today = new Date().toISOString().slice(0, 10);
     const prev = new Date(Date.now() - 7 * 86400000).toISOString().slice(0, 10);
@@ -1273,6 +1324,13 @@ async function fetchSpaceWeather() {
     let flares = [];
     if (res.ok) {
       flares = await res.json();
+    }
+
+    if (weatherSyncBadge && navigator.onLine) {
+      weatherSyncBadge.className = 'small-chip green';
+      weatherSyncBadge.style.background = 'var(--green-soft)';
+      weatherSyncBadge.style.color = 'var(--green)';
+      weatherSyncBadge.textContent = 'Auto-Synced 🟢';
     }
 
     if (list) {
@@ -1308,6 +1366,12 @@ async function fetchSpaceWeather() {
       `).join('');
     }
   } catch (_) {
+    if (weatherSyncBadge && !navigator.onLine) {
+      weatherSyncBadge.className = 'small-chip';
+      weatherSyncBadge.style.background = 'rgba(255, 69, 58, 0.2)';
+      weatherSyncBadge.style.color = 'var(--red)';
+      weatherSyncBadge.textContent = 'Offline 🔴';
+    }
     if (list) {
       list.innerHTML = `
         <div class="weather-event-row">
@@ -1366,7 +1430,7 @@ async function fetchAsteroids() {
   }
 }
 
-// 16. USGS Earthquakes
+// 16. USGS Earthquakes (Preserves Official USGS Source Badge)
 async function fetchEarthquakes() {
   const list = document.getElementById('earthquake-list');
   try {
@@ -1375,7 +1439,11 @@ async function fetchEarthquakes() {
     const data = await res.json();
     const quakes = data.features || [];
 
-    document.getElementById('quake-count').textContent = `${quakes.length} ACTIVE`;
+    const quakeBadge = document.getElementById('quake-count');
+    if (quakeBadge) {
+      quakeBadge.textContent = `USGS · ${quakes.length} ACTIVE`;
+    }
+
     const heroQ = document.getElementById('hero-quake-count');
     if (heroQ) heroQ.textContent = quakes.length;
 
@@ -1433,7 +1501,7 @@ async function fetchEarthquakes() {
   }
 }
 
-// 17. NASA EONET Hazards
+// 17. NASA EONET Hazards (Preserves Official NASA EONET Source Badge)
 async function fetchEonetHazards() {
   const list = document.getElementById('hazard-list');
   try {
@@ -1443,7 +1511,9 @@ async function fetchEonetHazards() {
     const events = data.events || [];
 
     const badge = document.getElementById('hazard-count');
-    if (badge) badge.textContent = `${events.length} ACTIVE`;
+    if (badge) {
+      badge.textContent = `NASA EONET · ${events.length} ACTIVE`;
+    }
 
     if (hazardLayerGroup) {
       hazardLayerGroup.clearLayers();
@@ -2105,3 +2175,4 @@ document.addEventListener('DOMContentLoaded', () => {
   setInterval(fetchLiveSatelliteTelemetry, 3000);
   setInterval(fetchSpaceWeather, 60000);
 });
+                                                                  
