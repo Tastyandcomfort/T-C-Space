@@ -195,15 +195,15 @@
             </article>
           </div>
 
-          <!-- Highlight Preview Cards -->
+          <!-- Highlight Preview Cards (Dynamically Populated Provider & Vehicle) -->
           <div class="two-col-grid">
             <div class="apple-card card-accent-orange clickable-card" data-goto="launches" title="Click to open Launch Manifest">
               <div class="card-eyebrow">NEXT ROCKET COUNTDOWN</div>
               <h3 class="card-heading" id="overview-launch-name">Querying flight manifest…</h3>
               <p class="card-text" id="overview-launch-desc">Tracking upcoming spaceport countdowns across the globe.</p>
               <div class="tag-cluster">
-                <span class="apple-tag" id="tag-provider">Provider: —</span>
-                <span class="apple-tag" id="tag-vehicle">Vehicle: —</span>
+                <span class="apple-tag" id="tag-provider">Provider: Querying…</span>
+                <span class="apple-tag" id="tag-vehicle">Vehicle: Querying…</span>
               </div>
             </div>
 
@@ -231,31 +231,31 @@
             <div class="planetary-media-bar">
               <span class="media-type-lbl">INSTRUMENT FORMAT:</span>
               <div class="planetary-media-chips" id="planetary-media-chips">
-                <button class="media-chip active" data-media="image,video,audio"> All Data</button>
-                <button class="media-chip" data-media="image"> Raw Detector Frames</button>
-                <button class="media-chip" data-media="video"> 4K Time-Lapses &amp; Motion</button>
-                <button class="media-chip" data-media="audio"> Space Radio Audio</button>
+                <button class="media-chip active" data-media="image,video,audio">All Data</button>
+                <button class="media-chip" data-media="image">Raw Detector Frames</button>
+                <button class="media-chip" data-media="video">4K Time-Lapses &amp; Motion</button>
+                <button class="media-chip" data-media="audio">Space Radio Audio</button>
               </div>
             </div>
 
             <!-- Universe-Wide Celestial Target Chips -->
             <div class="planetary-chips-scroll" id="planetary-topic-chips">
-              <button class="planetary-chip active" data-topic="deep-field"> Deep Field &amp; First Galaxies</button>
-              <button class="planetary-chip" data-topic="jwst-raw"> JWST Raw Science (Webb)</button>
-              <button class="planetary-chip" data-topic="hubble-raw"> Hubble Raw Detector (HST)</button>
-              <button class="planetary-chip" data-topic="nebulae"> Nebulae &amp; Stellar Nurseries</button>
-              <button class="planetary-chip" data-topic="galaxies"> Spiral &amp; Colliding Galaxies</button>
-              <button class="planetary-chip" data-topic="black-holes"> Black Holes &amp; X-Ray Jets</button>
-              <button class="planetary-chip" data-topic="supernovae"> Supernovae &amp; Remnants</button>
-              <button class="planetary-chip" data-topic="pulsars"> Pulsars &amp; Neutron Stars</button>
-              <button class="planetary-chip" data-topic="exoplanets"> Exoplanet Systems</button>
-              <button class="planetary-chip" data-topic="gravitational"> Gravitational Lenses</button>
-              <button class="planetary-chip" data-topic="sun"> Solar SDO Direct Telemetry</button>
-              <button class="planetary-chip" data-topic="mars-raw"> Mars Rover Raw Downlinks</button>
-              <button class="planetary-chip" data-topic="jupiter"> Jupiter JunoCam Raw Buffer</button>
-              <button class="planetary-chip" data-topic="saturn"> Saturn Cassini Archives</button>
-              <button class="planetary-chip" data-topic="interstellar"> Comets &amp; Interstellar Objects</button>
-              <button class="planetary-chip" data-topic="earth"> Earth Orbital Radiometers</button>
+              <button class="planetary-chip active" data-topic="deep-field">Deep Field &amp; First Galaxies</button>
+              <button class="planetary-chip" data-topic="jwst-raw">JWST Raw Science (Webb)</button>
+              <button class="planetary-chip" data-topic="hubble-raw">Hubble Raw Detector (HST)</button>
+              <button class="planetary-chip" data-topic="nebulae">Nebulae &amp; Stellar Nurseries</button>
+              <button class="planetary-chip" data-topic="galaxies">Spiral &amp; Colliding Galaxies</button>
+              <button class="planetary-chip" data-topic="black-holes">Black Holes &amp; X-Ray Jets</button>
+              <button class="planetary-chip" data-topic="supernovae">Supernovae &amp; Remnants</button>
+              <button class="planetary-chip" data-topic="pulsars">Pulsars &amp; Neutron Stars</button>
+              <button class="planetary-chip" data-topic="exoplanets">Exoplanet Systems</button>
+              <button class="planetary-chip" data-topic="gravitational">Gravitational Lenses</button>
+              <button class="planetary-chip" data-topic="sun">Solar SDO Direct Telemetry</button>
+              <button class="planetary-chip" data-topic="mars-raw">Mars Rover Raw Downlinks</button>
+              <button class="planetary-chip" data-topic="jupiter">Jupiter JunoCam Raw Buffer</button>
+              <button class="planetary-chip" data-topic="saturn">Saturn Cassini Archives</button>
+              <button class="planetary-chip" data-topic="interstellar">Comets &amp; Interstellar Objects</button>
+              <button class="planetary-chip" data-topic="earth">Earth Orbital Radiometers</button>
             </div>
 
             <!-- Live Status Row -->
@@ -295,6 +295,7 @@
               <div id="sat-search-dropdown" class="autocomplete-dropdown" hidden></div>
             </div>
 
+            <!-- Sleek Horizontal Slider for Presets -->
             <div class="sat-presets-bar">
               <span class="sat-select-lbl">FLEET PRESETS:</span>
               <button class="sat-chip active" data-sat-id="25544" data-sat-name="ISS (ZARYA)">ISS (Zarya)</button>
@@ -307,10 +308,10 @@
 
             <div class="map-toolbar-row">
               <div class="map-layer-chips">
-                <button class="layer-chip active" id="toggle-layer-iss"> Satellite Active</button>
-                <button class="layer-chip active" id="toggle-layer-quakes"> Quakes (USGS)</button>
-                <button class="layer-chip active" id="toggle-layer-hazards"> Hazards (EONET)</button>
-                <button class="layer-chip active" id="toggle-layer-track"> Ground Track</button>
+                <button class="layer-chip active" id="toggle-layer-iss">Satellite Active</button>
+                <button class="layer-chip active" id="toggle-layer-quakes">Quakes (USGS)</button>
+                <button class="layer-chip active" id="toggle-layer-hazards">Hazards (EONET)</button>
+                <button class="layer-chip active" id="toggle-layer-track">Ground Track</button>
               </div>
             </div>
 
@@ -542,7 +543,7 @@
                   <h3>USGS Global Seismic Network</h3>
                   <p>Live earthquake sensor log (M 2.5+ past 24h).</p>
                 </div>
-                <span class="small-chip green" id="quake-count">USGS LIVE</span>
+                <span class="small-chip green" id="quake-count">USGS · LIVE</span>
               </div>
               <div id="earthquake-list" class="earthquake-feed">
                 <div class="loading-state"><div class="apple-spinner"></div><p>Contacting USGS seismographs…</p></div>
@@ -555,7 +556,7 @@
                   <h3>NASA EONET Active Hazards</h3>
                   <p>Wildfires, active volcanoes, and severe storms.</p>
                 </div>
-                <span class="small-chip blue" id="hazard-count">NASA EONET</span>
+                <span class="small-chip blue" id="hazard-count">NASA EONET · LIVE</span>
               </div>
               <div id="hazard-list" class="earthquake-feed">
                 <div class="loading-state"><div class="apple-spinner"></div><p>Querying NASA EONET sensors…</p></div>
@@ -1061,7 +1062,7 @@
       <div class="apple-sheet-options">
         <button type="button" class="apple-sheet-option-btn primary" id="sheet-download-opt">
           <div class="sheet-opt-left">
-            <span class="sheet-opt-icon"></span>
+            <span class="sheet-opt-icon">⚡</span>
             <div>
               <b class="sheet-opt-title">Optimized File</b>
               <small class="sheet-opt-meta">Instant saving · Pristine screen clarity</small>
@@ -1075,7 +1076,7 @@
 
         <button type="button" class="apple-sheet-option-btn" id="sheet-download-raw">
           <div class="sheet-opt-left">
-            <span class="sheet-opt-icon"></span>
+            <span class="sheet-opt-icon">📸</span>
             <div>
               <b class="sheet-opt-title">Raw File</b>
               <small class="sheet-opt-meta" id="sheet-raw-format">Uncompressed camera sensor capture</small>
