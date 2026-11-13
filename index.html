@@ -28,7 +28,7 @@
           </div>
         </div>
         <span class="brand-copy">
-          <b>T&C SPACE</b>
+          <b>T&amp;C SPACE</b>
           <small>DATA CENTER</small>
         </span>
       </a>
@@ -77,17 +77,17 @@
         </a>
         <a class="nav-link" href="#about" data-nav="about">
           <span class="nav-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></span>
-          <span>About T&C Space</span>
+          <span>About T&amp;C Space</span>
         </a>
       </nav>
 
       <div class="sidebar-bottom">
         <div class="connection-indicator">
           <span class="live-dot pulse-dot"></span>
-          <span>ISRO|NASA|ESA|OPEN-METEO|WIKI </span>
-          <b>T&C SPACE</b>
+          <span>ISRO | NASA | ESA | OPEN-METEO</span>
+          <b>T&amp;C SPACE</b>
         </div>
-        <small> N E W  ●  M O D E R N  ●  M I S S I O N </small>
+        <small>N E W  ●  M O D E R N  ●  M I S S I O N</small>
       </div>
     </aside>
 
@@ -147,7 +147,7 @@
         <section class="section-block active-view" id="overview">
           <div class="welcome-row">
             <div>
-              <div class="eyebrow"><span class="live-dot pulse-dot"></span> N E W  ●  M O D E R N  ●  M I S S I O N </div>
+              <div class="eyebrow"><span class="live-dot pulse-dot"></span> N E W  ●  M O D E R N  ●  M I S S I O N</div>
               <h1><span>Space Live</span></h1>
               <p>Authentic real-time space awareness streamed directly from NASA, ISRO, USGS, WhereTheISS, and Open-Meteo.</p>
             </div>
@@ -157,14 +157,12 @@
             </div>
           </div>
 
-          <!-- Live Sensors Cyclical Ticker -->
           <div class="ticker-row">
             <div class="ticker-label"><span class="live-dot pulse-dot"></span> SENSORS CHECK</div>
             <div id="ticker" class="ticker-content">Syncing real-time telemetry from international observatories…</div>
             <div class="ticker-time">all-time progress</div>
           </div>
 
-          <!-- Interactive Metrics Grid -->
           <div class="metrics-grid">
             <article class="metric-card card-accent-blue clickable-card" data-goto="satellites" title="Click to view full Satellite Tracker &amp; Map">
               <div class="metric-top"><span>ACTIVE SAT ALTITUDE</span><span class="metric-symbol blue">◎</span></div>
@@ -181,7 +179,7 @@
             </article>
 
             <article class="metric-card card-accent-orange clickable-card" data-goto="launches" title="Click to view full Launch Manifest">
-              <div class="metric-top"><span>ROCKET LAUNCH </span><span class="metric-symbol orange">🚀</span></div>
+              <div class="metric-top"><span>NEXT LAUNCH T-MINUS</span><span class="metric-symbol orange">🚀</span></div>
               <strong id="hero-launch-timer"><div class="apple-spinner"></div></strong>
               <small id="hero-launch-name">Fetching upcoming missions…</small>
               <div class="metric-bottom" id="hero-launch-provider">Launch Library 2 ↗</div>
@@ -195,15 +193,14 @@
             </article>
           </div>
 
-          <!-- Highlight Preview Cards (Dynamically Populated Provider & Vehicle) -->
           <div class="two-col-grid">
             <div class="apple-card card-accent-orange clickable-card" data-goto="launches" title="Click to open Launch Manifest">
-              <div class="card-eyebrow">Launch Pad</div>
+              <div class="card-eyebrow">NEXT ROCKET COUNTDOWN</div>
               <h3 class="card-heading" id="overview-launch-name">Querying flight manifest…</h3>
               <p class="card-text" id="overview-launch-desc">Tracking upcoming spaceport countdowns across the globe.</p>
               <div class="tag-cluster">
-                <span class="apple-tag" id="tag-provider">Provider: Querying…</span>
-                <span class="apple-tag" id="tag-vehicle">Vehicle: Querying…</span>
+                <span class="apple-tag" id="tag-provider">Provider: —</span>
+                <span class="apple-tag" id="tag-vehicle">Vehicle: —</span>
               </div>
             </div>
 
@@ -216,7 +213,7 @@
           </div>
         </section>
 
-        <!-- PLANETARY EXPLORER (RAW PHOTOS, 4K VIDEOS & AUDIO) -->
+        <!-- PLANETARY EXPLORER -->
         <section class="section-block" id="planetary-explorer">
           <div class="section-title">
             <div>
@@ -227,7 +224,6 @@
           </div>
 
           <article class="surface planetary-panel">
-            <!-- Media Format Selector -->
             <div class="planetary-media-bar">
               <span class="media-type-lbl">INSTRUMENT FORMAT:</span>
               <div class="planetary-media-chips" id="planetary-media-chips">
@@ -238,7 +234,6 @@
               </div>
             </div>
 
-            <!-- Universe-Wide Celestial Target Chips -->
             <div class="planetary-chips-scroll" id="planetary-topic-chips">
               <button class="planetary-chip active" data-topic="deep-field">Deep Field &amp; First Galaxies</button>
               <button class="planetary-chip" data-topic="jwst-raw">JWST Raw Science (Webb)</button>
@@ -258,7 +253,6 @@
               <button class="planetary-chip" data-topic="earth">Earth Orbital Radiometers</button>
             </div>
 
-            <!-- Live Status Row -->
             <div class="planetary-status-row">
               <div>
                 <span class="live-dot pulse-dot"></span>
@@ -267,7 +261,6 @@
               <small id="planetary-feed-timestamp" class="mono muted">Connecting to Deep Space Telemetry…</small>
             </div>
 
-            <!-- Dynamic Raw Media Grid -->
             <div class="planetary-gallery-grid" id="planetary-gallery-container">
               <div class="loading-state">
                 <div class="apple-spinner large"></div>
@@ -295,7 +288,6 @@
               <div id="sat-search-dropdown" class="autocomplete-dropdown" hidden></div>
             </div>
 
-            <!-- Sleek Horizontal Slider for Presets -->
             <div class="sat-presets-bar">
               <span class="sat-select-lbl">FLEET PRESETS:</span>
               <button class="sat-chip active" data-sat-id="25544" data-sat-name="ISS (ZARYA)">ISS (Zarya)</button>
@@ -387,7 +379,7 @@
             <div>
               <div class="eyebrow">INTERPLANETARY OBSERVATIONS</div>
               <h2>Interplanetary Exploration: Earth &amp; Mars</h2>
-              <p><b>T&C Note:</b> The photos of Earth and Mars shown are real, though they are not live from today's Earth date. Earth images take 24 to 48 hours for NASA to process, while Mars rover photos are sent in batches via passing satellites based on Martian days (Sols). You can tap any photo to view it full-screen, download it, or share it.</p>
+              <p><b>T&amp;C Note:</b> Earth images take 24–48 hours for NASA to calibrate, while Mars rover photos are transmitted in batches via orbital relays based on Martian Sols. You can tap any photo to view it full-screen, download it, or share it.</p>
             </div>
           </div>
 
@@ -543,7 +535,7 @@
                   <h3>USGS Global Seismic Network</h3>
                   <p>Live earthquake sensor log (M 2.5+ past 24h).</p>
                 </div>
-                <span class="small-chip green" id="quake-count">USGS · LIVE</span>
+                <span class="small-chip green" id="quake-count">USGS LIVE</span>
               </div>
               <div id="earthquake-list" class="earthquake-feed">
                 <div class="loading-state"><div class="apple-spinner"></div><p>Contacting USGS seismographs…</p></div>
@@ -556,7 +548,7 @@
                   <h3>NASA EONET Active Hazards</h3>
                   <p>Wildfires, active volcanoes, and severe storms.</p>
                 </div>
-                <span class="small-chip blue" id="hazard-count">NASA EONET · LIVE</span>
+                <span class="small-chip blue" id="hazard-count">NASA EONET</span>
               </div>
               <div id="hazard-list" class="earthquake-feed">
                 <div class="loading-state"><div class="apple-spinner"></div><p>Querying NASA EONET sensors…</p></div>
@@ -709,7 +701,7 @@
               <p class="muted">Set your location to trigger notifications when satellites pass overhead.</p>
 
               <div class="location-btn-row">
-                <button class="apple-btn-secondary" id="use-gps-btn"> Use Current GPS Location</button>
+                <button class="apple-btn-secondary" id="use-gps-btn">Use Current GPS Location</button>
                 <select class="apple-select" id="metro-location-select" style="padding:8px 12px;">
                   <option value="17.3850,78.4867,Hyderabad">Hyderabad (Telangana)</option>
                   <option value="28.6139,77.2090,New Delhi">New Delhi (NCR)</option>
@@ -783,7 +775,7 @@
             <div class="setting-actions" style="display:flex;flex-direction:column;gap:10px;">
               <button id="save-firebase-btn" class="primary-button full-width">Save My Preferences</button>
               <button id="test-alert-btn" class="apple-btn-secondary full-width" style="justify-content:center;padding:12px;">
-                 Test Alert (Allow notification permissions)
+                🔔 Test Alert (Allow notification permissions)
               </button>
             </div>
           </article>
@@ -794,7 +786,7 @@
           <div class="section-title">
             <div>
               <div class="eyebrow">MISSION MANIFEST &amp; ECOSYSTEM</div>
-              <h2>About T&amp;C Space </h2>
+              <h2>About T&amp;C Space</h2>
             </div>
           </div>
 
@@ -833,7 +825,7 @@
                 </div>
               </div>
               <p class="about-text" style="margin-top:12px;">
-                Engineered with pure Web standards, Interface Guidelines, Fluid hardware-accelerated, Leaflet GIS, and Cloud Messaging for cross-platform performance.
+                Engineered with pure Web standards, Apple Interface Guidelines, Fluid hardware-accelerated CSS, Leaflet GIS, and Cloud Messaging for cross-platform performance.
               </p>
             </article>
 
@@ -850,12 +842,12 @@
                   <span class="eco-icon blue">T&amp;C</span>
                   <div>
                     <b>T&amp;C Stall</b>
-                    <small>Official Storefront </small>
+                    <small>Official Storefront &amp; Main Portal</small>
                   </div>
                   <span class="eco-arrow">↗</span>
                 </a>
                 <a class="ecosystem-card-item" href="https://tastyandcomfort.github.io/news/" target="_blank" rel="noopener">
-                  <span class="eco-icon orange">T&amp;C-N</span>
+                  <span class="eco-icon orange">N</span>
                   <div>
                     <b>T&amp;C News Hub</b>
                     <small>Real-time Global News &amp; Updates</small>
@@ -863,7 +855,7 @@
                   <span class="eco-arrow">↗</span>
                 </a>
                 <a class="ecosystem-card-item" href="https://tastyandcomfort.github.io/Farmer/" target="_blank" rel="noopener">
-                  <span class="eco-icon green">T&amp;C-F</span>
+                  <span class="eco-icon green">F</span>
                   <div>
                     <b>T&amp;C Farmer</b>
                     <small>Agricultural Intelligence &amp; Crop Support</small>
@@ -1016,7 +1008,7 @@
     </div>
   </div>
 
-  <!-- Universal In-App Apple Media Lightbox (With Standalone PWA Video Containment) -->
+  <!-- Universal In-App Apple Media Lightbox -->
   <div class="epic-lightbox-backdrop" id="universal-media-lightbox" aria-hidden="true">
     <div class="epic-lightbox-dialog" role="dialog" aria-label="Media Preview">
       <button class="lightbox-close-btn" id="close-universal-lightbox-btn" aria-label="Close Lightbox">✕</button>
@@ -1062,7 +1054,7 @@
       <div class="apple-sheet-options">
         <button type="button" class="apple-sheet-option-btn primary" id="sheet-download-opt">
           <div class="sheet-opt-left">
-            <span class="sheet-opt-icon"></span>
+            <span class="sheet-opt-icon">⚡</span>
             <div>
               <b class="sheet-opt-title">Optimized File</b>
               <small class="sheet-opt-meta">Instant saving · Pristine screen clarity</small>
@@ -1076,10 +1068,10 @@
 
         <button type="button" class="apple-sheet-option-btn" id="sheet-download-raw">
           <div class="sheet-opt-left">
-            <span class="sheet-opt-icon"></span>
+            <span class="sheet-opt-icon">📷</span>
             <div>
               <b class="sheet-opt-title">Raw File</b>
-              <small class="sheet-opt-meta" id="sheet-raw-format">Uncompressed camera sensor capture</small>
+              <small class="sheet-opt-meta" id="sheet-raw-format">Master sensor format</small>
             </div>
           </div>
           <div class="sheet-opt-right">
