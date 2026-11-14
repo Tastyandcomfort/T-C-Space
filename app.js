@@ -31,23 +31,57 @@ function initClocks() {
   setInterval(tick, 1000);
 }
 
-// 2. Real-Time Network Monitor & Live Speed Measurement
+// 2. Real-Time Network Monitor with Apple Dynamic Island Controller
 function initNetworkMonitor() {
   const textEl = document.getElementById('net-text');
-  const weatherSyncBadge = document.getElementById('weather-sync-badge');
+  const islandWrap = document.getElementById('dynamic-island');
+  const islandText = document.getElementById('island-text');
+  const islandCapsule = document.getElementById('island-capsule');
+  const islandAdvisory = document.getElementById('island-advisory');
+  const networkPill = document.getElementById('network-status-pill');
 
-  async function updateNetworkStatus() {
+  let islandTimer = null;
+
+  // Trigger Apple Dynamic Island Drop-down with 4.5s session timeout
+  function triggerDynamicIsland(message) {
+    if (!islandWrap || !islandText) return;
+    islandText.textContent = message;
+    islandWrap.classList.add('island-active');
+
+    if (islandTimer) clearTimeout(islandTimer);
+    islandTimer = setTimeout(() => {
+      // Retract capsule unless the user opened the advisory card
+      if (!islandAdvisory?.classList.contains('show')) {
+        islandWrap.classList.remove('island-active');
+      }
+    }, 4500);
+  }
+
+  // Interactive Tap to expand/collapse advisory card
+  function toggleAdvisory() {
+    if (!islandAdvisory) return;
+    const isShowing = islandAdvisory.classList.contains('show');
+    if (isShowing) {
+      islandAdvisory.classList.remove('show');
+      islandWrap?.classList.remove('island-active');
+    } else {
+      islandAdvisory.classList.add('show');
+      islandWrap?.classList.add('island-active');
+    }
+  }
+
+  islandCapsule?.addEventListener('click', toggleAdvisory);
+  islandAdvisory?.addEventListener('click', toggleAdvisory);
+  networkPill?.addEventListener('click', () => {
+    triggerDynamicIsland(islandText?.textContent || 'Live Telemetry Status');
+    toggleAdvisory();
+  });
+
+  async function updateNetworkStatus(showIslandNotification = true) {
     if (!navigator.onLine) {
       document.documentElement.setAttribute('data-network', 'offline');
       if (textEl) textEl.textContent = 'Offline';
-      currentNetworkSpeedMbps = 0.2;
-      if (weatherSyncBadge) {
-        weatherSyncBadge.className = 'small-chip';
-        weatherSyncBadge.style.background = 'rgba(255, 69, 58, 0.2)';
-        weatherSyncBadge.style.color = 'var(--red)';
-        weatherSyncBadge.textContent = 'Offline 🔴';
-      }
-      showToast('Network connection lost. T&C-Space paused.');
+      if (showIslandNotification) triggerDynamicIsland('No Internet Connection');
       return;
     }
 
@@ -55,38 +89,23 @@ function initNetworkMonitor() {
 
     if (conn && conn.downlink !== undefined) {
       const mbps = conn.downlink;
-      currentNetworkSpeedMbps = Math.max(0.3, mbps);
       if (mbps < 1.0) {
         document.documentElement.setAttribute('data-network', 'slow');
         if (textEl) textEl.textContent = 'Slow · <1 Mbps';
-        if (weatherSyncBadge) {
-          weatherSyncBadge.className = 'small-chip orange';
-          weatherSyncBadge.style.background = 'rgba(255, 180, 84, 0.2)';
-          weatherSyncBadge.style.color = 'var(--orange)';
-          weatherSyncBadge.textContent = 'Slow Telemetry 🟠';
-        }
+        if (showIslandNotification) triggerDynamicIsland('Slow Internet · Telemetry may delay');
       } else if (mbps <= 2.5) {
         document.documentElement.setAttribute('data-network', 'normal');
         if (textEl) textEl.textContent = `Normal · ~${mbps.toFixed(1)} Mbps`;
-        if (weatherSyncBadge) {
-          weatherSyncBadge.className = 'small-chip green';
-          weatherSyncBadge.style.background = 'var(--green-soft)';
-          weatherSyncBadge.style.color = 'var(--green)';
-          weatherSyncBadge.textContent = 'Auto-Synced 🟢';
-        }
+        if (showIslandNotification) triggerDynamicIsland('Good Internet Speed · Telemetry Active');
       } else {
         document.documentElement.setAttribute('data-network', 'fast');
         if (textEl) textEl.textContent = `Fast · ${mbps.toFixed(1)} Mbps`;
-        if (weatherSyncBadge) {
-          weatherSyncBadge.className = 'small-chip green';
-          weatherSyncBadge.style.background = 'var(--green-soft)';
-          weatherSyncBadge.style.color = 'var(--green)';
-          weatherSyncBadge.textContent = 'Auto-Synced 🟢';
-        }
+        if (showIslandNotification) triggerDynamicIsland('Live Telemetry Connected · High Speed');
       }
       return;
     }
 
+    // High-precision fallback for iOS Safari
     try {
       const t0 = performance.now();
       await fetch('https://api.wheretheiss.at/v1/satellites/25544', { method: 'HEAD', cache: 'no-store' });
@@ -95,59 +114,29 @@ function initNetworkMonitor() {
       if (rtt > 1200) {
         document.documentElement.setAttribute('data-network', 'slow');
         if (textEl) textEl.textContent = 'Slow · <1 Mbps';
-        currentNetworkSpeedMbps = 0.8;
-        if (weatherSyncBadge) {
-          weatherSyncBadge.className = 'small-chip orange';
-          weatherSyncBadge.style.background = 'rgba(255, 180, 84, 0.2)';
-          weatherSyncBadge.style.color = 'var(--orange)';
-          weatherSyncBadge.textContent = 'Slow Telemetry 🟠';
-        }
-      } else if (rtt > 500) {
-        document.documentElement.setAttribute('data-network', 'normal');
-        if (textEl) textEl.textContent = 'Normal · ~1 Mbps';
-        currentNetworkSpeedMbps = 1.8;
-        if (weatherSyncBadge) {
-          weatherSyncBadge.className = 'small-chip green';
-          weatherSyncBadge.style.background = 'var(--green-soft)';
-          weatherSyncBadge.style.color = 'var(--green)';
-          weatherSyncBadge.textContent = 'Auto-Synced 🟢';
-        }
+        if (showIslandNotification) triggerDynamicIsland('Slow Internet · Telemetry may delay');
       } else {
         document.documentElement.setAttribute('data-network', 'fast');
         if (textEl) textEl.textContent = 'Fast · ≥1 Mbps';
-        currentNetworkSpeedMbps = 5.0;
-        if (weatherSyncBadge) {
-          weatherSyncBadge.className = 'small-chip green';
-          weatherSyncBadge.style.background = 'var(--green-soft)';
-          weatherSyncBadge.style.color = 'var(--green)';
-          weatherSyncBadge.textContent = 'Auto-Synced 🟢';
-        }
+        if (showIslandNotification) triggerDynamicIsland('Live Telemetry Connected');
       }
     } catch (_) {
       document.documentElement.setAttribute('data-network', 'offline');
       if (textEl) textEl.textContent = 'Offline';
-      currentNetworkSpeedMbps = 0.2;
-      if (weatherSyncBadge) {
-        weatherSyncBadge.className = 'small-chip';
-        weatherSyncBadge.style.background = 'rgba(255, 69, 58, 0.2)';
-        weatherSyncBadge.style.color = 'var(--red)';
-        weatherSyncBadge.textContent = 'Offline 🔴';
-      }
+      if (showIslandNotification) triggerDynamicIsland('No Internet Connection');
     }
   }
 
-  window.addEventListener('online', () => {
-    updateNetworkStatus();
-    showToast('T&C Space connection restored.');
-  });
-  window.addEventListener('offline', updateNetworkStatus);
+  window.addEventListener('online', () => updateNetworkStatus(true));
+  window.addEventListener('offline', () => updateNetworkStatus(true));
 
   if (navigator.connection) {
-    navigator.connection.addEventListener('change', updateNetworkStatus);
+    navigator.connection.addEventListener('change', () => updateNetworkStatus(true));
   }
 
-  updateNetworkStatus();
-  setInterval(updateNetworkStatus, 30000);
+  // Initial check on page load without popping the pill immediately
+  updateNetworkStatus(false);
+  setInterval(() => updateNetworkStatus(false), 30000);
 }
 
 // 3. Navigation Router with "More •••" Sheet, Deep-Link Resolution & Leaflet Auto-Resize
