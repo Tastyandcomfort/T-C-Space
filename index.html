@@ -149,7 +149,7 @@
             <div>
               <div class="eyebrow"><span class="live-dot pulse-dot"></span> N E W  ●  M O D E R N  ●  M I S S I O N</div>
               <h1><span>Space Live</span></h1>
-              <p>T&C is projecting authentic real-time space information from NASA, ISRO, USGS, ISS, CSS, APOD & Open-Meteo endpoints.</p>
+              <p>T&C is projecting authentic real-time space information from NASA, ISRO, USGS, ISS, CSS, APOD &amp; Open-Meteo endpoints.</p>
             </div>
             <div class="welcome-meta">
               <span class="status-pill"><i class="pulse-dot"></i> SYSTEMS OPERATIONAL</span>
@@ -199,8 +199,8 @@
               <h3 class="card-heading" id="overview-launch-name">Querying flight manifest…</h3>
               <p class="card-text" id="overview-launch-desc">Tracking upcoming spaceport countdowns across the globe.</p>
               <div class="tag-cluster">
-                <span class="apple-tag" id="tag-provider">Provider: —</span>
-                <span class="apple-tag" id="tag-vehicle">Vehicle: —</span>
+                <span class="apple-tag" id="tag-provider">Provider: Querying…</span>
+                <span class="apple-tag" id="tag-vehicle">Vehicle: Querying…</span>
               </div>
             </div>
 
@@ -288,6 +288,7 @@
               <div id="sat-search-dropdown" class="autocomplete-dropdown" hidden></div>
             </div>
 
+            <!-- Sleek Horizontal Slider for Presets -->
             <div class="sat-presets-bar">
               <span class="sat-select-lbl">FLEET PRESETS:</span>
               <button class="sat-chip active" data-sat-id="25544" data-sat-name="ISS (ZARYA)">ISS (Zarya)</button>
@@ -298,12 +299,13 @@
               <button class="sat-chip" data-sat-id="43013" data-sat-name="NOAA 20">NOAA-20</button>
             </div>
 
+            <!-- Scrollable Layer Chips Toolbar -->
             <div class="map-toolbar-row">
               <div class="map-layer-chips">
-                <button class="layer-chip active" id="toggle-layer-iss">Satellite Active</button>
-                <button class="layer-chip active" id="toggle-layer-quakes">Quakes (USGS)</button>
-                <button class="layer-chip active" id="toggle-layer-hazards">Hazards (EONET)</button>
-                <button class="layer-chip active" id="toggle-layer-track">Ground Track</button>
+                <button class="layer-chip active" id="toggle-layer-iss">🛰️ Satellite Active</button>
+                <button class="layer-chip active" id="toggle-layer-quakes">🌍 Quakes (USGS)</button>
+                <button class="layer-chip active" id="toggle-layer-hazards">🌋 Hazards (EONET)</button>
+                <button class="layer-chip active" id="toggle-layer-track">⌖ Ground Track</button>
               </div>
             </div>
 
@@ -344,11 +346,13 @@
             </div>
           </div>
 
+          <!-- Spotlight Card with NASA T-Minus Mission Clock -->
           <article class="surface launch-spotlight-card">
             <div class="spotlight-left">
               <div class="spotlight-tags">
                 <span class="mission-badge">NEXT GLOBAL LAUNCH</span>
                 <span class="status-pill" id="spotlight-status"><i class="pulse-dot"></i> SCHEDULED</span>
+                <a href="https://thespacedevs.com/llapi" target="_blank" rel="noopener" class="small-chip blue">Launch Library 2 · SpaceDevs ↗</a>
               </div>
               <h3 id="spotlight-name">Querying flight manifest…</h3>
               <p id="spotlight-desc">Tracking upcoming spaceport countdowns across the globe.</p>
@@ -361,8 +365,17 @@
             </div>
             <div class="spotlight-right">
               <div class="countdown-box">
-                <div class="countdown-eyebrow">T-MINUS COUNTDOWN</div>
-                <div class="countdown-digits" id="spotlight-countdown"><div class="apple-spinner large"></div></div>
+                <div class="countdown-eyebrow">NASA T-MINUS MISSION CLOCK</div>
+                <!-- NASA Digital HUD Segmented Mission Clock Display -->
+                <div class="nasa-mission-clock" id="spotlight-countdown">
+                  <div class="clock-segment"><b id="clock-d">00</b><small>DAYS</small></div>
+                  <span class="clock-colon">:</span>
+                  <div class="clock-segment"><b id="clock-h">00</b><small>HRS</small></div>
+                  <span class="clock-colon">:</span>
+                  <div class="clock-segment"><b id="clock-m">00</b><small>MIN</small></div>
+                  <span class="clock-colon">:</span>
+                  <div class="clock-segment"><b id="clock-s">00</b><small>SEC</small></div>
+                </div>
                 <div class="countdown-foot" id="spotlight-time-utc">Calculating target window…</div>
               </div>
             </div>
@@ -451,7 +464,7 @@
             <div>
               <div class="eyebrow">HELIOPHYSICS &amp; SOLAR SENSORS</div>
               <h2>Space Weather Watch (NASA &amp; NOAA SWPC)</h2>
-              <p>Real-time solar flares and geomagnetic storm indexes. Automatically synced every 60 seconds.</p>
+              <p>Real-time solar flares, geomagnetic storm indexes, and coronal mass ejections automatically synced.</p>
             </div>
           </div>
 
@@ -487,6 +500,20 @@
             </div>
             <div id="weather-events" class="event-list-scroll">
               <div class="loading-state"><div class="apple-spinner"></div><p>Querying heliophysics sensors…</p></div>
+            </div>
+          </article>
+
+          <!-- Real-Time NASA DONKI Coronal Mass Ejections (CME) Panel -->
+          <article class="surface weather-panel" style="margin-top: 18px;">
+            <div class="card-heading">
+              <div>
+                <h3>Coronal Mass Ejections (CME) &amp; Plasma Shockwaves</h3>
+                <p>NASA DONKI solar plasma ejections, ejection speed (km/s), and Earth trajectory tracking.</p>
+              </div>
+              <span class="small-chip orange">NASA DONKI CME</span>
+            </div>
+            <div id="cme-events" class="event-list-scroll">
+              <div class="loading-state"><div class="apple-spinner"></div><p>Scanning NASA solar storm radars…</p></div>
             </div>
           </article>
         </section>
@@ -535,7 +562,10 @@
                   <h3>USGS Global Seismic Network</h3>
                   <p>Live earthquake sensor log (M 2.5+ past 24h).</p>
                 </div>
-                <span class="small-chip green" id="quake-count">USGS LIVE</span>
+                <div style="display:flex;gap:6px;align-items:center;">
+                  <span class="small-chip green">USGS SEISMIC</span>
+                  <span class="small-chip" id="quake-count">LIVE</span>
+                </div>
               </div>
               <div id="earthquake-list" class="earthquake-feed">
                 <div class="loading-state"><div class="apple-spinner"></div><p>Contacting USGS seismographs…</p></div>
@@ -548,7 +578,10 @@
                   <h3>NASA EONET Active Hazards</h3>
                   <p>Wildfires, active volcanoes, and severe storms.</p>
                 </div>
-                <span class="small-chip blue" id="hazard-count">NASA EONET</span>
+                <div style="display:flex;gap:6px;align-items:center;">
+                  <span class="small-chip purple">NASA EONET</span>
+                  <span class="small-chip" id="hazard-count">LIVE</span>
+                </div>
               </div>
               <div id="hazard-list" class="earthquake-feed">
                 <div class="loading-state"><div class="apple-spinner"></div><p>Querying NASA EONET sensors…</p></div>
@@ -594,9 +627,42 @@
               </div>
             </div>
 
+            <!-- Live Weather Metrics Suite -->
+            <div class="eyebrow" style="margin: 16px 0 8px;">ATMOSPHERIC WEATHER CONDITIONS (OPEN-METEO)</div>
+            <div class="intel-metrics-grid" style="margin-bottom: 18px;">
+              <div class="intel-metric-card">
+                <div class="metric-top"><span>TEMPERATURE</span><span class="metric-symbol blue">🌡️</span></div>
+                <div class="val-group">
+                  <strong id="intel-temp">—</strong>
+                  <span class="status-tag green" id="intel-condition">Clear</span>
+                </div>
+                <small id="intel-feels-like">Feels like: —</small>
+              </div>
+
+              <div class="intel-metric-card">
+                <div class="metric-top"><span>RELATIVE HUMIDITY</span><span class="metric-symbol teal">💧</span></div>
+                <div class="val-group">
+                  <strong id="intel-humidity">—</strong>
+                  <span class="status-tag blue">Moisture</span>
+                </div>
+                <small>Atmospheric water vapor index</small>
+              </div>
+
+              <div class="intel-metric-card">
+                <div class="metric-top"><span>SURFACE WIND SPEED</span><span class="metric-symbol orange">💨</span></div>
+                <div class="val-group">
+                  <strong id="intel-wind">—</strong>
+                  <span class="status-tag green" id="intel-wind-status">Calm</span>
+                </div>
+                <small>Ground velocity reading</small>
+              </div>
+            </div>
+
+            <!-- Air Quality & Radiation Sensors -->
+            <div class="eyebrow" style="margin: 16px 0 8px;">AIR QUALITY &amp; RADIATION SENSORS</div>
             <div class="intel-metrics-grid">
               <div class="intel-metric-card">
-                <div class="metric-top"><span>AIR QUALITY (US AQI)</span><span class="metric-symbol green"></span></div>
+                <div class="metric-top"><span>AIR QUALITY (US AQI)</span><span class="metric-symbol green">🍃</span></div>
                 <div class="val-group">
                   <strong id="intel-aqi">—</strong>
                   <span class="status-tag" id="intel-aqi-badge">Good</span>
@@ -605,7 +671,7 @@
               </div>
 
               <div class="intel-metric-card">
-                <div class="metric-top"><span>FINE PARTICULATES (PM2.5)</span><span class="metric-symbol orange"></span></div>
+                <div class="metric-top"><span>FINE PARTICULATES (PM2.5)</span><span class="metric-symbol orange">🏭</span></div>
                 <div class="val-group">
                   <strong id="intel-pm25">—</strong>
                   <span class="status-tag" id="intel-pm25-badge">Safe</span>
@@ -614,7 +680,7 @@
               </div>
 
               <div class="intel-metric-card">
-                <div class="metric-top"><span>COARSE PARTICULATES (PM10)</span><span class="metric-symbol orange"></span></div>
+                <div class="metric-top"><span>COARSE PARTICULATES (PM10)</span><span class="metric-symbol orange">🌫️</span></div>
                 <div class="val-group">
                   <strong id="intel-pm10">—</strong>
                   <span class="status-tag" id="intel-pm10-badge">Safe</span>
@@ -623,7 +689,7 @@
               </div>
 
               <div class="intel-metric-card">
-                <div class="metric-top"><span>NITROGEN DIOXIDE (NO₂)</span><span class="metric-symbol teal"></span></div>
+                <div class="metric-top"><span>NITROGEN DIOXIDE (NO₂)</span><span class="metric-symbol teal">🚗</span></div>
                 <div class="val-group">
                   <strong id="intel-no2">—</strong>
                   <span class="status-tag" id="intel-no2-badge">Low</span>
@@ -632,7 +698,7 @@
               </div>
 
               <div class="intel-metric-card">
-                <div class="metric-top"><span>SURFACE SOLAR FLUX</span><span class="metric-symbol purple"></span></div>
+                <div class="metric-top"><span>SURFACE SOLAR FLUX</span><span class="metric-symbol purple">☀️</span></div>
                 <div class="val-group">
                   <strong id="intel-solar">—</strong>
                   <span class="status-tag" id="intel-solar-badge">Normal</span>
@@ -1008,7 +1074,7 @@
     </div>
   </div>
 
-  <!-- Universal In-App Apple Media Lightbox -->
+  <!-- Universal In-App Apple Media Lightbox (With Standalone PWA Video Containment) -->
   <div class="epic-lightbox-backdrop" id="universal-media-lightbox" aria-hidden="true">
     <div class="epic-lightbox-dialog" role="dialog" aria-label="Media Preview">
       <button class="lightbox-close-btn" id="close-universal-lightbox-btn" aria-label="Close Lightbox">✕</button>
