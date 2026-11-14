@@ -113,6 +113,25 @@
           <div class="network-status-pill" id="network-status-pill" title="Real-Time Network Speed &amp; Telemetry Status">
             <span class="status-dot pulse-dot"></span>
             <span id="net-text">Checking…</span>
+
+            <!-- Apple Dynamic Island Network Pill -->
+          <div class="dynamic-island-wrapper" id="dynamic-island">
+            <div class="dynamic-island-pill" id="island-capsule">
+              <span class="island-dot pulse-dot"></span>
+              <span class="island-text" id="island-text">Live Telemetry Connected</span>
+            </div>
+            
+            <!-- Interactive Tap Advisory Popover -->
+            <div class="dynamic-island-advisory" id="island-advisory" aria-hidden="true">
+              <div class="advisory-title">
+                <span>📡</span>
+                <b>Network Advisory</b>
+              </div>
+              <p>During offline or slow internet conditions, real-time satellite coordinates, rocket countdowns, and space weather feeds will be delayed or paused.</p>
+              <small>Tap anywhere to dismiss</small>
+            </div>
+          </div>
+          
           </div>
 
           <button id="pwa-install-btn" class="install-pill-btn" style="display: none;" title="Install Space Hub App">
