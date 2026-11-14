@@ -1492,3 +1492,109 @@ html[data-theme="dark"] .leaflet-tile {
   transition: background 0.15s;
 }
 .more-sheet-close-btn:hover { background: var(--line); }
+
+
+
+
+
+/* ============================================================================
+   Apple Dynamic Island Network Capsule & Interactive Advisory
+   ============================================================================ */
+.dynamic-island-wrapper {
+  position: fixed;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-90px) scale(0.85);
+  z-index: 2500;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease;
+}
+
+/* Island active dropped state */
+.dynamic-island-wrapper.island-active {
+  transform: translateX(-50%) translateY(0) scale(1);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* The Sleek Frosted Black Dynamic Island Capsule */
+.dynamic-island-pill {
+  background: rgba(0, 0, 0, 0.92);
+  backdrop-filter: blur(28px) saturate(190%);
+  -webkit-backdrop-filter: blur(28px) saturate(190%);
+  border: 0.5px solid rgba(255, 255, 255, 0.2);
+  border-radius: 99px;
+  padding: 8px 18px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55);
+  cursor: pointer;
+  user-select: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dynamic-island-pill:hover {
+  transform: scale(1.02);
+}
+
+.island-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.island-text {
+  font: 600 12px var(--sans);
+  color: #ffffff;
+  letter-spacing: -0.2px;
+  white-space: nowrap;
+}
+
+/* Interactive Advisory Popover Card */
+.dynamic-island-advisory {
+  margin-top: 8px;
+  background: var(--surface-solid);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 14px 16px;
+  max-width: 320px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+  display: none;
+  animation: appleFadeIn 0.2s ease-out;
+  cursor: pointer;
+}
+
+.dynamic-island-advisory.show {
+  display: block;
+}
+
+.advisory-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.dynamic-island-advisory p {
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--muted);
+  margin: 0 0 6px;
+}
+
+.dynamic-island-advisory small {
+  font: 9px var(--mono);
+  color: var(--blue);
+  display: block;
+  text-align: right;
+}
+
