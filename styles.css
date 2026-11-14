@@ -414,6 +414,46 @@ html[data-theme="dark"] .leaflet-tile {
 }
 .leaflet-control-attribution { display: none !important; }
 
+/* --- Animated Spacecraft & Radar Beacon CSS --- */
+.animated-spacecraft-marker {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@keyframes satRadarPulse {
+  0% { transform: scale(0.6); opacity: 0.9; }
+  60% { transform: scale(2.4); opacity: 0.3; }
+  100% { transform: scale(3.2); opacity: 0; }
+}
+
+@keyframes satFloatGlow {
+  0% { transform: scale(1) translateY(0); filter: drop-shadow(0 0 6px var(--blue)); }
+  50% { transform: scale(1.08) translateY(-2px); filter: drop-shadow(0 0 12px var(--blue)); }
+  100% { transform: scale(1) translateY(0); filter: drop-shadow(0 0 6px var(--blue)); }
+}
+
+.sat-radar-ripple {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1.5px solid var(--blue);
+  animation: satRadarPulse 2.4s infinite cubic-bezier(0.1, 0.7, 0.4, 1);
+  pointer-events: none;
+}
+.sat-radar-ripple.delay {
+  animation-delay: 1.2s;
+}
+
+.sat-svg-shape {
+  position: relative;
+  z-index: 2;
+  animation: satFloatGlow 3s infinite ease-in-out;
+  cursor: pointer;
+}
+
 .map-hud-chip {
   position: absolute;
   top: 12px;
@@ -698,6 +738,8 @@ html[data-theme="dark"] .leaflet-tile {
 .hazard-pill { font: 700 8px var(--mono); padding: 2px 7px; border-radius: 99px; }
 .hazard-pill.red { background: rgba(255, 69, 58, 0.2); color: var(--red); }
 .hazard-pill.green { background: rgba(48, 209, 88, 0.2); color: var(--green); }
+.hazard-pill.orange { background: rgba(255, 180, 84, 0.2); color: var(--orange); }
+.hazard-pill.purple { background: rgba(191, 156, 255, 0.2); color: var(--purple); }
 .neo-item-stats { display: flex; justify-content: space-between; font: 10px var(--mono); color: var(--muted); margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--line); }
 .neo-item-stats b { color: var(--blue); }
 .neo-verify-link { display: inline-block; font-size: 9px; color: var(--blue); margin-top: 8px; text-decoration: none; }
@@ -713,7 +755,8 @@ html[data-theme="dark"] .leaflet-tile {
 
 .dual-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
 .earthquake-feed { display: flex; flex-direction: column; gap: 9px; max-height: 480px; overflow-y: auto; }
-.quake-row { padding: 12px 14px; border-radius: 12px; background: var(--surface-solid); border: 1px solid var(--line); display: flex; align-items: center; gap: 12px; min-width: 0; }
+.quake-row { padding: 12px 14px; border-radius: 12px; background: var(--surface-solid); border: 1px solid var(--line); display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.quake-row-main { display: flex; align-items: center; gap: 12px; width: 100%; }
 .mag-box { width: 38px; height: 38px; border-radius: 10px; display: grid; place-items: center; font: 700 12px var(--mono); flex-shrink: 0; }
 .mag-box.green { background: var(--green-soft); color: var(--green); }
 .mag-box.orange { background: rgba(255, 180, 84, 0.2); color: var(--orange); }
