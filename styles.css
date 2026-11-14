@@ -285,6 +285,7 @@ button { font-family: inherit; }
 .small-chip.green { background: var(--green-soft); color: var(--green); }
 .small-chip.blue { background: var(--blue-soft); color: var(--blue); }
 .small-chip.orange { background: rgba(255, 180, 84, 0.2); color: var(--orange); }
+.small-chip.purple { background: rgba(191, 156, 255, 0.2); color: var(--purple); }
 
 .ticker-row {
   display: flex;
@@ -381,8 +382,17 @@ button { font-family: inherit; }
 }
 .sat-chip.active { background: var(--blue); color: #fff; border-color: var(--blue); }
 
+/* --- Map Layer Chips: Single Horizontal Slidable Row on Mobile --- */
 .map-toolbar-row { margin-bottom: 12px; }
-.map-layer-chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.map-layer-chips {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  white-space: nowrap;
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 4px;
+}
 .layer-chip {
   padding: 6px 14px;
   border-radius: 99px;
@@ -393,6 +403,7 @@ button { font-family: inherit; }
   font-size: 10px;
   font-weight: 600;
   cursor: pointer;
+  flex-shrink: 0;
 }
 .layer-chip.active { background: var(--blue); color: #fff; border-color: var(--blue); }
 
@@ -450,6 +461,7 @@ html[data-theme="dark"] .leaflet-tile {
 .map-foot { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 12px; font-size: 10px; color: var(--muted); }
 .map-foot b { font-family: var(--mono); color: var(--blue); }
 
+/* --- Spotlight Launch Card & NASA T-Minus Mission Clock --- */
 .launch-spotlight-card {
   display: grid;
   grid-template-columns: minmax(0, 1.4fr) minmax(0, 0.8fr);
@@ -469,8 +481,42 @@ html[data-theme="dark"] .leaflet-tile {
 .spotlight-meta-grid b { font-size: 11px; overflow-wrap: anywhere; }
 
 .countdown-box { background: var(--surface-solid); border: 1px solid var(--line); border-radius: 16px; padding: 22px; text-align: center; min-width: 0; max-width: 100%; }
-.countdown-eyebrow { font-size: 9px; font-weight: 750; letter-spacing: 1px; color: var(--orange); margin-bottom: 8px; }
-.countdown-digits { font: 700 24px var(--mono); margin-bottom: 8px; overflow-wrap: anywhere; }
+.countdown-eyebrow { font-size: 9px; font-weight: 750; letter-spacing: 1.2px; color: var(--orange); margin-bottom: 12px; }
+
+/* NASA Digital HUD Segmented Mission Clock */
+.nasa-mission-clock {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.clock-segment {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  padding: 8px 10px;
+  border-radius: 10px;
+  min-width: 52px;
+}
+.clock-segment b {
+  font: 800 24px var(--mono);
+  color: var(--text);
+  line-height: 1;
+}
+.clock-segment small {
+  font: 700 8px var(--mono);
+  color: var(--muted);
+  margin-top: 4px;
+  letter-spacing: 0.5px;
+}
+.clock-colon {
+  font: 800 20px var(--mono);
+  color: var(--orange);
+  margin-bottom: 14px;
+}
 .countdown-foot { font-size: 10px; color: var(--muted); overflow-wrap: anywhere; }
 
 .launches-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; min-width: 0; }
@@ -663,6 +709,7 @@ html[data-theme="dark"] .leaflet-tile {
 .apod-copy h3 { font-size: 22px; margin: 8px 0; overflow-wrap: anywhere; }
 .apod-explanation { font-size: 11px; line-height: 1.65; color: var(--muted); max-height: 180px; overflow-y: auto; overflow-wrap: anywhere; }
 .apod-foot { display: flex; justify-content: space-between; align-items: center; margin-top: 14px; font-size: 10px; }
+.apod-foot a { color: var(--blue); text-decoration: underline; }
 
 .dual-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
 .earthquake-feed { display: flex; flex-direction: column; gap: 9px; max-height: 480px; overflow-y: auto; }
@@ -743,6 +790,7 @@ html[data-theme="dark"] .leaflet-tile {
 .status-tag.yellow { background: rgba(255, 214, 10, 0.2); color: #ffd60a; }
 .status-tag.orange { background: rgba(255, 180, 84, 0.2); color: var(--orange); }
 .status-tag.red { background: rgba(255, 69, 58, 0.2); color: var(--red); }
+.status-tag.blue { background: var(--blue-soft); color: var(--blue); }
 .intel-metric-card small { font-size: 9px; color: var(--muted); }
 
 .wiki-result-card { display: grid; grid-template-columns: 140px 1fr; gap: 20px; padding: 20px; border-radius: 16px; border: 1px solid var(--line); background: var(--surface-solid); min-width: 0; }
@@ -1006,6 +1054,9 @@ html[data-theme="dark"] .leaflet-tile {
   .clock-duo { font-size: 10px; }
   .theme-picker { padding: 5px 6px; }
   .theme-picker select { font-size: 9px; }
+  .clock-segment { min-width: 44px; padding: 6px 8px; }
+  .clock-segment b { font-size: 18px; }
+  .clock-colon { font-size: 16px; margin-bottom: 10px; }
 }
 
 @media (max-width: 480px) {
