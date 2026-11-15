@@ -82,7 +82,14 @@ button { font-family: inherit; }
   flex-shrink: 0;
 }
 
-.network-status-pill {
+/* --- Compact Network Indicator & Right-Aligned Dropdown Popover --- */
+.network-status-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.network-beacon-btn {
   display: flex;
   align-items: center;
   gap: 7px;
@@ -93,7 +100,82 @@ button { font-family: inherit; }
   font-size: 11px;
   font-weight: 600;
   color: var(--text);
-  flex-shrink: 0;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.16s ease, background 0.16s ease;
+}
+.network-beacon-btn:hover {
+  background: var(--surface-solid);
+  border-color: var(--blue);
+}
+
+.network-popover-bubble {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 250px;
+  background: color-mix(in srgb, var(--surface-solid) 92%, transparent);
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 14px 16px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+  z-index: 1000;
+  opacity: 0;
+  transform: translateY(-8px) scale(0.96);
+  pointer-events: none;
+  transition: opacity 0.22s ease, transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.network-popover-bubble.open {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+.popover-caret {
+  position: absolute;
+  top: -6px;
+  right: 18px;
+  width: 10px;
+  height: 10px;
+  background: var(--surface-solid);
+  border-left: 1px solid var(--line);
+  border-top: 1px solid var(--line);
+  transform: rotate(45deg);
+}
+
+.popover-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.popover-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--line);
+}
+.popover-header b {
+  font-size: 12.5px;
+  color: var(--text);
+}
+.popover-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+}
+.popover-row span { color: var(--muted); }
+.popover-row b { font-family: var(--mono); color: var(--text); }
+.popover-note {
+  font-size: 9.5px;
+  color: var(--dim);
+  line-height: 1.4;
+  margin-top: 4px;
+  border-top: 1px solid var(--line);
+  padding-top: 6px;
 }
 
 .app-shell { display: flex; min-height: 100vh; width: 100vw; }
@@ -414,44 +496,82 @@ html[data-theme="dark"] .leaflet-tile {
 }
 .leaflet-control-attribution { display: none !important; }
 
-/* --- Animated Spacecraft & Radar Beacon CSS --- */
-.animated-spacecraft-marker {
+/* ============================================================================
+   Model 1: Aerospace Tactical HUD Satellite Marker & Compass Sweep
+   ============================================================================ */
+.aerospace-hud-marker {
   position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+}
+
+.hud-reticle-box {
+  position: relative;
+  width: 52px;
+  height: 52px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-@keyframes satRadarPulse {
-  0% { transform: scale(0.6); opacity: 0.9; }
-  60% { transform: scale(2.4); opacity: 0.3; }
+@keyframes hudCompassSweep {
+  100% { transform: rotate(360deg); }
+}
+
+.hud-compass-ring {
+  position: absolute;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px dashed color-mix(in srgb, var(--hud-accent, #2997ff) 50%, transparent);
+  animation: hudCompassSweep 16s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes hudSonarPulse {
+  0% { transform: scale(0.6); opacity: 0.95; }
+  65% { transform: scale(2.4); opacity: 0.25; }
   100% { transform: scale(3.2); opacity: 0; }
 }
 
-@keyframes satFloatGlow {
-  0% { transform: scale(1) translateY(0); filter: drop-shadow(0 0 6px var(--blue)); }
-  50% { transform: scale(1.08) translateY(-2px); filter: drop-shadow(0 0 12px var(--blue)); }
-  100% { transform: scale(1) translateY(0); filter: drop-shadow(0 0 6px var(--blue)); }
-}
-
-.sat-radar-ripple {
+.hud-radar-pulse {
   position: absolute;
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
-  border: 1.5px solid var(--blue);
-  animation: satRadarPulse 2.4s infinite cubic-bezier(0.1, 0.7, 0.4, 1);
+  border: 1.5px solid var(--hud-accent, #2997ff);
+  animation: hudSonarPulse 2.4s infinite cubic-bezier(0.1, 0.7, 0.4, 1);
   pointer-events: none;
 }
-.sat-radar-ripple.delay {
+.hud-radar-pulse.delay {
   animation-delay: 1.2s;
 }
 
-.sat-svg-shape {
+.hud-crosshair-svg {
   position: relative;
-  z-index: 2;
-  animation: satFloatGlow 3s infinite ease-in-out;
+  z-index: 3;
+  filter: drop-shadow(0 0 6px var(--hud-accent, #2997ff));
   cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.hud-micro-tag {
+  margin-top: 2px;
+  padding: 2px 7px;
+  background: rgba(16, 17, 20, 0.92);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid color-mix(in srgb, var(--hud-accent, #2997ff) 45%, var(--line));
+  border-radius: 6px;
+  font: 700 8.5px var(--mono);
+  color: var(--hud-accent, #2997ff);
+  white-space: nowrap;
+  letter-spacing: 0.4px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
 }
 
 .map-hud-chip {
@@ -653,6 +773,34 @@ html[data-theme="dark"] .leaflet-tile {
 }
 .lightbox-img-wrap { flex: 1; background: #000; display: grid; place-items: center; max-height: 65vh; overflow: hidden; }
 .lightbox-img-wrap img { max-width: 100%; max-height: 65vh; object-fit: contain; }
+
+/* Responsive Full-Width Audio Player Box */
+.lightbox-audio-wrap {
+  display: none;
+  width: 100%;
+  max-width: 520px;
+  margin: 32px auto;
+  padding: 24px;
+  text-align: center;
+  background: var(--surface-solid);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  box-sizing: border-box;
+}
+.audio-avatar-icon {
+  font-size: 46px;
+  margin-bottom: 14px;
+}
+.audio-player-box {
+  width: 100%;
+}
+.audio-player-box audio {
+  width: 100% !important;
+  height: 48px;
+  outline: none;
+  border-radius: 99px;
+}
+
 .lightbox-footer {
   display: flex;
   justify-content: space-between;
@@ -738,8 +886,6 @@ html[data-theme="dark"] .leaflet-tile {
 .hazard-pill { font: 700 8px var(--mono); padding: 2px 7px; border-radius: 99px; }
 .hazard-pill.red { background: rgba(255, 69, 58, 0.2); color: var(--red); }
 .hazard-pill.green { background: rgba(48, 209, 88, 0.2); color: var(--green); }
-.hazard-pill.orange { background: rgba(255, 180, 84, 0.2); color: var(--orange); }
-.hazard-pill.purple { background: rgba(191, 156, 255, 0.2); color: var(--purple); }
 .neo-item-stats { display: flex; justify-content: space-between; font: 10px var(--mono); color: var(--muted); margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--line); }
 .neo-item-stats b { color: var(--blue); }
 .neo-verify-link { display: inline-block; font-size: 9px; color: var(--blue); margin-top: 8px; text-decoration: none; }
@@ -755,8 +901,7 @@ html[data-theme="dark"] .leaflet-tile {
 
 .dual-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
 .earthquake-feed { display: flex; flex-direction: column; gap: 9px; max-height: 480px; overflow-y: auto; }
-.quake-row { padding: 12px 14px; border-radius: 12px; background: var(--surface-solid); border: 1px solid var(--line); display: flex; flex-direction: column; gap: 6px; min-width: 0; }
-.quake-row-main { display: flex; align-items: center; gap: 12px; width: 100%; }
+.quake-row { padding: 12px 14px; border-radius: 12px; background: var(--surface-solid); border: 1px solid var(--line); display: flex; align-items: center; gap: 12px; min-width: 0; }
 .mag-box { width: 38px; height: 38px; border-radius: 10px; display: grid; place-items: center; font: 700 12px var(--mono); flex-shrink: 0; }
 .mag-box.green { background: var(--green-soft); color: var(--green); }
 .mag-box.orange { background: rgba(255, 180, 84, 0.2); color: var(--orange); }
@@ -1082,8 +1227,7 @@ html[data-theme="dark"] .leaflet-tile {
 
 @media (max-width: 600px) {
   .top-actions { gap: 6px; }
-  .network-status-pill { padding: 6px 8px; }
-  #net-text { display: none; }
+  .beacon-label { display: none; } /* Show only glowing radar beacon on mobile */
   .install-pill-btn {
     padding: 6px 8px;
     border-radius: 50%;
@@ -1492,109 +1636,3 @@ html[data-theme="dark"] .leaflet-tile {
   transition: background 0.15s;
 }
 .more-sheet-close-btn:hover { background: var(--line); }
-
-
-
-
-
-/* ============================================================================
-   Apple Dynamic Island Network Capsule & Interactive Advisory
-   ============================================================================ */
-.dynamic-island-wrapper {
-  position: fixed;
-  top: 14px;
-  left: 50%;
-  transform: translateX(-50%) translateY(-90px) scale(0.85);
-  z-index: 2500;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  opacity: 0;
-  pointer-events: none;
-  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease;
-}
-
-/* Island active dropped state */
-.dynamic-island-wrapper.island-active {
-  transform: translateX(-50%) translateY(0) scale(1);
-  opacity: 1;
-  pointer-events: auto;
-}
-
-/* The Sleek Frosted Black Dynamic Island Capsule */
-.dynamic-island-pill {
-  background: rgba(0, 0, 0, 0.92);
-  backdrop-filter: blur(28px) saturate(190%);
-  -webkit-backdrop-filter: blur(28px) saturate(190%);
-  border: 0.5px solid rgba(255, 255, 255, 0.2);
-  border-radius: 99px;
-  padding: 8px 18px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55);
-  cursor: pointer;
-  user-select: none;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.dynamic-island-pill:hover {
-  transform: scale(1.02);
-}
-
-.island-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-.island-text {
-  font: 600 12px var(--sans);
-  color: #ffffff;
-  letter-spacing: -0.2px;
-  white-space: nowrap;
-}
-
-/* Interactive Advisory Popover Card */
-.dynamic-island-advisory {
-  margin-top: 8px;
-  background: var(--surface-solid);
-  border: 1px solid var(--line);
-  border-radius: 18px;
-  padding: 14px 16px;
-  max-width: 320px;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
-  display: none;
-  animation: appleFadeIn 0.2s ease-out;
-  cursor: pointer;
-}
-
-.dynamic-island-advisory.show {
-  display: block;
-}
-
-.advisory-title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--text);
-  margin-bottom: 6px;
-}
-
-.dynamic-island-advisory p {
-  font-size: 11px;
-  line-height: 1.5;
-  color: var(--muted);
-  margin: 0 0 6px;
-}
-
-.dynamic-island-advisory small {
-  font: 9px var(--mono);
-  color: var(--blue);
-  display: block;
-  text-align: right;
-}
-
