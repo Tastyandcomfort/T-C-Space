@@ -282,7 +282,7 @@ function initOverviewClickableCards() {
   });
 }
 
-// 5. Multi-Layer Leaflet Map with Model 1 Tactical Aerospace HUD & Full 90-Min Ground Track
+// 5. Multi-Layer Leaflet Map with Model 1 Tactical Aerospace HUD & Minimal Auto-Opening Micro-Bubble
 let satMap = null;
 let issMarker = null;
 let issOrbitLayerGroup = null;
@@ -300,6 +300,25 @@ const ORBITAL_FLEET = {
   43013: { name: "NOAA 20", inc: 98.7, mm: 14.2, alt: 824.0, vel: 7.45, isApi: false, color: "#2997ff" }
 };
 
+// Global function callable from popup to expand full telemetry
+window.showFullSatTelemetry = function() {
+  if (!lastSatData || !issMarker) return;
+  const satConfig = ORBITAL_FLEET[currentSatelliteId] || { color: "#2997ff" };
+  issMarker.setPopupContent(`
+    <div style="font-size:11px;min-width:180px;padding:2px;">
+      <b style="color:${satConfig.color};font-size:12px;display:block;margin-bottom:4px;">${currentSatelliteName}</b>
+      <div>Latitude: <b>${lastSatData.latitude.toFixed(2)}°</b></div>
+      <div>Longitude: <b>${lastSatData.longitude.toFixed(2)}°</b></div>
+      <div>Altitude: <b>${lastSatData.altitude.toFixed(1)} km</b></div>
+      <div>Velocity: <b>${lastSatData.velocity.toFixed(2)} km/s</b></div>
+      <div style="margin-top:6px;padding-top:4px;border-top:1px solid var(--line);font-size:9px;color:var(--muted);text-align:center;">
+        NORAD Spacecraft Telemetry
+      </div>
+    </div>
+  `);
+};
+
+// Model 1: Aerospace Tactical HUD Reticle with Theme-Adaptive Clickable Tag
 function getModel1TacticalHudIcon(satId, satName, altStr, velStr, headingDeg = 45) {
   const satConfig = ORBITAL_FLEET[satId] || { color: "#2997ff" };
   const accentColor = satConfig.color || "#2997ff";
@@ -307,7 +326,7 @@ function getModel1TacticalHudIcon(satId, satName, altStr, velStr, headingDeg = 4
   return L.divIcon({
     className: 'aerospace-hud-marker',
     html: `
-      <div class="hud-reticle-box" style="--hud-accent: ${accentColor};">
+      <div class="hud-reticle-box" style="--hud-accent: ${accentColor};" onclick="if(issMarker) issMarker.openPopup();">
         <div class="hud-radar-pulse"></div>
         <div class="hud-radar-pulse delay"></div>
         <div class="hud-compass-ring"></div>
@@ -327,13 +346,14 @@ function getModel1TacticalHudIcon(satId, satName, altStr, velStr, headingDeg = 4
           </g>
         </svg>
       </div>
-      <div class="hud-micro-tag" style="--hud-accent: ${accentColor};">
+      <!-- Theme-Adaptive Clickable Tag Below Marker -->
+      <div class="hud-micro-tag" style="--hud-accent: ${accentColor};" onclick="if(issMarker) issMarker.openPopup();">
         ${satName} · ${altStr} · ${velStr}
       </div>
     `,
     iconSize: [52, 68],
     iconAnchor: [26, 26],
-    popupAnchor: [0, -28]
+    popupAnchor: [0, -30]
   });
 }
 
@@ -394,7 +414,7 @@ function initMap() {
   issMarker = L.marker([0, 0], {
     icon: getModel1TacticalHudIcon(currentSatelliteId, currentSatelliteName, "418.0 km", "7.66 km/s", 45)
   }).addTo(satMap);
-  issMarker.bindPopup(`<b>${currentSatelliteName}</b><br>Fetching live telemetry…`);
+  issMarker.bindPopup(`<b>${currentSatelliteName}</b>`);
 
   document.querySelectorAll('.sat-chip').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -476,6 +496,7 @@ function initSatelliteSearch() {
         currentSatelliteName = btn.getAttribute('data-name');
         document.getElementById('hud-sat-name').textContent = currentSatelliteName;
         document.getElementById('active-sat-name-sub').textContent = currentSatelliteName;
+        if (issMarker) issMarker.setIcon(getModel1TacticalHudIcon(currentSatelliteId, currentSatelliteName, "—", "—", 45));
         input.value = currentSatelliteName;
         dropdown.hidden = true;
         fetchLiveSatelliteTelemetry(true);
@@ -484,7 +505,7 @@ function initSatelliteSearch() {
   });
 }
 
-// 6. Live Satellite Telemetry Stream & Flight Heading Vector
+// 6. Live Satellite Telemetry Stream & Minimal Auto-Opening Micro-Bubble
 let lastSatData = null;
 let previousLat = null;
 let previousLon = null;
@@ -545,16 +566,19 @@ async function fetchLiveSatelliteTelemetry(shouldCenterMap = false) {
     if (issMarker && satMap) {
       issMarker.setLatLng([lat, lon]);
       issMarker.setIcon(getModel1TacticalHudIcon(currentSatelliteId, currentSatelliteName, altStr, velStr, headingDeg));
-      issMarker.setPopupContent(`
-        <div style="font-size:12px;padding:4px;">
-          <b style="color:${satConfig.color};font-size:13px;">${currentSatelliteName}</b><br>
-          <span>Latitude: ${latStr}</span><br>
-          <span>Longitude: ${lonStr}</span><br>
-          <span>Altitude: ${altStr}</span><br>
-          <span>Velocity: ${velStr}</span>
-        </div>
-      `);
 
+      // Compact Apple-Style Micro-Bubble with Less Info
+      const orbitType = alt > 30000 ? 'Geostationary Orbit' : 'Active LEO Orbit';
+      const minimalPopupHtml = `
+        <div style="font-size:11px;min-width:140px;text-align:center;">
+          <b style="color:${satConfig.color};font-size:12px;display:block;margin-bottom:2px;">🛰️ ${currentSatelliteName}</b>
+          <span style="font-size:9.5px;color:var(--muted);">${orbitType}</span>
+          <div style="margin-top:6px;padding-top:4px;border-top:1px solid var(--line);font-size:9px;color:var(--blue);cursor:pointer;" onclick="showFullSatTelemetry()">Full Telemetry ↗</div>
+        </div>
+      `;
+      issMarker.setPopupContent(minimalPopupHtml);
+
+      // Auto-open on satellite switch with minimal clutter
       if (shouldCenterMap) {
         satMap.flyTo([lat, lon], 4, { duration: 1.2 });
         setTimeout(() => issMarker.openPopup(), 400);
@@ -826,6 +850,7 @@ async function openUniversalLightbox(url, title, timeStr, filename, mediaType = 
   }
 }
 
+// In-Place Blob Downloader (Saves directly to device storage without opening new tab)
 async function performInPlaceDownload(targetUrl, outputFilename) {
   let secureUrl = (targetUrl || '').replace(/^http:\/\//i, 'https://');
   if (!secureUrl) return;
@@ -1069,7 +1094,7 @@ async function fetchPlanetaryFeed(topicKey, mediaFilter = 'image,video,audio') {
     const displayItems = items.slice(0, 18);
     planetaryExplorerLoaded = true;
 
-    if (timestamp) timestamp.textContent = `${targetObj.instrument} · ${displayItems.length} raw observations`;
+    if (timestamp) timestamp.textContent = `🛰️ ${targetObj.instrument} · ${displayItems.length} raw observations`;
 
     container.innerHTML = displayItems.map((item, index) => {
       const info = item.data?.[0] || {};
@@ -1377,27 +1402,43 @@ async function fetchSpaceWeather() {
   }
 }
 
-// 15. NASA NeoWs Asteroids
+// 15. NASA NeoWs Asteroids (Full 7-Day Approach Feed - 15 to 30 Active Asteroids)
 async function fetchAsteroids() {
   const container = document.getElementById('neo-list');
   try {
-    const today = new Date().toISOString().slice(0, 10);
-    const res = await fetch(`https://api.nasa.gov/neo/rest/v1/feed?start_date=${today}&end_date=${today}&api_key=${NASA_API_KEY}&cb=${Date.now()}`);
+    const startDate = new Date().toISOString().slice(0, 10);
+    const endDate = new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10);
+
+    const res = await fetch(`https://api.nasa.gov/neo/rest/v1/feed?start_date=${startDate}&end_date=${endDate}&api_key=${NASA_API_KEY}&cb=${Date.now()}`);
     if (!res.ok) throw new Error();
     const data = await res.json();
-    const neos = data.near_earth_objects[today] || [];
+
+    // Flatten all asteroids across the 7-day approach window
+    let allNeos = [];
+    const dateMap = data.near_earth_objects || {};
+    Object.keys(dateMap).forEach(dKey => {
+      allNeos = allNeos.concat(dateMap[dKey]);
+    });
+
+    // Sort by proximity (closest miss distance first)
+    allNeos.sort((a, b) => {
+      const distA = parseFloat(a.close_approach_data?.[0]?.miss_distance?.kilometers || 999999999);
+      const distB = parseFloat(b.close_approach_data?.[0]?.miss_distance?.kilometers || 999999999);
+      return distA - distB;
+    });
 
     if (container) {
-      if (neos.length === 0) {
-        container.innerHTML = '<p class="muted">No immediate asteroid approaches recorded for today.</p>';
+      if (allNeos.length === 0) {
+        container.innerHTML = '<p class="muted">No near-Earth asteroid approaches recorded for this week.</p>';
         return;
       }
-      container.innerHTML = neos.slice(0, 8).map(ast => {
+      container.innerHTML = allNeos.slice(0, 18).map(ast => {
         const isHazard = ast.is_potentially_hazardous_asteroid;
-        const ca = ast.close_approach_data[0] || {};
+        const ca = ast.close_approach_data?.[0] || {};
         const missKm = ca.miss_distance ? (parseFloat(ca.miss_distance.kilometers) / 1000000).toFixed(2) + 'M km' : '—';
         const velKmS = ca.relative_velocity ? parseFloat(ca.relative_velocity.kilometers_per_second).toFixed(1) + ' km/s' : '—';
         const diam = ast.estimated_diameter?.meters?.estimated_diameter_max?.toFixed(0) || '—';
+        const approachDate = ca.close_approach_date || 'Upcoming';
         const verifyUrl = `https://ssd.jpl.nasa.gov/tools/sbdb_lookup.html#/?sstr=${encodeURIComponent(ast.name)}`;
 
         return `
@@ -1407,6 +1448,7 @@ async function fetchAsteroids() {
               <span class="hazard-pill ${isHazard ? 'red' : 'green'}">${isHazard ? 'POTENTIAL HAZARD' : 'SAFE FLYBY'}</span>
             </div>
             <div class="neo-item-stats">
+              <span>Date: <b>${approachDate}</b></span>
               <span>Miss: <b>${missKm}</b></span>
               <span>Speed: <b>${velKmS}</b></span>
               <span>Size: <b>~${diam}m</b></span>
@@ -1421,7 +1463,7 @@ async function fetchAsteroids() {
   }
 }
 
-// 16. USGS Earthquakes (Preserves Official USGS Source Badge & Adds Direct Verification Links)
+// 16. USGS Earthquakes (Preserves Official Source Badge & Symmetrical Two-Row Cards)
 async function fetchEarthquakes() {
   const list = document.getElementById('earthquake-list');
   try {
@@ -1459,11 +1501,14 @@ async function fetchEarthquakes() {
 
         const timeStr = new Date(q.properties.time).toLocaleString('en-US', { timeZone: 'Asia/Kolkata' });
         circle.bindPopup(`
-          <div style="font-size:12px;padding:4px;">
-            <b style="color:${color};font-size:13px;">USGS Magnitude ${mag.toFixed(1)}</b><br>
-            <b>Location:</b> ${q.properties.place}<br>
-            <b>Depth:</b> ${coords[2]} km<br>
-            <b>Time:</b> ${timeStr} IST
+          <div style="font-size:11px;min-width:160px;padding:2px;">
+            <b style="color:${color};font-size:12px;display:block;margin-bottom:4px;">USGS Magnitude ${mag.toFixed(1)}</b>
+            <div>Location: <b>${q.properties.place}</b></div>
+            <div>Depth: <b>${coords[2]} km</b></div>
+            <div>Time: <b>${timeStr} IST</b></div>
+            <div style="margin-top:6px;padding-top:4px;border-top:1px solid var(--line);">
+              <a href="${q.properties.url}" target="_blank" rel="noopener" style="color:var(--blue);text-decoration:underline;">Verify on USGS Record ↗</a>
+            </div>
           </div>
         `);
         quakeLayerGroup.addLayer(circle);
@@ -1476,14 +1521,14 @@ async function fetchEarthquakes() {
         const color = q.properties.mag >= 5.0 ? 'red' : (q.properties.mag >= 4.0 ? 'orange' : 'green');
         return `
           <div class="quake-row">
-            <div class="quake-row-main">
+            <div class="quake-row-top">
               <div class="mag-box ${color}">M${mag}</div>
-              <div>
-                <b>${q.properties.place}</b>
-                <small>${new Date(q.properties.time).toLocaleString('en-US', { timeZone: 'Asia/Kolkata' })} IST</small>
-              </div>
+              <b>${q.properties.place}</b>
             </div>
-            <a class="neo-verify-link" href="${q.properties.url}" target="_blank" rel="noopener">Verify on USGS Seismic Record ↗</a>
+            <div class="quake-row-bottom">
+              <small>${new Date(q.properties.time).toLocaleString('en-US', { timeZone: 'Asia/Kolkata' })} IST</small>
+              <a class="neo-verify-link" href="${q.properties.url}" target="_blank" rel="noopener">Verify on USGS ↗</a>
+            </div>
           </div>
         `;
       }).join('');
@@ -1493,7 +1538,7 @@ async function fetchEarthquakes() {
   }
 }
 
-// 17. NASA EONET Hazards (Preserves Official NASA EONET Source Badge & Adds Direct Verification Links)
+// 17. NASA EONET Hazards (Preserves Official Source Badge & Symmetrical Two-Row Cards)
 async function fetchEonetHazards() {
   const list = document.getElementById('hazard-list');
   try {
@@ -1518,11 +1563,15 @@ async function fetchEonetHazards() {
             weight: 1,
             fillOpacity: 0.65
           });
+          const verifyUrl = ev.sources?.[0]?.url || 'https://eonet.gsfc.nasa.gov/';
           circle.bindPopup(`
-            <div style="font-size:12px;padding:4px;">
-              <b style="color:#bf9cff;font-size:13px;">${ev.title}</b><br>
-              <span>Category: ${ev.categories?.[0]?.title || 'Natural Hazard'}</span><br>
-              <span>Date: ${geo.date?.slice(0, 10) || 'Recent'}</span>
+            <div style="font-size:11px;min-width:160px;padding:2px;">
+              <b style="color:#bf9cff;font-size:12px;display:block;margin-bottom:4px;">${ev.title}</b>
+              <div>Category: <b>${ev.categories?.[0]?.title || 'Natural Hazard'}</b></div>
+              <div>Date: <b>${geo.date?.slice(0, 10) || 'Recent'}</b></div>
+              <div style="margin-top:6px;padding-top:4px;border-top:1px solid var(--line);">
+                <a href="${verifyUrl}" target="_blank" rel="noopener" style="color:var(--blue);text-decoration:underline;">Verify with NASA EONET ↗</a>
+              </div>
             </div>
           `);
           hazardLayerGroup.addLayer(circle);
@@ -1533,16 +1582,17 @@ async function fetchEonetHazards() {
     if (list) {
       list.innerHTML = events.slice(0, 8).map(ev => {
         const verifyUrl = ev.sources?.[0]?.url || 'https://eonet.gsfc.nasa.gov/';
+        const categoryTitle = ev.categories?.[0]?.title || 'Hazard';
         return `
           <div class="quake-row">
-            <div class="quake-row-main">
+            <div class="quake-row-top">
               <div class="mag-box purple">🌋</div>
-              <div>
-                <b>${ev.title}</b>
-                <small>${ev.categories?.[0]?.title || 'Hazard'}</small>
-              </div>
+              <b>${ev.title}</b>
             </div>
-            <a class="neo-verify-link" href="${verifyUrl}" target="_blank" rel="noopener">Verify with NASA EONET Sensor ↗</a>
+            <div class="quake-row-bottom">
+              <small>${categoryTitle}</small>
+              <a class="neo-verify-link" href="${verifyUrl}" target="_blank" rel="noopener">Verify with NASA EONET ↗</a>
+            </div>
           </div>
         `;
       }).join('');
@@ -1906,9 +1956,7 @@ function initAlertPreferences() {
   const locStatus = document.getElementById('current-location-status');
   const savedCity = localStorage.getItem('user_target_city');
 
-  if (savedCity && metroSelect) {
-    locStatus.textContent = `Current Target: ${savedCity}`;
-  }
+  if (savedCity && metroSelect) locStatus.textContent = `Current Target: ${savedCity}`;
 
   metroSelect?.addEventListener('change', (e) => {
     const parts = e.target.value.split(',');
@@ -2123,7 +2171,6 @@ function initPwaInstall() {
   });
 }
 
-// Toast Notification Helper
 function showToast(text) {
   const toast = document.getElementById('toast');
   if (!toast) return;
