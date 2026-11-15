@@ -72,7 +72,7 @@
           <span>Space Wiki</span>
         </a>
         <a class="nav-link" href="#settings" data-nav="settings">
-          <span class="nav-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06-.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83-2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
+          <span class="nav-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83-2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
           <span>Preferences &amp; Alerts</span>
         </a>
         <a class="nav-link" href="#about" data-nav="about">
@@ -87,7 +87,7 @@
           <span>ISRO | NASA | ESA | OPEN-METEO</span>
           <b>T&amp;C SPACE</b>
         </div>
-        <small> N E W  ●  M O D E R N  ●  M I S S I O N</small>
+        <small>N E W  ●  M O D E R N  ●  M I S S I O N</small>
       </div>
     </aside>
 
@@ -110,28 +110,32 @@
         </div>
 
         <div class="top-actions">
-          <div class="network-status-pill" id="network-status-pill" title="Real-Time Network Speed &amp; Telemetry Status">
-            <span class="status-dot pulse-dot"></span>
-            <span id="net-text">Checking…</span>
-
-            <!-- Apple Dynamic Island Network Pill -->
-          <div class="dynamic-island-wrapper" id="dynamic-island">
-            <div class="dynamic-island-pill" id="island-capsule">
-              <span class="island-dot pulse-dot"></span>
-              <span class="island-text" id="island-text">Live Telemetry Connected</span>
-            </div>
+          <!-- Compact Network Status Pill & Right-Aligned Dropdown Popover -->
+          <div class="network-status-wrapper" id="network-status-wrapper">
+            <button class="network-beacon-btn" id="network-beacon-btn" type="button" aria-label="Network Telemetry Status">
+              <span class="status-dot pulse-dot"></span>
+              <span class="beacon-label" id="net-text">Checking…</span>
+            </button>
             
-            <!-- Interactive Tap Advisory Popover -->
-            <div class="dynamic-island-advisory" id="island-advisory" aria-hidden="true">
-              <div class="advisory-title">
-                <span>📡</span>
-                <b>Network Advisory</b>
+            <!-- Speech Bubble Popover Hanging Directly Below (Right-Aligned) -->
+            <div class="network-popover-bubble" id="network-popover-bubble" aria-hidden="true">
+              <div class="popover-caret"></div>
+              <div class="popover-content">
+                <div class="popover-header">
+                  <span class="popover-status-dot pulse-dot"></span>
+                  <b id="popover-status-title">Active Telemetry</b>
+                </div>
+                <div class="popover-row">
+                  <span>Downlink Speed:</span>
+                  <b id="popover-speed-val">~3.5 Mbps</b>
+                </div>
+                <div class="popover-row">
+                  <span>Sensor Stream:</span>
+                  <span id="popover-stream-status" class="status-tag green">Synchronized</span>
+                </div>
+                <small class="popover-note">T&C telemetry streams live from NASA, ISRO, USGS &amp; Open-Meteo.</small>
               </div>
-              <p>During offline or slow internet conditions, real-time satellite coordinates, rocket countdowns, and space weather feeds will be delayed or paused.</p>
-              <small>Tap anywhere to dismiss</small>
             </div>
-          </div>
-          
           </div>
 
           <button id="pwa-install-btn" class="install-pill-btn" style="display: none;" title="Install Space Hub App">
@@ -168,7 +172,7 @@
             <div>
               <div class="eyebrow"><span class="live-dot pulse-dot"></span> N E W  ●  M O D E R N  ●  M I S S I O N</div>
               <h1><span>Space Live</span></h1>
-              <p>T&C is projecting authentic real-time space information from NASA, ISRO, USGS, ISS, CSS, CHANDRAYAAN3, NAVIC1I, HUBBLE, NOAA, DONKI, JWST, NEOWS, NASA JPL, EONET &amp; Open-Meteo endpoints.</p>
+              <p>T&C is projecting authentic real-time space information from NASA, ISRO, USGS, ISS, CSS, APOD &amp; Open-Meteo endpoints.</p>
             </div>
             <div class="welcome-meta">
               <span class="status-pill"><i class="pulse-dot"></i> SYSTEMS OPERATIONAL</span>
@@ -307,7 +311,7 @@
               <div id="sat-search-dropdown" class="autocomplete-dropdown" hidden></div>
             </div>
 
-            <!-- Sleek Horizontal Slider for Presets -->
+            <!-- Single-Line Horizontally Scrollable Fleet Presets Slider -->
             <div class="sat-presets-bar">
               <span class="sat-select-lbl">FLEET PRESETS:</span>
               <button class="sat-chip active" data-sat-id="25544" data-sat-name="ISS (ZARYA)">ISS (Zarya)</button>
@@ -318,13 +322,13 @@
               <button class="sat-chip" data-sat-id="43013" data-sat-name="NOAA 20">NOAA-20</button>
             </div>
 
-            <!-- Single-Line Horizontally Scrollable Map Layer Chips -->
+            <!-- Single-Line Horizontally Scrollable Map Layer Chips Toolbar -->
             <div class="map-toolbar-row">
               <div class="map-layer-chips">
-                <button class="layer-chip active" id="toggle-layer-iss"> Satellite Active</button>
-                <button class="layer-chip active" id="toggle-layer-quakes"> Quakes (USGS)</button>
-                <button class="layer-chip active" id="toggle-layer-hazards"> Hazards (EONET)</button>
-                <button class="layer-chip active" id="toggle-layer-track"> Ground Track</button>
+                <button class="layer-chip active" id="toggle-layer-iss">🛰️ Satellite Active</button>
+                <button class="layer-chip active" id="toggle-layer-quakes">🌍 Quakes (USGS)</button>
+                <button class="layer-chip active" id="toggle-layer-hazards">🌋 Hazards (EONET)</button>
+                <button class="layer-chip active" id="toggle-layer-track">⌖ Ground Track</button>
               </div>
             </div>
 
@@ -384,8 +388,7 @@
             </div>
             <div class="spotlight-right">
               <div class="countdown-box">
-                <div class="countdown-eyebrow"> T-MINUS COUNTDOWN </div>
-                <!-- NASA Digital HUD Segmented Mission Clock Display -->
+                <div class="countdown-eyebrow">NASA T-MINUS MISSION CLOCK</div>
                 <div class="nasa-mission-clock" id="spotlight-countdown">
                   <div class="clock-segment"><b id="clock-d">00</b><small>DAYS</small></div>
                   <span class="clock-colon">:</span>
@@ -581,10 +584,7 @@
                   <h3>USGS Global Seismic Network</h3>
                   <p>Live earthquake sensor log (M 2.5+ past 24h).</p>
                 </div>
-                <div style="display:flex;gap:6px;align-items:center;">
-                  <span class="small-chip green">USGS SEISMIC</span>
-                  <span class="small-chip" id="quake-count">LIVE</span>
-                </div>
+                <span class="small-chip green" id="quake-count">USGS LIVE</span>
               </div>
               <div id="earthquake-list" class="earthquake-feed">
                 <div class="loading-state"><div class="apple-spinner"></div><p>Contacting USGS seismographs…</p></div>
@@ -597,10 +597,7 @@
                   <h3>NASA EONET Active Hazards</h3>
                   <p>Wildfires, active volcanoes, and severe storms.</p>
                 </div>
-                <div style="display:flex;gap:6px;align-items:center;">
-                  <span class="small-chip purple">NASA EONET</span>
-                  <span class="small-chip" id="hazard-count">LIVE</span>
-                </div>
+                <span class="small-chip blue" id="hazard-count">NASA EONET</span>
               </div>
               <div id="hazard-list" class="earthquake-feed">
                 <div class="loading-state"><div class="apple-spinner"></div><p>Querying NASA EONET sensors…</p></div>
@@ -860,7 +857,7 @@
             <div class="setting-actions" style="display:flex;flex-direction:column;gap:10px;">
               <button id="save-firebase-btn" class="primary-button full-width">Save My Preferences</button>
               <button id="test-alert-btn" class="apple-btn-secondary full-width" style="justify-content:center;padding:12px;">
-                 Test Alert (Allow notification permissions)
+                🔔 Test Alert (Allow notification permissions)
               </button>
             </div>
           </article>
@@ -906,11 +903,11 @@
                 <div class="developer-avatar">MM</div>
                 <div>
                   <h4>Murali Manohar</h4>
-                  <small>Architect &amp; Lead Developer · T &amp; C Network</small>
+                  <small>Architect &amp; Lead Developer · Tasty &amp; Comfort Network</small>
                 </div>
               </div>
               <p class="about-text" style="margin-top:12px;">
-                Engineered with Web standards, Interface Guidelines, Fluid hardware-accelerated CSS, Leaflet GIS, and Cloud Messaging for cross-platform performance.
+                Engineered with pure Web standards, Apple Interface Guidelines, Fluid hardware-accelerated CSS, Leaflet GIS, and Cloud Messaging for cross-platform performance.
               </p>
             </article>
 
@@ -919,7 +916,7 @@
                 <div>
                   <div class="eyebrow">THE T&amp;C NETWORK</div>
                   <h3>Explore the T&amp;C Ecosystem</h3>
-                  <p> Explore our platforms and public web services.</p>
+                  <p>Discover our other independent platforms and public web services.</p>
                 </div>
               </div>
               <div class="ecosystem-cards-row">
@@ -1018,7 +1015,7 @@
           </span>
           <div>
             <b>Earth &amp; Mars</b>
-            <small>Discover EARTH from 1Million Miles &amp; Rovers</small>
+            <small>DSCOVR 1M Miles &amp; Rovers</small>
           </div>
           <span class="more-item-arrow">›</span>
         </a>
@@ -1093,7 +1090,7 @@
     </div>
   </div>
 
-  <!-- Universal In-App Apple Media Lightbox -->
+  <!-- Universal In-App Apple Media Lightbox (Fixed Audio Player Container) -->
   <div class="epic-lightbox-backdrop" id="universal-media-lightbox" aria-hidden="true">
     <div class="epic-lightbox-dialog" role="dialog" aria-label="Media Preview">
       <button class="lightbox-close-btn" id="close-universal-lightbox-btn" aria-label="Close Lightbox">✕</button>
@@ -1109,9 +1106,12 @@
                disablePictureInPicture 
                style="display:none; width:100%; max-height:65vh; object-fit:contain; border-radius:12px;"></video>
         
-        <div id="universal-lightbox-audio-wrap" style="display:none; text-align:center; padding:30px 20px;">
-          <div style="font-size:42px; margin-bottom:12px;">🎙️</div>
-          <audio id="universal-lightbox-audio" controls style="width:100%; max-width:400px;"></audio>
+        <!-- Space Audio Player with Full-Width Responsive Container -->
+        <div id="universal-lightbox-audio-wrap" class="lightbox-audio-wrap">
+          <div class="audio-avatar-icon">🎙️</div>
+          <div class="audio-player-box">
+            <audio id="universal-lightbox-audio" controls preload="metadata"></audio>
+          </div>
         </div>
       </div>
 
@@ -1139,7 +1139,7 @@
       <div class="apple-sheet-options">
         <button type="button" class="apple-sheet-option-btn primary" id="sheet-download-opt">
           <div class="sheet-opt-left">
-            <span class="sheet-opt-icon"></span>
+            <span class="sheet-opt-icon">⚡</span>
             <div>
               <b class="sheet-opt-title">Optimized File</b>
               <small class="sheet-opt-meta">Instant saving · Pristine screen clarity</small>
@@ -1153,7 +1153,7 @@
 
         <button type="button" class="apple-sheet-option-btn" id="sheet-download-raw">
           <div class="sheet-opt-left">
-            <span class="sheet-opt-icon"></span>
+            <span class="sheet-opt-icon">📷</span>
             <div>
               <b class="sheet-opt-title">Raw File</b>
               <small class="sheet-opt-meta" id="sheet-raw-format">Master sensor format</small>
