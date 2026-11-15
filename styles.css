@@ -497,7 +497,35 @@ html[data-theme="dark"] .leaflet-tile {
 .leaflet-control-attribution { display: none !important; }
 
 /* ============================================================================
-   Model 1: Aerospace Tactical HUD Satellite Marker & Compass Sweep
+   Leaflet Re-Themed Apple Frosted Glass Popups (Dark & Light Adaptive)
+   ============================================================================ */
+.leaflet-popup-content-wrapper {
+  background: var(--surface-solid) !important;
+  backdrop-filter: var(--blur) !important;
+  -webkit-backdrop-filter: var(--blur) !important;
+  border: 1px solid var(--line) !important;
+  border-radius: 16px !important;
+  color: var(--text) !important;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45) !important;
+  padding: 0 !important;
+}
+.leaflet-popup-tip {
+  background: var(--surface-solid) !important;
+  border: 1px solid var(--line) !important;
+}
+.leaflet-popup-content {
+  margin: 10px 14px !important;
+  line-height: 1.4 !important;
+}
+.leaflet-container a.leaflet-popup-close-button {
+  color: var(--muted) !important;
+  top: 8px !important;
+  right: 8px !important;
+  font-size: 14px !important;
+}
+
+/* ============================================================================
+   Model 1: Aerospace Tactical HUD Satellite Marker & Theme-Adaptive Tag
    ============================================================================ */
 .aerospace-hud-marker {
   position: relative;
@@ -558,20 +586,26 @@ html[data-theme="dark"] .leaflet-tile {
   transition: transform 0.2s ease;
 }
 
+/* Theme-Adaptive Clickable Satellite Tag */
 .hud-micro-tag {
-  margin-top: 2px;
-  padding: 2px 7px;
-  background: rgba(16, 17, 20, 0.92);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid color-mix(in srgb, var(--hud-accent, #2997ff) 45%, var(--line));
+  margin-top: 4px;
+  padding: 3px 8px;
+  background: var(--surface-solid);
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
+  border: 1px solid var(--line);
   border-radius: 6px;
   font: 700 8.5px var(--mono);
   color: var(--hud-accent, #2997ff);
   white-space: nowrap;
   letter-spacing: 0.4px;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
-  pointer-events: none;
+  box-shadow: var(--shadow);
+  pointer-events: auto;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+.hud-micro-tag:hover {
+  border-color: var(--hud-accent, #2997ff);
 }
 
 .map-hud-chip {
@@ -643,7 +677,6 @@ html[data-theme="dark"] .leaflet-tile {
 .countdown-box { background: var(--surface-solid); border: 1px solid var(--line); border-radius: 16px; padding: 22px; text-align: center; min-width: 0; max-width: 100%; }
 .countdown-eyebrow { font-size: 9px; font-weight: 750; letter-spacing: 1.2px; color: var(--orange); margin-bottom: 12px; }
 
-/* NASA Digital HUD Segmented Mission Clock */
 .nasa-mission-clock {
   display: flex;
   align-items: center;
@@ -774,7 +807,6 @@ html[data-theme="dark"] .leaflet-tile {
 .lightbox-img-wrap { flex: 1; background: #000; display: grid; place-items: center; max-height: 65vh; overflow: hidden; }
 .lightbox-img-wrap img { max-width: 100%; max-height: 65vh; object-fit: contain; }
 
-/* Responsive Full-Width Audio Player Box */
 .lightbox-audio-wrap {
   display: none;
   width: 100%;
@@ -787,19 +819,9 @@ html[data-theme="dark"] .leaflet-tile {
   border-radius: 20px;
   box-sizing: border-box;
 }
-.audio-avatar-icon {
-  font-size: 46px;
-  margin-bottom: 14px;
-}
-.audio-player-box {
-  width: 100%;
-}
-.audio-player-box audio {
-  width: 100% !important;
-  height: 48px;
-  outline: none;
-  border-radius: 99px;
-}
+.audio-avatar-icon { font-size: 46px; margin-bottom: 14px; }
+.audio-player-box { width: 100%; }
+.audio-player-box audio { width: 100% !important; height: 48px; outline: none; border-radius: 99px; }
 
 .lightbox-footer {
   display: flex;
@@ -888,7 +910,7 @@ html[data-theme="dark"] .leaflet-tile {
 .hazard-pill.green { background: rgba(48, 209, 88, 0.2); color: var(--green); }
 .neo-item-stats { display: flex; justify-content: space-between; font: 10px var(--mono); color: var(--muted); margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--line); }
 .neo-item-stats b { color: var(--blue); }
-.neo-verify-link { display: inline-block; font-size: 9px; color: var(--blue); margin-top: 8px; text-decoration: none; }
+.neo-verify-link { display: inline-block; font-size: 9px; color: var(--blue); margin-top: 6px; text-decoration: none; }
 .neo-verify-link:hover { text-decoration: underline; }
 
 .apod-layout { display: grid; grid-template-columns: minmax(280px, 0.9fr) 1.1fr; gap: 24px; min-width: 0; }
@@ -899,16 +921,47 @@ html[data-theme="dark"] .leaflet-tile {
 .apod-foot { display: flex; justify-content: space-between; align-items: center; margin-top: 14px; font-size: 10px; }
 .apod-foot a { color: var(--blue); text-decoration: underline; }
 
+/* Symmetrical Two-Row Earthquake & Hazard Cards */
 .dual-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
-.earthquake-feed { display: flex; flex-direction: column; gap: 9px; max-height: 480px; overflow-y: auto; }
-.quake-row { padding: 12px 14px; border-radius: 12px; background: var(--surface-solid); border: 1px solid var(--line); display: flex; align-items: center; gap: 12px; min-width: 0; }
-.mag-box { width: 38px; height: 38px; border-radius: 10px; display: grid; place-items: center; font: 700 12px var(--mono); flex-shrink: 0; }
+.earthquake-feed { display: flex; flex-direction: column; gap: 10px; max-height: 480px; overflow-y: auto; }
+.quake-row {
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--surface-solid);
+  border: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+.quake-row-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+.quake-row-top b {
+  font-size: 11.5px;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+.quake-row-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding-top: 6px;
+  border-top: 1px solid var(--line);
+  font-size: 9.5px;
+}
+.quake-row-bottom small {
+  color: var(--muted);
+}
+.mag-box { width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; font: 700 12px var(--mono); flex-shrink: 0; }
 .mag-box.green { background: var(--green-soft); color: var(--green); }
 .mag-box.orange { background: rgba(255, 180, 84, 0.2); color: var(--orange); }
 .mag-box.red { background: rgba(255, 69, 58, 0.2); color: var(--red); }
 .mag-box.purple { background: rgba(191, 90, 242, 0.2); color: var(--purple); }
-.quake-row b { font-size: 11px; display: block; overflow-wrap: anywhere; }
-.quake-row small { font-size: 9px; color: var(--muted); }
 
 .intel-search-wrapper, .wiki-search-box-wrapper { position: relative; margin-bottom: 14px; width: 100%; }
 .intel-search-box, .wiki-search-box { display: flex; gap: 10px; width: 100%; }
@@ -1225,9 +1278,23 @@ html[data-theme="dark"] .leaflet-tile {
   .dock-link.active { color: var(--blue); font-weight: 600; }
 }
 
+/* Centered Mobile Connection Status Popover */
 @media (max-width: 600px) {
   .top-actions { gap: 6px; }
-  .beacon-label { display: none; } /* Show only glowing radar beacon on mobile */
+  .beacon-label { display: none; }
+  .network-popover-bubble {
+    position: fixed !important;
+    top: 76px !important;
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%) translateY(-8px) scale(0.96) !important;
+    width: calc(100vw - 32px) !important;
+    max-width: 320px !important;
+  }
+  .network-popover-bubble.open {
+    transform: translateX(-50%) translateY(0) scale(1) !important;
+  }
+  .popover-caret { display: none !important; }
   .install-pill-btn {
     padding: 6px 8px;
     border-radius: 50%;
@@ -1253,6 +1320,8 @@ html[data-theme="dark"] .leaflet-tile {
   .spotlight-meta-grid { grid-template-columns: 1fr; }
   .mars-stats-row { grid-template-columns: 1fr; }
   .mars-photos-grid { grid-template-columns: 1fr; }
+  .dual-grid { grid-template-columns: 1fr; }
+  .neo-list-scroll { grid-template-columns: 1fr; }
 }
 
 /* --- Planetary Explorer Styles --- */
