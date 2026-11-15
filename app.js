@@ -12,14 +12,13 @@ const NOTIFICATION_HERO_PHOTOS = {
   cosmic: 'https://images-assets.nasa.gov/image/GSFC_20171208_Archive_e000494/GSFC_20171208_Archive_e000494~medium.jpg'
 };
 
-// Live measured network throughput used for exact download time estimation
 let currentNetworkSpeedMbps = 3.5;
+let popoverAutoDismissTimer = null;
 
 // 1. Dual Clock (Live IST & UTC Synchronization)
 function initClocks() {
   const istEl = document.getElementById('ist-clock');
   const utcEl = document.getElementById('utc-clock');
-
   function tick() {
     const now = new Date();
     const ist = now.toLocaleTimeString('en-US', { timeZone: 'Asia/Kolkata', hour12: false }) + ' IST';
@@ -31,57 +30,60 @@ function initClocks() {
   setInterval(tick, 1000);
 }
 
-// 2. Real-Time Network Monitor with Apple Dynamic Island Controller
+// 2. Real-Time Network Monitor, Right-Aligned Popover & Auto-Retract System
 function initNetworkMonitor() {
   const textEl = document.getElementById('net-text');
-  const islandWrap = document.getElementById('dynamic-island');
-  const islandText = document.getElementById('island-text');
-  const islandCapsule = document.getElementById('island-capsule');
-  const islandAdvisory = document.getElementById('island-advisory');
-  const networkPill = document.getElementById('network-status-pill');
+  const weatherSyncBadge = document.getElementById('weather-sync-badge');
+  const beaconBtn = document.getElementById('network-beacon-btn');
+  const popover = document.getElementById('network-popover-bubble');
+  const popTitle = document.getElementById('popover-status-title');
+  const popSpeed = document.getElementById('popover-speed-val');
+  const popStream = document.getElementById('popover-stream-status');
 
-  let islandTimer = null;
-
-  // Trigger Apple Dynamic Island Drop-down with 4.5s session timeout
-  function triggerDynamicIsland(message) {
-    if (!islandWrap || !islandText) return;
-    islandText.textContent = message;
-    islandWrap.classList.add('island-active');
-
-    if (islandTimer) clearTimeout(islandTimer);
-    islandTimer = setTimeout(() => {
-      // Retract capsule unless the user opened the advisory card
-      if (!islandAdvisory?.classList.contains('show')) {
-        islandWrap.classList.remove('island-active');
-      }
-    }, 4500);
+  function showTemporaryAlertBubble() {
+    if (!popover) return;
+    popover.classList.add('open');
+    popover.setAttribute('aria-hidden', 'false');
+    clearTimeout(popoverAutoDismissTimer);
+    popoverAutoDismissTimer = setTimeout(() => {
+      popover.classList.remove('open');
+      popover.setAttribute('aria-hidden', 'true');
+    }, 4000);
   }
 
-  // Interactive Tap to expand/collapse advisory card
-  function toggleAdvisory() {
-    if (!islandAdvisory) return;
-    const isShowing = islandAdvisory.classList.contains('show');
-    if (isShowing) {
-      islandAdvisory.classList.remove('show');
-      islandWrap?.classList.remove('island-active');
-    } else {
-      islandAdvisory.classList.add('show');
-      islandWrap?.classList.add('island-active');
-    }
-  }
-
-  islandCapsule?.addEventListener('click', toggleAdvisory);
-  islandAdvisory?.addEventListener('click', toggleAdvisory);
-  networkPill?.addEventListener('click', () => {
-    triggerDynamicIsland(islandText?.textContent || 'Live Telemetry Status');
-    toggleAdvisory();
+  beaconBtn?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    clearTimeout(popoverAutoDismissTimer);
+    const isOpen = popover.classList.contains('open');
+    popover.classList.toggle('open', !isOpen);
+    popover.setAttribute('aria-hidden', isOpen ? 'true' : 'false');
   });
 
-  async function updateNetworkStatus(showIslandNotification = true) {
+  const dismissPopover = (e) => {
+    if (popover && popover.classList.contains('open') && !popover.contains(e.target) && !beaconBtn.contains(e.target)) {
+      popover.classList.remove('open');
+      popover.setAttribute('aria-hidden', 'true');
+    }
+  };
+  document.addEventListener('pointerdown', dismissPopover);
+  document.addEventListener('touchstart', dismissPopover, { passive: true });
+
+  async function updateNetworkStatus() {
     if (!navigator.onLine) {
       document.documentElement.setAttribute('data-network', 'offline');
       if (textEl) textEl.textContent = 'Offline';
-      if (showIslandNotification) triggerDynamicIsland('No Internet Connection');
+      currentNetworkSpeedMbps = 0.2;
+      if (popTitle) popTitle.textContent = 'Offline (Paused)';
+      if (popSpeed) popSpeed.textContent = '0.0 Mbps';
+      if (popStream) { popStream.className = 'status-tag red'; popStream.textContent = 'Disconnected'; }
+      if (weatherSyncBadge) {
+        weatherSyncBadge.className = 'small-chip';
+        weatherSyncBadge.style.background = 'rgba(255, 69, 58, 0.2)';
+        weatherSyncBadge.style.color = 'var(--red)';
+        weatherSyncBadge.textContent = 'Offline 🔴';
+      }
+      showToast('Network connection lost. T&C-Space paused.');
+      showTemporaryAlertBubble();
       return;
     }
 
@@ -89,23 +91,47 @@ function initNetworkMonitor() {
 
     if (conn && conn.downlink !== undefined) {
       const mbps = conn.downlink;
+      currentNetworkSpeedMbps = Math.max(0.3, mbps);
+      if (popSpeed) popSpeed.textContent = `~${mbps.toFixed(1)} Mbps`;
+
       if (mbps < 1.0) {
         document.documentElement.setAttribute('data-network', 'slow');
         if (textEl) textEl.textContent = 'Slow · <1 Mbps';
-        if (showIslandNotification) triggerDynamicIsland('Slow Internet · Telemetry may delay');
+        if (popTitle) popTitle.textContent = 'Slow Connection';
+        if (popStream) { popStream.className = 'status-tag orange'; popStream.textContent = 'Delayed Stream'; }
+        if (weatherSyncBadge) {
+          weatherSyncBadge.className = 'small-chip orange';
+          weatherSyncBadge.style.background = 'rgba(255, 180, 84, 0.2)';
+          weatherSyncBadge.style.color = 'var(--orange)';
+          weatherSyncBadge.textContent = 'Slow Telemetry 🟠';
+        }
+        showTemporaryAlertBubble();
       } else if (mbps <= 2.5) {
         document.documentElement.setAttribute('data-network', 'normal');
         if (textEl) textEl.textContent = `Normal · ~${mbps.toFixed(1)} Mbps`;
-        if (showIslandNotification) triggerDynamicIsland('Good Internet Speed · Telemetry Active');
+        if (popTitle) popTitle.textContent = 'Normal Telemetry';
+        if (popStream) { popStream.className = 'status-tag green'; popStream.textContent = 'Synchronized'; }
+        if (weatherSyncBadge) {
+          weatherSyncBadge.className = 'small-chip green';
+          weatherSyncBadge.style.background = 'var(--green-soft)';
+          weatherSyncBadge.style.color = 'var(--green)';
+          weatherSyncBadge.textContent = 'Auto-Synced 🟢';
+        }
       } else {
         document.documentElement.setAttribute('data-network', 'fast');
         if (textEl) textEl.textContent = `Fast · ${mbps.toFixed(1)} Mbps`;
-        if (showIslandNotification) triggerDynamicIsland('Live Telemetry Connected · High Speed');
+        if (popTitle) popTitle.textContent = 'High-Speed Telemetry';
+        if (popStream) { popStream.className = 'status-tag green'; popStream.textContent = 'Synchronized'; }
+        if (weatherSyncBadge) {
+          weatherSyncBadge.className = 'small-chip green';
+          weatherSyncBadge.style.background = 'var(--green-soft)';
+          weatherSyncBadge.style.color = 'var(--green)';
+          weatherSyncBadge.textContent = 'Auto-Synced 🟢';
+        }
       }
       return;
     }
 
-    // High-precision fallback for iOS Safari
     try {
       const t0 = performance.now();
       await fetch('https://api.wheretheiss.at/v1/satellites/25544', { method: 'HEAD', cache: 'no-store' });
@@ -114,29 +140,45 @@ function initNetworkMonitor() {
       if (rtt > 1200) {
         document.documentElement.setAttribute('data-network', 'slow');
         if (textEl) textEl.textContent = 'Slow · <1 Mbps';
-        if (showIslandNotification) triggerDynamicIsland('Slow Internet · Telemetry may delay');
+        currentNetworkSpeedMbps = 0.8;
+        if (popSpeed) popSpeed.textContent = '<1.0 Mbps';
+        if (popTitle) popTitle.textContent = 'Slow Connection';
+        if (popStream) { popStream.className = 'status-tag orange'; popStream.textContent = 'Delayed'; }
+        showTemporaryAlertBubble();
+      } else if (rtt > 500) {
+        document.documentElement.setAttribute('data-network', 'normal');
+        if (textEl) textEl.textContent = 'Normal · ~1 Mbps';
+        currentNetworkSpeedMbps = 1.8;
+        if (popSpeed) popSpeed.textContent = '~1.8 Mbps';
+        if (popTitle) popTitle.textContent = 'Active Telemetry';
+        if (popStream) { popStream.className = 'status-tag green'; popStream.textContent = 'Synchronized'; }
       } else {
         document.documentElement.setAttribute('data-network', 'fast');
         if (textEl) textEl.textContent = 'Fast · ≥1 Mbps';
-        if (showIslandNotification) triggerDynamicIsland('Live Telemetry Connected');
+        currentNetworkSpeedMbps = 5.0;
+        if (popSpeed) popSpeed.textContent = '≥5.0 Mbps';
+        if (popTitle) popTitle.textContent = 'High-Speed Telemetry';
+        if (popStream) { popStream.className = 'status-tag green'; popStream.textContent = 'Synchronized'; }
       }
     } catch (_) {
       document.documentElement.setAttribute('data-network', 'offline');
       if (textEl) textEl.textContent = 'Offline';
-      if (showIslandNotification) triggerDynamicIsland('No Internet Connection');
+      currentNetworkSpeedMbps = 0.2;
     }
   }
 
-  window.addEventListener('online', () => updateNetworkStatus(true));
-  window.addEventListener('offline', () => updateNetworkStatus(true));
+  window.addEventListener('online', () => {
+    updateNetworkStatus();
+    showToast('T&C Space connection restored.');
+  });
+  window.addEventListener('offline', updateNetworkStatus);
 
   if (navigator.connection) {
-    navigator.connection.addEventListener('change', () => updateNetworkStatus(true));
+    navigator.connection.addEventListener('change', updateNetworkStatus);
   }
 
-  // Initial check on page load without popping the pill immediately
-  updateNetworkStatus(false);
-  setInterval(() => updateNetworkStatus(false), 30000);
+  updateNetworkStatus();
+  setInterval(updateNetworkStatus, 30000);
 }
 
 // 3. Navigation Router with "More •••" Sheet, Deep-Link Resolution & Leaflet Auto-Resize
@@ -149,20 +191,13 @@ function initNavigation() {
   const moreSheet = document.getElementById('more-sheet-backdrop');
   const moreSheetClose = document.getElementById('more-sheet-close-btn');
 
-  function openMoreSheet() {
-    if (moreSheet) moreSheet.classList.add('open');
-  }
-  function closeMoreSheet() {
-    if (moreSheet) moreSheet.classList.remove('open');
-  }
+  function openMoreSheet() { if (moreSheet) moreSheet.classList.add('open'); }
+  function closeMoreSheet() { if (moreSheet) moreSheet.classList.remove('open'); }
 
   moreDockBtn?.addEventListener('click', (e) => {
     e.preventDefault();
-    if (moreSheet?.classList.contains('open')) {
-      closeMoreSheet();
-    } else {
-      openMoreSheet();
-    }
+    if (moreSheet?.classList.contains('open')) closeMoreSheet();
+    else openMoreSheet();
   });
 
   moreSheetClose?.addEventListener('click', closeMoreSheet);
@@ -171,9 +206,7 @@ function initNavigation() {
   });
 
   document.querySelectorAll('.more-sheet-item').forEach(item => {
-    item.addEventListener('click', () => {
-      closeMoreSheet();
-    });
+    item.addEventListener('click', () => closeMoreSheet());
   });
 
   function handleRoute(hashStr) {
@@ -190,30 +223,20 @@ function initNavigation() {
       }
     });
 
-    if (!matched && sections.length > 0) {
-      sections[0].classList.add('active-view');
-    }
+    if (!matched && sections.length > 0) sections[0].classList.add('active-view');
 
     navLinks.forEach(link => {
-      if (link.getAttribute('data-nav') === targetId) {
-        link.classList.add('active');
-      } else {
-        link.classList.remove('active');
-      }
+      if (link.getAttribute('data-nav') === targetId) link.classList.add('active');
+      else link.classList.remove('active');
     });
 
     const extendedSections = ['interplanetary', 'space-weather', 'cosmos-hazards', 'intel-brief', 'wiki', 'settings', 'about'];
     if (moreDockBtn) {
-      if (extendedSections.includes(targetId)) {
-        moreDockBtn.classList.add('active');
-      } else {
-        moreDockBtn.classList.remove('active');
-      }
+      if (extendedSections.includes(targetId)) moreDockBtn.classList.add('active');
+      else moreDockBtn.classList.remove('active');
     }
 
-    if (label) {
-      label.textContent = targetId.charAt(0).toUpperCase() + targetId.slice(1).replace('-', ' ');
-    }
+    if (label) label.textContent = targetId.charAt(0).toUpperCase() + targetId.slice(1).replace('-', ' ');
 
     if (targetId === 'satellites' && satMap) {
       setTimeout(() => satMap.invalidateSize(), 200);
@@ -259,75 +282,99 @@ function initOverviewClickableCards() {
   });
 }
 
-// 5. Multi-Layer Leaflet Map with Animated Spacecraft Silhouettes & Radar Pulse
+// 5. Multi-Layer Leaflet Map with Model 1 Tactical Aerospace HUD & Full 90-Min Ground Track
 let satMap = null;
 let issMarker = null;
-let issTrackLine = null;
-const issTrackPoints = [];
+let issOrbitLayerGroup = null;
 let currentSatelliteId = 25544;
 let currentSatelliteName = "ISS (ZARYA)";
-
 let quakeLayerGroup = null;
 let hazardLayerGroup = null;
 
 const ORBITAL_FLEET = {
-  25544: { name: "ISS (ZARYA)", inc: 51.64, mm: 15.49, alt: 418.0, isApi: true },
-  57320: { name: "CHANDRAYAAN-3 (ISRO)", inc: 21.3, mm: 11.5, alt: 384000.0, vel: 1.02, isApi: false },
-  43286: { name: "NAVIC-1I (ISRO)", inc: 29.5, mm: 1.0, alt: 35786.0, vel: 3.07, isApi: false },
-  48274: { name: "CSS TIANHE (TIANGONG)", inc: 41.5, mm: 15.6, alt: 385.0, vel: 7.68, isApi: false },
-  20580: { name: "HUBBLE SPACE TELESCOPE", inc: 28.5, mm: 15.1, alt: 535.0, vel: 7.59, isApi: false },
-  43013: { name: "NOAA 20", inc: 98.7, mm: 14.2, alt: 824.0, vel: 7.45, isApi: false }
+  25544: { name: "ISS (ZARYA)", inc: 51.64, mm: 15.49, alt: 418.0, isApi: true, color: "#2997ff" },
+  57320: { name: "CHANDRAYAAN-3 (ISRO)", inc: 21.3, mm: 11.5, alt: 384000.0, vel: 1.02, isApi: false, color: "#30d158" },
+  43286: { name: "NAVIC-1I (ISRO)", inc: 29.5, mm: 1.0, alt: 35786.0, vel: 3.07, isApi: false, color: "#64d9e5" },
+  48274: { name: "CSS TIANHE (TIANGONG)", inc: 41.5, mm: 15.6, alt: 385.0, vel: 7.68, isApi: false, color: "#ffb454" },
+  20580: { name: "HUBBLE SPACE TELESCOPE", inc: 28.5, mm: 15.1, alt: 535.0, vel: 7.59, isApi: false, color: "#bf9cff" },
+  43013: { name: "NOAA 20", inc: 98.7, mm: 14.2, alt: 824.0, vel: 7.45, isApi: false, color: "#2997ff" }
 };
 
-function getAnimatedSpacecraftIcon(satId) {
-  let shapeSvg = '';
-
-  if (satId === 25544) {
-    shapeSvg = `
-      <svg class="sat-svg-shape" width="36" height="36" viewBox="0 0 36 36" fill="none">
-        <rect x="2" y="7" width="32" height="5" fill="#2997ff" rx="1"/>
-        <rect x="2" y="24" width="32" height="5" fill="#2997ff" rx="1"/>
-        <line x1="18" y1="5" x2="18" y2="31" stroke="#ffffff" stroke-width="2.5"/>
-        <circle cx="18" cy="18" r="4.5" fill="#ffffff" stroke="#2997ff" stroke-width="1.5"/>
-      </svg>
-    `;
-  } else if (satId === 48274) {
-    shapeSvg = `
-      <svg class="sat-svg-shape" width="34" height="34" viewBox="0 0 34 34" fill="none">
-        <rect x="3" y="14" width="28" height="6" fill="#ffb454" rx="1.5"/>
-        <rect x="14" y="6" width="6" height="22" fill="#ffffff" rx="1.5"/>
-        <circle cx="17" cy="17" r="3.5" fill="#2997ff"/>
-      </svg>
-    `;
-  } else if (satId === 57320 || satId === 43286) {
-    shapeSvg = `
-      <svg class="sat-svg-shape" width="34" height="34" viewBox="0 0 34 34" fill="none">
-        <rect x="5" y="13" width="24" height="8" fill="#30d158" rx="1.5"/>
-        <rect x="13" y="11" width="8" height="12" fill="#ffffff" rx="1"/>
-        <line x1="17" y1="5" x2="17" y2="11" stroke="#30d158" stroke-width="2"/>
-        <circle cx="17" cy="5" r="2.5" fill="#ffffff"/>
-      </svg>
-    `;
-  } else {
-    shapeSvg = `
-      <svg class="sat-svg-shape" width="32" height="32" viewBox="0 0 32 32" fill="none">
-        <rect x="12" y="5" width="8" height="22" fill="#ffffff" rx="2"/>
-        <line x1="4" y1="16" x2="28" y2="16" stroke="#bf9cff" stroke-width="3" stroke-linecap="round"/>
-        <circle cx="16" cy="16" r="3" fill="#bf9cff"/>
-      </svg>
-    `;
-  }
+function getModel1TacticalHudIcon(satId, satName, altStr, velStr, headingDeg = 45) {
+  const satConfig = ORBITAL_FLEET[satId] || { color: "#2997ff" };
+  const accentColor = satConfig.color || "#2997ff";
 
   return L.divIcon({
-    className: 'animated-spacecraft-marker',
+    className: 'aerospace-hud-marker',
     html: `
-      <div class="sat-radar-ripple"></div>
-      <div class="sat-radar-ripple delay"></div>
-      ${shapeSvg}
+      <div class="hud-reticle-box" style="--hud-accent: ${accentColor};">
+        <div class="hud-radar-pulse"></div>
+        <div class="hud-radar-pulse delay"></div>
+        <div class="hud-compass-ring"></div>
+        <svg class="hud-crosshair-svg" width="46" height="46" viewBox="0 0 46 46" fill="none">
+          <path d="M4 14V6C4 4.89543 4.89543 4 6 4H14" stroke="${accentColor}" stroke-width="1.8" stroke-linecap="round"/>
+          <path d="M42 14V6C42 4.89543 41.1046 4 40 4H32" stroke="${accentColor}" stroke-width="1.8" stroke-linecap="round"/>
+          <path d="M4 32V40C4 41.1046 4.89543 42 6 42H14" stroke="${accentColor}" stroke-width="1.8" stroke-linecap="round"/>
+          <path d="M42 32V40C42 41.1046 41.1046 42 40 42H32" stroke="${accentColor}" stroke-width="1.8" stroke-linecap="round"/>
+          <line x1="23" y1="9" x2="23" y2="17" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="23" y1="29" x2="23" y2="37" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="9" y1="23" x2="17" y2="23" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="29" y1="23" x2="37" y2="23" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"/>
+          <circle cx="23" cy="23" r="5" stroke="${accentColor}" stroke-width="1.5"/>
+          <circle cx="23" cy="23" r="1.8" fill="#ffffff"/>
+          <g transform="rotate(${headingDeg} 23 23)">
+            <path d="M23 10L20 15H26L23 10Z" fill="${accentColor}"/>
+          </g>
+        </svg>
+      </div>
+      <div class="hud-micro-tag" style="--hud-accent: ${accentColor};">
+        ${satName} · ${altStr} · ${velStr}
+      </div>
     `,
-    iconSize: [44, 44],
-    iconAnchor: [22, 22],
-    popupAnchor: [0, -22]
+    iconSize: [52, 68],
+    iconAnchor: [26, 26],
+    popupAnchor: [0, -28]
+  });
+}
+
+function renderOrbitalGroundTrack(satConfig, currentLat, currentLon) {
+  if (!satMap || !issOrbitLayerGroup) return;
+  issOrbitLayerGroup.clearLayers();
+
+  const mm = satConfig.mm || 15.0;
+  const periodMinutes = (1440 / mm);
+  const inc = satConfig.inc || 51.64;
+  const color = satConfig.color || "#2997ff";
+
+  const totalPoints = 90;
+  const stepMinutes = (periodMinutes / totalPoints);
+  const earthRotateDegPerMin = 0.25;
+
+  const currentPhase = Math.asin(Math.max(-1, Math.min(1, currentLat / inc)));
+  const trackSegments = [];
+  let currentSegment = [];
+
+  for (let i = -45; i <= 45; i++) {
+    const dt = i * stepMinutes;
+    const phase = currentPhase + ((dt / periodMinutes) * 2 * Math.PI);
+    const lat = Math.sin(phase) * inc;
+    let lon = currentLon + ((phase - currentPhase) * (180 / Math.PI)) - (dt * earthRotateDegPerMin);
+
+    lon = (((lon + 180) % 360) + 360) % 360 - 180;
+
+    if (currentSegment.length > 0) {
+      const prevLon = currentSegment[currentSegment.length - 1][1];
+      if (Math.abs(lon - prevLon) > 180) {
+        trackSegments.push(currentSegment);
+        currentSegment = [];
+      }
+    }
+    currentSegment.push([lat, lon]);
+  }
+  if (currentSegment.length > 0) trackSegments.push(currentSegment);
+
+  trackSegments.forEach(seg => {
+    L.polyline(seg, { color: color, weight: 1.8, dashArray: '5, 8', opacity: 0.65 }).addTo(issOrbitLayerGroup);
   });
 }
 
@@ -342,11 +389,12 @@ function initMap() {
 
   quakeLayerGroup = L.layerGroup().addTo(satMap);
   hazardLayerGroup = L.layerGroup().addTo(satMap);
+  issOrbitLayerGroup = L.layerGroup().addTo(satMap);
 
-  issMarker = L.marker([0, 0], { icon: getAnimatedSpacecraftIcon(currentSatelliteId) }).addTo(satMap);
+  issMarker = L.marker([0, 0], {
+    icon: getModel1TacticalHudIcon(currentSatelliteId, currentSatelliteName, "418.0 km", "7.66 km/s", 45)
+  }).addTo(satMap);
   issMarker.bindPopup(`<b>${currentSatelliteName}</b><br>Fetching live telemetry…`);
-
-  issTrackLine = L.polyline([], { color: '#2997ff', weight: 2, dashArray: '5, 8', opacity: 0.7 }).addTo(satMap);
 
   document.querySelectorAll('.sat-chip').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -359,50 +407,32 @@ function initMap() {
       document.getElementById('hud-sat-name').textContent = currentSatelliteName;
       document.getElementById('active-sat-name-sub').textContent = currentSatelliteName;
 
-      if (issMarker) {
-        issMarker.setIcon(getAnimatedSpacecraftIcon(currentSatelliteId));
-      }
-
-      issTrackPoints.length = 0;
-      issTrackLine.setLatLngs([]);
       fetchLiveSatelliteTelemetry(true);
     });
   });
 
   document.getElementById('toggle-layer-iss')?.addEventListener('click', (e) => {
     e.target.classList.toggle('active');
-    if (e.target.classList.contains('active')) {
-      satMap.addLayer(issMarker);
-    } else {
-      satMap.removeLayer(issMarker);
-    }
+    if (e.target.classList.contains('active')) satMap.addLayer(issMarker);
+    else satMap.removeLayer(issMarker);
   });
 
   document.getElementById('toggle-layer-quakes')?.addEventListener('click', (e) => {
     e.target.classList.toggle('active');
-    if (e.target.classList.contains('active')) {
-      satMap.addLayer(quakeLayerGroup);
-    } else {
-      satMap.removeLayer(quakeLayerGroup);
-    }
+    if (e.target.classList.contains('active')) satMap.addLayer(quakeLayerGroup);
+    else satMap.removeLayer(quakeLayerGroup);
   });
 
   document.getElementById('toggle-layer-hazards')?.addEventListener('click', (e) => {
     e.target.classList.toggle('active');
-    if (e.target.classList.contains('active')) {
-      satMap.addLayer(hazardLayerGroup);
-    } else {
-      satMap.removeLayer(hazardLayerGroup);
-    }
+    if (e.target.classList.contains('active')) satMap.addLayer(hazardLayerGroup);
+    else satMap.removeLayer(hazardLayerGroup);
   });
 
   document.getElementById('toggle-layer-track')?.addEventListener('click', (e) => {
     e.target.classList.toggle('active');
-    if (e.target.classList.contains('active')) {
-      satMap.addLayer(issTrackLine);
-    } else {
-      satMap.removeLayer(issTrackLine);
-    }
+    if (e.target.classList.contains('active')) satMap.addLayer(issOrbitLayerGroup);
+    else satMap.removeLayer(issOrbitLayerGroup);
   });
 
   initSatelliteSearch();
@@ -428,13 +458,11 @@ function initSatelliteSearch() {
       dropdown.hidden = true;
       return;
     }
-
     const matches = popularSats.filter(s => s.name.includes(q) || String(s.id).includes(q));
     if (matches.length === 0) {
       dropdown.hidden = true;
       return;
     }
-
     dropdown.innerHTML = matches.map(s => `
       <button type="button" class="dropdown-item" data-id="${s.id}" data-name="${s.name}">
         <b>${s.name}</b> (NORAD #${s.id})
@@ -446,32 +474,25 @@ function initSatelliteSearch() {
       btn.addEventListener('click', () => {
         currentSatelliteId = parseInt(btn.getAttribute('data-id'));
         currentSatelliteName = btn.getAttribute('data-name');
-
         document.getElementById('hud-sat-name').textContent = currentSatelliteName;
         document.getElementById('active-sat-name-sub').textContent = currentSatelliteName;
-
-        if (issMarker) {
-          issMarker.setIcon(getAnimatedSpacecraftIcon(currentSatelliteId));
-        }
-
         input.value = currentSatelliteName;
         dropdown.hidden = true;
-
-        issTrackPoints.length = 0;
-        issTrackLine.setLatLngs([]);
         fetchLiveSatelliteTelemetry(true);
       });
     });
   });
 }
 
-// 6. Live Satellite Telemetry Stream
+// 6. Live Satellite Telemetry Stream & Flight Heading Vector
 let lastSatData = null;
+let previousLat = null;
+let previousLon = null;
 
 async function fetchLiveSatelliteTelemetry(shouldCenterMap = false) {
   try {
     let lat = 0, lon = 0, alt = 418.0, vel = 7.66;
-    const satConfig = ORBITAL_FLEET[currentSatelliteId] || { inc: 51.6, mm: 15.0, alt: 500, vel: 7.6 };
+    const satConfig = ORBITAL_FLEET[currentSatelliteId] || { inc: 51.6, mm: 15.0, alt: 500, vel: 7.6, color: "#2997ff" };
 
     if (currentSatelliteId === 25544) {
       const res = await fetch('https://api.wheretheiss.at/v1/satellites/25544');
@@ -486,7 +507,6 @@ async function fetchLiveSatelliteTelemetry(shouldCenterMap = false) {
       const nowSec = (Date.now() / 1000);
       const periodSec = 86400 / satConfig.mm;
       const phase = ((nowSec % periodSec) / periodSec) * 2 * Math.PI;
-
       lat = Math.sin(phase) * satConfig.inc;
       lon = (((nowSec / 240) + (phase * 180 / Math.PI)) % 360) - 180;
       alt = satConfig.alt;
@@ -500,6 +520,15 @@ async function fetchLiveSatelliteTelemetry(shouldCenterMap = false) {
     const latStr = lat.toFixed(2) + '°';
     const lonStr = lon.toFixed(2) + '°';
 
+    let headingDeg = 45;
+    if (previousLat !== null && previousLon !== null) {
+      const dY = lat - previousLat;
+      const dX = (lon - previousLon) * Math.cos(lat * Math.PI / 180);
+      headingDeg = (Math.atan2(dX, dY) * (180 / Math.PI) + 360) % 360;
+    }
+    previousLat = lat;
+    previousLon = lon;
+
     const altEl = document.getElementById('iss-alt');
     const velEl = document.getElementById('iss-velocity');
     if (altEl) altEl.textContent = altStr;
@@ -511,15 +540,14 @@ async function fetchLiveSatelliteTelemetry(shouldCenterMap = false) {
     document.getElementById('map-vel').textContent = velStr;
 
     const hudTelem = document.getElementById('hud-sat-telemetry');
-    if (hudTelem) {
-      hudTelem.textContent = `${latStr}N, ${lonStr}E · Alt: ${altStr} · Spd: ${velStr}`;
-    }
+    if (hudTelem) hudTelem.textContent = `${latStr}N, ${lonStr}E · Alt: ${altStr} · Spd: ${velStr}`;
 
     if (issMarker && satMap) {
       issMarker.setLatLng([lat, lon]);
+      issMarker.setIcon(getModel1TacticalHudIcon(currentSatelliteId, currentSatelliteName, altStr, velStr, headingDeg));
       issMarker.setPopupContent(`
         <div style="font-size:12px;padding:4px;">
-          <b style="color:#2997ff;font-size:13px;">${currentSatelliteName}</b><br>
+          <b style="color:${satConfig.color};font-size:13px;">${currentSatelliteName}</b><br>
           <span>Latitude: ${latStr}</span><br>
           <span>Longitude: ${lonStr}</span><br>
           <span>Altitude: ${altStr}</span><br>
@@ -532,9 +560,7 @@ async function fetchLiveSatelliteTelemetry(shouldCenterMap = false) {
         setTimeout(() => issMarker.openPopup(), 400);
       }
 
-      issTrackPoints.push([lat, lon]);
-      if (issTrackPoints.length > 50) issTrackPoints.shift();
-      issTrackLine.setLatLngs(issTrackPoints);
+      renderOrbitalGroundTrack(satConfig, lat, lon);
     }
 
     checkSatelliteOverheadPass(lat, lon, currentSatelliteName, vel);
@@ -589,18 +615,15 @@ function startLiveTickerEngine() {
 
   function updateTicker() {
     const messages = [];
-
     if (lastSatData) {
       messages.push(`🛰️ ${currentSatelliteName}: Lat ${lastSatData.latitude.toFixed(2)}°, Lon ${lastSatData.longitude.toFixed(2)}° · Alt ${lastSatData.altitude.toFixed(1)} km · Speed ${lastSatData.velocity.toFixed(2)} km/s`);
     }
     messages.push(`🚀 ORBITAL LAUNCH: ${lastNextLaunchText}`);
     messages.push(`🌍 SEISMIC RADAR: ${lastEarthquakeText}`);
     messages.push(`☀️ SPACE WEATHER: Solar background wind nominal · Kp < 3 · Geomagnetic flux quiet`);
-
     tickerEl.textContent = messages[tickerCycleIndex % messages.length];
     tickerCycleIndex++;
   }
-
   updateTicker();
   setInterval(updateTicker, 4500);
 }
@@ -669,7 +692,6 @@ async function fetchLaunches() {
         const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
         const mins = Math.floor((diff / (1000 * 60)) % 60);
         const secs = Math.floor((diff / 1000) % 60);
-
         const pad = n => String(n).padStart(2, '0');
 
         const dEl = document.getElementById('clock-d');
@@ -709,7 +731,7 @@ async function fetchLaunches() {
   }
 }
 
-// 10. Universal Lightbox with Apple-Style Action Sheet & Deep Link Generator
+// 10. Universal Lightbox with Apple Action Sheet & Deep Link Generator
 let activeLightboxMedia = {
   url: "",
   origUrl: "",
@@ -778,7 +800,6 @@ async function openUniversalLightbox(url, title, timeStr, filename, mediaType = 
       if (assetRes.ok) {
         const assetData = await assetRes.json();
         const items = assetData.collection?.items || [];
-
         const origAsset = items.find(i => i.href && i.href.includes('~orig.')) || items[0];
         const optAsset = items.find(i => i.href && (i.href.includes('~large.') || i.href.includes('~medium.'))) || items[0];
 
@@ -787,7 +808,6 @@ async function openUniversalLightbox(url, title, timeStr, filename, mediaType = 
           const ext = activeLightboxMedia.origUrl.split('.').pop().split('?')[0].toUpperCase();
           if (rawTag) rawTag.textContent = `100% RAW MASTER (${ext}) READY`;
         }
-
         if (optAsset && optAsset.href) {
           activeLightboxMedia.optUrl = optAsset.href.replace(/^http:\/\//i, 'https://');
         }
@@ -806,13 +826,11 @@ async function openUniversalLightbox(url, title, timeStr, filename, mediaType = 
   }
 }
 
-// In-Place Blob Downloader (Guaranteed to save locally without opening new tab)
 async function performInPlaceDownload(targetUrl, outputFilename) {
   let secureUrl = (targetUrl || '').replace(/^http:\/\//i, 'https://');
   if (!secureUrl) return;
 
   showToast(`⬇ Saving ${outputFilename} directly to your device…`);
-
   let blob = null;
 
   const isImage = /\.(jpg|jpeg|png|webp|tif|tiff)$/i.test(secureUrl.split('?')[0]) || activeLightboxMedia.mediaType === 'image';
@@ -821,9 +839,7 @@ async function performInPlaceDownload(targetUrl, outputFilename) {
     try {
       const proxyUrl = `https://wsrv.nl/?url=${encodeURIComponent(secureUrl)}&output=jpg`;
       const res = await fetch(proxyUrl);
-      if (res.ok) {
-        blob = await res.blob();
-      }
+      if (res.ok) blob = await res.blob();
     } catch (_) {}
   }
 
@@ -831,9 +847,7 @@ async function performInPlaceDownload(targetUrl, outputFilename) {
     try {
       const cacheBustUrl = secureUrl.includes('?') ? `${secureUrl}&cb=${Date.now()}` : `${secureUrl}?cb=${Date.now()}`;
       const res = await fetch(cacheBustUrl, { mode: 'cors' });
-      if (res.ok) {
-        blob = await res.blob();
-      }
+      if (res.ok) blob = await res.blob();
     } catch (_) {}
   }
 
@@ -842,7 +856,6 @@ async function performInPlaceDownload(targetUrl, outputFilename) {
       `https://corsproxy.io/?${encodeURIComponent(secureUrl)}`,
       `https://api.codetabs.com/v1/proxy/?quest=${encodeURIComponent(secureUrl)}`
     ];
-
     for (const pUrl of proxies) {
       try {
         const res = await fetch(pUrl);
@@ -862,12 +875,10 @@ async function performInPlaceDownload(targetUrl, outputFilename) {
     a.download = outputFilename;
     document.body.appendChild(a);
     a.click();
-
     setTimeout(() => {
       document.body.removeChild(a);
       URL.revokeObjectURL(blobUrl);
     }, 4000);
-
     showToast('File saved to your device');
     return;
   }
@@ -949,7 +960,6 @@ function initUniversalLightbox() {
 
   shareBtn?.addEventListener('click', async () => {
     const deepLinkUrl = `${window.location.origin}${window.location.pathname}#planetary-explorer?asset=${encodeURIComponent(activeLightboxMedia.nasaId || '')}&title=${encodeURIComponent(activeLightboxMedia.title || '')}&media=${encodeURIComponent(activeLightboxMedia.mediaType || 'image')}`;
-
     if (navigator.share) {
       try {
         await navigator.share({
@@ -961,7 +971,6 @@ function initUniversalLightbox() {
         return;
       } catch (_) {}
     }
-
     navigator.clipboard.writeText(deepLinkUrl);
     showToast('T&C Space deep link copied! Directly opens this capture.');
   });
@@ -971,118 +980,22 @@ function initUniversalLightbox() {
 // 11. COSMIC & PLANETARY EXPLORER (UNIVERSE-WIDE RAW DATA DOWNLINKS)
 // ============================================================================
 const COSMIC_TARGETS = {
-  "deep-field": {
-    name: "Deep Field & First Galaxies",
-    query: "Deep Field Webb Hubble ultra deep field distant galaxy",
-    fallback: "Hubble Ultra Deep Field",
-    instrument: "JWST/NIRCam · HST/ACS",
-    type: "deep-space"
-  },
-  "jwst-raw": {
-    name: "JWST Raw Science (Webb)",
-    query: "James Webb Space Telescope NIRCam MIRI uncalibrated",
-    fallback: "James Webb raw image",
-    instrument: "JWST NIRCam/MIRI/NIRSpec",
-    type: "deep-space"
-  },
-  "hubble-raw": {
-    name: "Hubble Raw Detector (HST)",
-    query: "Hubble Space Telescope WFC3 ACS detector exposure",
-    fallback: "Hubble Space Telescope",
-    instrument: "HST WFC3/UVIS · ACS/WFC",
-    type: "deep-space"
-  },
-  "nebulae": {
-    name: "Nebulae & Stellar Nurseries",
-    query: "Carina Nebula Orion Pillars of Creation Webb Hubble",
-    fallback: "Eagle Nebula Pillars of Creation",
-    instrument: "Infrared & Narrowband Photometry",
-    type: "deep-space"
-  },
-  "galaxies": {
-    name: "Spiral & Colliding Galaxies",
-    query: "Andromeda Whirlpool Sombrero Cartwheel galaxy collision",
-    fallback: "Spiral galaxy Webb Hubble",
-    instrument: "Wide-Field Camera Array",
-    type: "deep-space"
-  },
-  "black-holes": {
-    name: "Black Holes & X-Ray Jets",
-    query: "Chandra X-ray Observatory black hole Sagittarius M87 jet",
-    fallback: "Chandra X-ray black hole",
-    instrument: "Chandra ACIS / HRC High-Energy",
-    type: "deep-space"
-  },
-  "supernovae": {
-    name: "Supernovae & Remnants",
-    query: "Cassiopeia A Crab Nebula supernova remnant Chandra Webb",
-    fallback: "Crab Nebula supernova",
-    instrument: "X-Ray & Thermal Infrared",
-    type: "deep-space"
-  },
-  "pulsars": {
-    name: "Pulsars & Neutron Stars",
-    query: "pulsar neutron star magnetar Chandra Fermi",
-    fallback: "Crab pulsar X-ray",
-    instrument: "High-Energy Gamma & X-Ray",
-    type: "deep-space"
-  },
-  "exoplanets": {
-    name: "Exoplanet Systems",
-    query: "exoplanet transit spectroscopy Kepler TESS Webb atmosphere",
-    fallback: "exoplanet transit light curve",
-    instrument: "Transit Photometer & Spectrometer",
-    type: "deep-space"
-  },
-  "gravitational": {
-    name: "Gravitational Lenses",
-    query: "gravitational lensing Einstein ring galaxy cluster Webb",
-    fallback: "gravitational lens galaxy cluster",
-    instrument: "Deep Space Cosmological Sensor",
-    type: "deep-space"
-  },
-  "sun": {
-    name: "Solar SDO Direct Telemetry",
-    query: "Solar Dynamics Observatory AIA extreme ultraviolet flare",
-    fallback: "SDO solar flare 193 171",
-    instrument: "SDO AIA / HMI EUV Imagers",
-    type: "solar"
-  },
-  "mars-raw": {
-    name: "Mars Rover Raw Downlinks",
-    query: "Perseverance Curiosity raw image Mastcam Navcam Hazcam Sol",
-    fallback: "Perseverance Mars raw",
-    instrument: "Mastcam-Z / Navcam Raw Detectors",
-    type: "planetary"
-  },
-  "jupiter": {
-    name: "Jupiter JunoCam Raw Buffer",
-    query: "Juno spacecraft JunoCam Jupiter raw Great Red Spot",
-    fallback: "Juno Jupiter atmosphere",
-    instrument: "JunoCam Raw Push-Frame Detector",
-    type: "planetary"
-  },
-  "saturn": {
-    name: "Saturn Cassini Archives",
-    query: "Cassini spacecraft Saturn rings Enceladus Titan raw",
-    fallback: "Cassini Saturn rings",
-    instrument: "Cassini ISS Telemetry (Historic)",
-    type: "planetary"
-  },
-  "interstellar": {
-    name: "Comets & Interstellar Objects",
-    query: "Oumuamua Borisov comet Rosetta OSIRIS-REx Bennu",
-    fallback: "Comet 67P Rosetta",
-    instrument: "Deep Space Navigational Imagers",
-    type: "planetary"
-  },
-  "earth": {
-    name: "Earth Orbital Radiometers",
-    query: "Earth DSCOVR EPIC MODIS VIIRS satellite swath",
-    fallback: "Earth from space DSCOVR",
-    instrument: "DSCOVR EPIC / Terra MODIS",
-    type: "planetary"
-  }
+  "deep-field": { name: "Deep Field & First Galaxies", query: "Deep Field Webb Hubble ultra deep field distant galaxy", fallback: "Hubble Ultra Deep Field", instrument: "JWST/NIRCam · HST/ACS", type: "deep-space" },
+  "jwst-raw": { name: "JWST Raw Science (Webb)", query: "James Webb Space Telescope NIRCam MIRI uncalibrated", fallback: "James Webb raw image", instrument: "JWST NIRCam/MIRI/NIRSpec", type: "deep-space" },
+  "hubble-raw": { name: "Hubble Raw Detector (HST)", query: "Hubble Space Telescope WFC3 ACS detector exposure", fallback: "Hubble Space Telescope", instrument: "HST WFC3/UVIS · ACS/WFC", type: "deep-space" },
+  "nebulae": { name: "Nebulae & Stellar Nurseries", query: "Carina Nebula Orion Pillars of Creation Webb Hubble", fallback: "Eagle Nebula Pillars of Creation", instrument: "Infrared & Narrowband Photometry", type: "deep-space" },
+  "galaxies": { name: "Spiral & Colliding Galaxies", query: "Andromeda Whirlpool Sombrero Cartwheel galaxy collision", fallback: "Spiral galaxy Webb Hubble", instrument: "Wide-Field Camera Array", type: "deep-space" },
+  "black-holes": { name: "Black Holes & X-Ray Jets", query: "Chandra X-ray Observatory black hole Sagittarius M87 jet", fallback: "Chandra X-ray black hole", instrument: "Chandra ACIS / HRC High-Energy", type: "deep-space" },
+  "supernovae": { name: "Supernovae & Remnants", query: "Cassiopeia A Crab Nebula supernova remnant Chandra Webb", fallback: "Crab Nebula supernova", instrument: "X-Ray & Thermal Infrared", type: "deep-space" },
+  "pulsars": { name: "Pulsars & Neutron Stars", query: "pulsar neutron star magnetar Chandra Fermi", fallback: "Crab pulsar X-ray", instrument: "High-Energy Gamma & X-Ray", type: "deep-space" },
+  "exoplanets": { name: "Exoplanet Systems", query: "exoplanet transit spectroscopy Kepler TESS Webb atmosphere", fallback: "exoplanet transit light curve", instrument: "Transit Photometer & Spectrometer", type: "deep-space" },
+  "gravitational": { name: "Gravitational Lenses", query: "gravitational lensing Einstein ring galaxy cluster Webb", fallback: "gravitational lens galaxy cluster", instrument: "Deep Space Cosmological Sensor", type: "deep-space" },
+  "sun": { name: "Solar SDO Direct Telemetry", query: "Solar Dynamics Observatory AIA extreme ultraviolet flare", fallback: "SDO solar flare 193 171", instrument: "SDO AIA / HMI EUV Imagers", type: "solar" },
+  "mars-raw": { name: "Mars Rover Raw Downlinks", query: "Perseverance Curiosity raw image Mastcam Navcam Hazcam Sol", fallback: "Perseverance Mars raw", instrument: "Mastcam-Z / Navcam Raw Detectors", type: "planetary" },
+  "jupiter": { name: "Jupiter JunoCam Raw Buffer", query: "Juno spacecraft JunoCam Jupiter raw Great Red Spot", fallback: "Juno Jupiter atmosphere", instrument: "JunoCam Raw Push-Frame Detector", type: "planetary" },
+  "saturn": { name: "Saturn Cassini Archives", query: "Cassini spacecraft Saturn rings Enceladus Titan raw", fallback: "Cassini Saturn rings", instrument: "Cassini ISS Telemetry (Historic)", type: "planetary" },
+  "interstellar": { name: "Comets & Interstellar Objects", query: "Oumuamua Borisov comet Rosetta OSIRIS-REx Bennu", fallback: "Comet 67P Rosetta", instrument: "Deep Space Navigational Imagers", type: "planetary" },
+  "earth": { name: "Earth Orbital Radiometers", query: "Earth DSCOVR EPIC MODIS VIIRS satellite swath", fallback: "Earth from space DSCOVR", instrument: "DSCOVR EPIC / Terra MODIS", type: "planetary" }
 };
 
 let planetaryExplorerLoaded = false;
@@ -1143,14 +1056,8 @@ async function fetchPlanetaryFeed(topicKey, mediaFilter = 'image,video,audio') {
 
   try {
     let items = await queryNasaApi(targetObj.query, mediaFilter);
-
-    if (!items.length && targetObj.fallback) {
-      items = await queryNasaApi(targetObj.fallback, mediaFilter);
-    }
-    if (!items.length && mediaFilter !== 'image,video,audio') {
-      items = await queryNasaApi(targetObj.query, 'image,video,audio');
-    }
-
+    if (!items.length && targetObj.fallback) items = await queryNasaApi(targetObj.fallback, mediaFilter);
+    if (!items.length && mediaFilter !== 'image,video,audio') items = await queryNasaApi(targetObj.query, 'image,video,audio');
     if (!items.length) throw new Error("No sensor data returned");
 
     items.sort((a, b) => {
@@ -1162,9 +1069,7 @@ async function fetchPlanetaryFeed(topicKey, mediaFilter = 'image,video,audio') {
     const displayItems = items.slice(0, 18);
     planetaryExplorerLoaded = true;
 
-    if (timestamp) {
-      timestamp.textContent = `🛰️ ${targetObj.instrument} · ${displayItems.length} raw observations`;
-    }
+    if (timestamp) timestamp.textContent = `${targetObj.instrument} · ${displayItems.length} raw observations`;
 
     container.innerHTML = displayItems.map((item, index) => {
       const info = item.data?.[0] || {};
@@ -1173,10 +1078,7 @@ async function fetchPlanetaryFeed(topicKey, mediaFilter = 'image,video,audio') {
       const nasaId = info.nasa_id || '';
 
       let thumbSrc = links.find(l => l.href && (l.render === 'image' || l.href.endsWith('.jpg') || l.href.endsWith('.png')))?.href || links[0]?.href || '';
-      
-      if (!thumbSrc && mediaType === 'audio') {
-        thumbSrc = 'https://images-assets.nasa.gov/image/s130e012111/s130e012111~medium.jpg';
-      }
+      if (!thumbSrc && mediaType === 'audio') thumbSrc = 'https://images-assets.nasa.gov/image/s130e012111/s130e012111~medium.jpg';
       if (!thumbSrc) return '';
 
       thumbSrc = thumbSrc.replace(/^http:\/\//i, 'https://');
@@ -1188,7 +1090,6 @@ async function fetchPlanetaryFeed(topicKey, mediaFilter = 'image,video,audio') {
       const rawDate = info.date_created;
       const dateStr = rawDate ? new Date(rawDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Observation Log';
       const cleanFilename = generateTcFilename(title, "Asset", mediaType === 'video' ? 'mp4' : mediaType === 'audio' ? 'mp3' : 'jpg');
-
       const formatBadge = mediaType === 'video' ? '🎬 4K TIME-LAPSE' : mediaType === 'audio' ? '🎙️ RADIO AUDIO' : '📸 RAW DETECTOR';
 
       return `
@@ -1223,7 +1124,6 @@ async function fetchPlanetaryFeed(topicKey, mediaFilter = 'image,video,audio') {
         openUniversalLightbox(url, title, `${targetObj.instrument} · ${timeStr}`, filename, mediaType, nasaId);
       });
     });
-
   } catch (err) {
     if (container) {
       container.innerHTML = `
@@ -1259,9 +1159,7 @@ async function fetchEpicEarth() {
       document.getElementById('epic-date-ist').textContent = dateIstStr;
 
       const coords = item.centroid_coordinates;
-      if (coords) {
-        document.getElementById('epic-centroid').textContent = `${coords.lat.toFixed(1)}°N, ${coords.lon.toFixed(1)}°E`;
-      }
+      if (coords) document.getElementById('epic-centroid').textContent = `${coords.lat.toFixed(1)}°N, ${coords.lon.toFixed(1)}°E`;
 
       if (box) {
         box.innerHTML = `<img src="${imgUrl}" alt="Earth from 1,000,000 miles" loading="lazy">`;
@@ -1271,9 +1169,7 @@ async function fetchEpicEarth() {
       }
     }
   } catch (_) {
-    if (box) {
-      box.innerHTML = '<p class="muted">NASA DSCOVR EPIC satellite data synchronizing…</p>';
-    }
+    if (box) box.innerHTML = '<p class="muted">NASA DSCOVR EPIC satellite data synchronizing…</p>';
   }
 }
 
@@ -1297,7 +1193,6 @@ async function fetchMarsPhotos() {
     });
   }
 
-  // Tier 1: Query Curiosity Rover Latest Sols
   try {
     const res = await fetch(`https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/latest_photos?api_key=${NASA_API_KEY}`);
     if (res.ok) {
@@ -1306,22 +1201,18 @@ async function fetchMarsPhotos() {
       if (photos.length > 0) {
         document.getElementById('curiosity-sol').textContent = 'Sol ' + photos[0].sol;
         document.getElementById('mars-gallery-title').textContent = 'Latest Surface Photos (Curiosity Rover)';
-
-        const formatted = photos.slice(0, 4).map(p => ({
+        renderMarsItems(photos.slice(0, 4).map(p => ({
           url: p.img_src.replace('http://', 'https://'),
           title: `Mars Surface (${p.rover.name} Rover - ${p.camera.full_name || 'Camera'})`,
           time: `Sol ${p.sol} · Earth Date: ${p.earth_date}`,
           tag: `${p.camera.full_name || 'Navcam'} · Sol ${p.sol}`,
           filename: `T&C_Space_Mars_${p.rover.name}_Sol_${p.sol}.jpg`
-        }));
-
-        renderMarsItems(formatted);
+        })));
         return;
       }
     }
   } catch (_) {}
 
-  // Tier 2: Query Perseverance Rover Raw Surface Imagery
   try {
     const res = await fetch('https://images-api.nasa.gov/search?q=Perseverance%20Mars%20surface%20raw&media_type=image');
     if (res.ok) {
@@ -1329,42 +1220,32 @@ async function fetchMarsPhotos() {
       const items = data.collection?.items || [];
       if (items.length > 0) {
         document.getElementById('mars-gallery-title').textContent = 'Martian Surface Captures (Perseverance Mars 2020)';
-
-        const formatted = items.slice(0, 4).map(item => ({
+        renderMarsItems(items.slice(0, 4).map(item => ({
           url: (item.links?.[0]?.href || '').replace('http://', 'https://'),
           title: item.data?.[0]?.title || 'Mars Surface Raw',
           time: `Captured: ${item.data?.[0]?.date_created?.slice(0, 10) || 'Recent'}`,
           tag: `${(item.data?.[0]?.title || 'Mars Raw').slice(0, 24)}`,
           filename: `T&C_Space_Mars_Surface_Capture.jpg`
-        }));
-
-        renderMarsItems(formatted);
+        })));
         return;
       }
     }
   } catch (_) {}
 
-  // Tier 3: Guaranteed Verified High-Res Mars Surface Fallback
   try {
     const res = await fetch('https://images-api.nasa.gov/search?q=Mars%20surface%20panorama%20rover&media_type=image');
     if (!res.ok) throw new Error();
     const data = await res.json();
     const items = data.collection?.items || [];
-
     if (items.length > 0) {
       document.getElementById('mars-gallery-title').textContent = 'Martian Panoramic Surface Telemetry (NASA Rovers)';
-
-      const formatted = items.slice(0, 4).map(item => ({
+      renderMarsItems(items.slice(0, 4).map(item => ({
         url: (item.links?.[0]?.href || '').replace('http://', 'https://'),
         title: item.data?.[0]?.title || 'Mars Panorama',
         time: `Observation: ${item.data?.[0]?.date_created?.slice(0, 10) || 'Recent'}`,
         tag: `${(item.data?.[0]?.title || 'Mars').slice(0, 24)}`,
         filename: `T&C_Space_Mars_Panorama.jpg`
-      }));
-
-      renderMarsItems(formatted);
-    } else {
-      throw new Error();
+      })));
     }
   } catch (_) {
     container.innerHTML = '<p class="muted">NASA Deep Space Network syncing Mars rover imagery…</p>';
@@ -1380,7 +1261,6 @@ async function fetchSpaceWeather() {
   const today = new Date().toISOString().slice(0, 10);
   const prev = new Date(Date.now() - 7 * 86400000).toISOString().slice(0, 10);
 
-  // Fetch Solar Flares
   try {
     const res = await fetch(`https://api.nasa.gov/DONKI/FLR?startDate=${prev}&endDate=${today}&api_key=${NASA_API_KEY}&cb=${Date.now()}`);
     let flares = [];
@@ -1398,7 +1278,6 @@ async function fetchSpaceWeather() {
         document.getElementById('sw-kp-val').textContent = 'Kp 1.7';
         document.getElementById('sw-flare-val').textContent = 'Class B/C';
         document.getElementById('sw-storm-val').textContent = 'G0 Alert';
-
         list.innerHTML = `
           <div class="weather-event-row">
             <div>
@@ -1431,20 +1310,8 @@ async function fetchSpaceWeather() {
       weatherSyncBadge.style.color = 'var(--red)';
       weatherSyncBadge.textContent = 'Offline 🔴';
     }
-    if (list) {
-      list.innerHTML = `
-        <div class="weather-event-row">
-          <div>
-            <b>NOAA SWPC Heliophysics Telemetry</b>
-            <small>Sun is currently in standard quiet background flux. Solar radiation storms: None.</small>
-          </div>
-          <span class="small-chip green">NOMINAL</span>
-        </div>
-      `;
-    }
   }
 
-  // Fetch Coronal Mass Ejections (CME)
   if (cmeList) {
     try {
       const cmeRes = await fetch(`https://api.nasa.gov/DONKI/CME?startDate=${prev}&endDate=${today}&api_key=${NASA_API_KEY}&cb=${Date.now()}`);
@@ -1467,7 +1334,6 @@ async function fetchSpaceWeather() {
           const speed = speedNum + ' km/s';
           const isEarthDirected = Boolean(c.cmeAnalyses?.[0]?.isEarthDirected);
 
-          // Calculate approximate physical transit time from Sun to Earth (~150M km)
           const transitHours = Math.max(18, Math.round(150000000 / (speedNum * 3600)));
           const arrivalEstimate = c.startTime ? new Date(new Date(c.startTime).getTime() + transitHours * 3600000).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Kolkata' }) + ' IST' : 'Calculated in transit';
 
@@ -1516,7 +1382,6 @@ async function fetchAsteroids() {
   const container = document.getElementById('neo-list');
   try {
     const today = new Date().toISOString().slice(0, 10);
-    const prev = new Date().toISOString().slice(0, 10);
     const res = await fetch(`https://api.nasa.gov/neo/rest/v1/feed?start_date=${today}&end_date=${today}&api_key=${NASA_API_KEY}&cb=${Date.now()}`);
     if (!res.ok) throw new Error();
     const data = await res.json();
@@ -1566,9 +1431,7 @@ async function fetchEarthquakes() {
     const quakes = data.features || [];
 
     const quakeBadge = document.getElementById('quake-count');
-    if (quakeBadge) {
-      quakeBadge.textContent = `${quakes.length} ACTIVE`;
-    }
+    if (quakeBadge) quakeBadge.textContent = `${quakes.length} ACTIVE`;
 
     const heroQ = document.getElementById('hero-quake-count');
     if (heroQ) heroQ.textContent = quakes.length;
@@ -1640,9 +1503,7 @@ async function fetchEonetHazards() {
     const events = data.events || [];
 
     const badge = document.getElementById('hazard-count');
-    if (badge) {
-      badge.textContent = `${events.length} ACTIVE`;
-    }
+    if (badge) badge.textContent = `${events.length} ACTIVE`;
 
     if (hazardLayerGroup) {
       hazardLayerGroup.clearLayers();
@@ -1703,7 +1564,6 @@ async function fetchAreaIntel(lat, lon, locationName) {
     if (weatherRes.ok) {
       const wData = await weatherRes.json();
       const curW = wData.current || {};
-
       const temp = curW.temperature_2m !== undefined ? Math.round(curW.temperature_2m) + '°C' : '—';
       const feels = curW.apparent_temperature !== undefined ? Math.round(curW.apparent_temperature) + '°C' : '—';
       const hum = curW.relative_humidity_2m !== undefined ? curW.relative_humidity_2m + '%' : '—';
@@ -1742,7 +1602,6 @@ async function fetchAreaIntel(lat, lon, locationName) {
     if (aqiRes.ok) {
       const aqiData = await aqiRes.json();
       const curA = aqiData.current || {};
-
       const aqi = curA.us_aqi ?? 25;
       document.getElementById('intel-aqi').textContent = aqi;
       const aqiBadge = document.getElementById('intel-aqi-badge');
@@ -1764,44 +1623,29 @@ async function fetchAreaIntel(lat, lon, locationName) {
       const pm25 = curA.pm2_5 ?? 10;
       document.getElementById('intel-pm25').textContent = pm25 + ' μg/m³';
       const pm25Badge = document.getElementById('intel-pm25-badge');
-      if (pm25 <= 12) {
-        pm25Badge.className = 'status-tag green'; pm25Badge.textContent = 'Safe';
-      } else if (pm25 <= 35) {
-        pm25Badge.className = 'status-tag yellow'; pm25Badge.textContent = 'Moderate';
-      } else {
-        pm25Badge.className = 'status-tag red'; pm25Badge.textContent = 'Elevated';
-      }
+      if (pm25 <= 12) { pm25Badge.className = 'status-tag green'; pm25Badge.textContent = 'Safe'; }
+      else if (pm25 <= 35) { pm25Badge.className = 'status-tag yellow'; pm25Badge.textContent = 'Moderate'; }
+      else { pm25Badge.className = 'status-tag red'; pm25Badge.textContent = 'Elevated'; }
 
       const pm10 = curA.pm10 ?? 20;
       document.getElementById('intel-pm10').textContent = pm10 + ' μg/m³';
       const pm10Badge = document.getElementById('intel-pm10-badge');
-      if (pm10 <= 54) {
-        pm10Badge.className = 'status-tag green'; pm10Badge.textContent = 'Safe';
-      } else if (pm10 <= 154) {
-        pm10Badge.className = 'status-tag yellow'; pm10Badge.textContent = 'Moderate';
-      } else {
-        pm10Badge.className = 'status-tag red'; pm10Badge.textContent = 'Dusty';
-      }
+      if (pm10 <= 54) { pm10Badge.className = 'status-tag green'; pm10Badge.textContent = 'Safe'; }
+      else if (pm10 <= 154) { pm10Badge.className = 'status-tag yellow'; pm10Badge.textContent = 'Moderate'; }
+      else { pm10Badge.className = 'status-tag red'; pm10Badge.textContent = 'Dusty'; }
 
       const no2 = curA.nitrogen_dioxide ?? 15;
       document.getElementById('intel-no2').textContent = no2 + ' μg/m³';
       const no2Badge = document.getElementById('intel-no2-badge');
-      if (no2 <= 40) {
-        no2Badge.className = 'status-tag green'; no2Badge.textContent = 'Low';
-      } else {
-        no2Badge.className = 'status-tag orange'; no2Badge.textContent = 'Traffic Fumes';
-      }
+      if (no2 <= 40) { no2Badge.className = 'status-tag green'; no2Badge.textContent = 'Low'; }
+      else { no2Badge.className = 'status-tag orange'; no2Badge.textContent = 'Traffic Fumes'; }
 
       const solar = curA.direct_normal_irradiance ?? 0;
       document.getElementById('intel-solar').textContent = solar + ' W/m²';
       const solarBadge = document.getElementById('intel-solar-badge');
-      if (solar <= 200) {
-        solarBadge.className = 'status-tag green'; solarBadge.textContent = 'Low/Night';
-      } else if (solar <= 600) {
-        solarBadge.className = 'status-tag yellow'; solarBadge.textContent = 'Normal';
-      } else {
-        solarBadge.className = 'status-tag orange'; solarBadge.textContent = 'Intense Sun';
-      }
+      if (solar <= 200) { solarBadge.className = 'status-tag green'; solarBadge.textContent = 'Low/Night'; }
+      else if (solar <= 600) { solarBadge.className = 'status-tag yellow'; solarBadge.textContent = 'Normal'; }
+      else { solarBadge.className = 'status-tag orange'; solarBadge.textContent = 'Intense Sun'; }
     }
   } catch (_) {}
 }
@@ -1894,9 +1738,7 @@ async function fetchApod() {
     document.getElementById('apod-date').textContent = date;
 
     const creditEl = document.getElementById('apod-copyright');
-    if (creditEl) {
-      creditEl.innerHTML = 'Credit: ' + credit;
-    }
+    if (creditEl) creditEl.innerHTML = 'Credit: ' + credit;
 
     const prevTitle = document.getElementById('apod-preview-title');
     const prevDesc = document.getElementById('apod-preview-desc');
@@ -2152,7 +1994,6 @@ function initAlertPreferences() {
         showToast('Preferences & Location Synced');
         return;
       }
-
       showToast('Notification preferences saved locally.');
     } catch (e) {
       showToast('Preferences saved: ' + (e.message || 'Complete'));
@@ -2163,12 +2004,10 @@ function initAlertPreferences() {
     if ('Notification' in window && Notification.permission === 'default') {
       await Notification.requestPermission();
     }
-
     if ('Notification' in window && Notification.permission === 'denied') {
       showToast('Notifications blocked. Tap lock icon in browser bar to allow.');
       return;
     }
-
     if ('Notification' in window && Notification.permission === 'granted') {
       const isCosmic = document.getElementById('toggle-cosmic').checked;
       const isIss = document.getElementById('toggle-iss').checked;
