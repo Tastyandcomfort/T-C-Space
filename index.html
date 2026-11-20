@@ -333,29 +333,27 @@
               <div id="sat-search-dropdown" class="autocomplete-dropdown" hidden></div>
             </div>
 
-            <!-- Single-Line Horizontally Scrollable Fleet Presets Slider -->
-            <div class="sat-presets-bar">
+           <!-- Single-Line Horizontally Scrollable Fleet Presets Slider -->
+            <div class="sat-presets-bar" id="sat-presets-bar">
               <span class="sat-select-lbl">ACTIVE FLEET:</span>
-              <button class="sat-chip active" data-sat-id="25544" data-sat-name="ISS (ZARYA)">🛰️ ISS (Zarya)</button>
-              <button class="sat-chip" data-sat-id="48274" data-sat-name="CSS TIANHE (TIANGONG)">🛰️ Tiangong (CSS)</button>
+              <button class="sat-chip active" data-sat-id="25544" data-sat-name="ISS (ZARYA)"> ISS (Zarya)</button>
+              <button class="sat-chip" data-sat-id="48274" data-sat-name="CSS TIANHE (TIANGONG)"> Tiangong (CSS)</button>
               <button class="sat-chip" data-sat-id="57320" data-sat-name="CHANDRAYAAN-3 (ISRO)">🇮🇳 Chandrayaan-3</button>
               <button class="sat-chip" data-sat-id="43286" data-sat-name="NAVIC-1I (ISRO)">🇮🇳 NavIC-1I</button>
-              <button class="sat-chip" data-sat-id="20580" data-sat-name="HUBBLE SPACE TELESCOPE">🔭 Hubble (HST)</button>
-              <button class="sat-chip" data-sat-id="43013" data-sat-name="NOAA 20">🛰️ NOAA-20</button>
-              <button class="sat-chip" data-sat-id="new-eos08" data-sat-name="EOS-08 (ISRO SSLV)">🚀 EOS-08 (ISRO SSLV)</button>
-              <button class="sat-chip" data-sat-id="new-starlink" data-sat-name="STARLINK-31200">🚀 Starlink-31200</button>
-              <button class="sat-chip" data-sat-id="new-cygnus" data-sat-name="CYGNUS NG-21">🚀 Cygnus NG-21</button>
-              <button class="sat-chip" data-sat-id="voyager-1" data-sat-name="VOYAGER 1 (INTERSTELLAR)">🌌 Voyager 1 (Interstellar)</button>
-              <button class="sat-chip" data-sat-id="voyager-2" data-sat-name="VOYAGER 2 (INTERSTELLAR)">🌌 Voyager 2 (Interstellar)</button>
+              <button class="sat-chip" data-sat-id="20580" data-sat-name="HUBBLE SPACE TELESCOPE"> Hubble (HST)</button>
+              <button class="sat-chip" data-sat-id="43013" data-sat-name="NOAA 20"> NOAA-20</button>
+              <button class="sat-chip" data-sat-id="newly-deployed" data-sat-name="NEWLY DEPLOYED" id="newly-deployed-btn"> Newly Deployed (30days)</button>
+              <button class="sat-chip" data-sat-id="voyager-1" data-sat-name="VOYAGER 1 (INTERSTELLAR)"> Voyager 1 (Interstellar)</button>
+              <button class="sat-chip" data-sat-id="voyager-2" data-sat-name="VOYAGER 2 (INTERSTELLAR)"> Voyager 2 (Interstellar)</button>
             </div>
-
+            
             <!-- Map Layer Chips Toolbar -->
             <div class="map-toolbar-row">
               <div class="map-layer-chips">
-                <button class="layer-chip active" id="toggle-layer-iss">🛰️ Spacecraft Active</button>
-                <button class="layer-chip active" id="toggle-layer-quakes">🌍 Quakes (USGS)</button>
-                <button class="layer-chip active" id="toggle-layer-hazards">🌋 Hazards (EONET)</button>
-                <button class="layer-chip active" id="toggle-layer-track">⌖ Ground Track</button>
+                <button class="layer-chip active" id="toggle-layer-iss"> Spacecraft Active</button>
+                <button class="layer-chip active" id="toggle-layer-quakes"> Quakes (USGS)</button>
+                <button class="layer-chip active" id="toggle-layer-hazards"> Hazards (EONET)</button>
+                <button class="layer-chip active" id="toggle-layer-track"> Ground Track</button>
               </div>
             </div>
 
@@ -1090,13 +1088,13 @@
       <div class="apple-sheet-options">
         <button type="button" class="apple-sheet-option-btn primary" id="sheet-download-opt">
           <div class="sheet-opt-left">
-            <span class="sheet-opt-icon">⚡</span>
+            <span class="sheet-opt-icon"></span>
             <div><b class="sheet-opt-title">Optimized File</b><small class="sheet-opt-meta">Instant saving</small></div>
           </div>
         </button>
         <button type="button" class="apple-sheet-option-btn" id="sheet-download-raw">
           <div class="sheet-opt-left">
-            <span class="sheet-opt-icon">📷</span>
+            <span class="sheet-opt-icon"></span>
             <div><b class="sheet-opt-title">Raw Master File</b><small class="sheet-opt-meta">Full resolution sensor data</small></div>
           </div>
         </button>
