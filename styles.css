@@ -529,12 +529,140 @@ button { font-family: inherit; }
 }
 .layer-chip.active { background: var(--blue); color: #fff; border-color: var(--blue); }
 
-.map-viewport-wrapper { position: relative; border-radius: 14px; overflow: hidden; }
-.map { height: 440px; background: #111; }
+/* ============================================================================
+   MAP VIEWPORT, ZOOM CONTROL POSITIONING & REALISTIC SATELLITE MARKER
+   ============================================================================ */
+.map-viewport-wrapper {
+  position: relative;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.map {
+  height: 480px;
+  background: #111;
+}
+
 html[data-theme="dark"] .leaflet-tile {
   filter: brightness(0.68) invert(1) contrast(2.8) hue-rotate(180deg) saturate(0.35);
 }
 .leaflet-control-attribution { display: none !important; }
+
+/* Move Leaflet zoom controls safely to bottom-right so they never overlap HUD */
+.leaflet-bottom.leaflet-right {
+  bottom: 14px !important;
+  right: 14px !important;
+  z-index: 500 !important;
+}
+
+.leaflet-control-zoom {
+  border: 1px solid var(--line) !important;
+  border-radius: 10px !important;
+  overflow: hidden;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4) !important;
+}
+
+.leaflet-control-zoom a {
+  background: var(--surface-solid) !important;
+  color: var(--text) !important;
+  border-bottom: 1px solid var(--line) !important;
+}
+
+/* Clear placement for Top-Left Telemetry Overlay */
+.map-hud-chip {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 600;
+  background: var(--surface);
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
+  border: 1px solid var(--line);
+  color: var(--text);
+  padding: 8px 14px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  pointer-events: none;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+.map-hud-chip b { font-size: 11px; display: block; color: var(--text); }
+.map-hud-chip span { font: 9px var(--mono); color: var(--blue); }
+
+/* Aerospace Realistic Satellite SVG Marker */
+.aerospace-hud-marker {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.hud-reticle-box {
+  position: relative;
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hud-satellite-svg {
+  position: relative;
+  z-index: 5;
+  filter: drop-shadow(0 0 6px var(--hud-accent, #2997ff));
+  transition: transform 0.25s ease;
+}
+
+@keyframes hudCompassSweep { 100% { transform: rotate(360deg); } }
+
+.hud-compass-ring {
+  position: absolute;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px dashed color-mix(in srgb, var(--hud-accent, #2997ff) 50%, transparent);
+  animation: hudCompassSweep 16s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes hudSonarPulse {
+  0% { transform: scale(0.6); opacity: 0.95; }
+  65% { transform: scale(2.4); opacity: 0.25; }
+  100% { transform: scale(3.2); opacity: 0; }
+}
+
+.hud-radar-pulse {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1.5px solid var(--hud-accent, #2997ff);
+  animation: hudSonarPulse 2.4s infinite cubic-bezier(0.1, 0.7, 0.4, 1);
+  pointer-events: none;
+}
+
+.hud-micro-tag {
+  margin-top: 4px;
+  padding: 3px 8px;
+  background: var(--surface-solid);
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  font: 700 8.5px var(--mono);
+  color: var(--hud-accent, #2997ff);
+  white-space: nowrap;
+  letter-spacing: 0.4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+  pointer-events: auto;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.hud-micro-tag:hover { border-color: var(--hud-accent, #2997ff); }
 
 /* Re-Themed Apple Frosted Glass Leaflet Popups */
 .leaflet-popup-content-wrapper {
@@ -562,97 +690,6 @@ html[data-theme="dark"] .leaflet-tile {
   font-size: 14px !important;
 }
 
-/* Realistic Spacecraft Marker & HUD */
-.aerospace-hud-marker {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  pointer-events: auto;
-}
-.hud-reticle-box {
-  position: relative;
-  width: 52px;
-  height: 52px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-}
-@keyframes hudCompassSweep { 100% { transform: rotate(360deg); } }
-.hud-compass-ring {
-  position: absolute;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  border: 1px dashed color-mix(in srgb, var(--hud-accent, #2997ff) 50%, transparent);
-  animation: hudCompassSweep 16s linear infinite;
-  pointer-events: none;
-}
-@keyframes hudSonarPulse {
-  0% { transform: scale(0.6); opacity: 0.95; }
-  65% { transform: scale(2.4); opacity: 0.25; }
-  100% { transform: scale(3.2); opacity: 0; }
-}
-.hud-radar-pulse {
-  position: absolute;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  border: 1.5px solid var(--hud-accent, #2997ff);
-  animation: hudSonarPulse 2.4s infinite cubic-bezier(0.1, 0.7, 0.4, 1);
-  pointer-events: none;
-}
-.hud-radar-pulse.delay { animation-delay: 1.2s; }
-.hud-crosshair-svg {
-  position: relative;
-  z-index: 3;
-  filter: drop-shadow(0 0 6px var(--hud-accent, #2997ff));
-  cursor: pointer;
-  transition: transform 0.2s ease;
-}
-
-/* Theme-Adaptive Clickable Satellite Tag */
-.hud-micro-tag {
-  margin-top: 4px;
-  padding: 3px 8px;
-  background: var(--surface-solid);
-  backdrop-filter: var(--blur);
-  -webkit-backdrop-filter: var(--blur);
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  font: 700 8.5px var(--mono);
-  color: var(--hud-accent, #2997ff);
-  white-space: nowrap;
-  letter-spacing: 0.4px;
-  box-shadow: var(--shadow);
-  pointer-events: auto;
-  cursor: pointer;
-  transition: background 0.2s, color 0.2s, border-color 0.2s;
-}
-.hud-micro-tag:hover { border-color: var(--hud-accent, #2997ff); }
-
-.map-hud-chip {
-  position: absolute;
-  top: 12px;
-  left: 12px;
-  z-index: 500;
-  background: var(--surface);
-  backdrop-filter: var(--blur);
-  -webkit-backdrop-filter: var(--blur);
-  border: 1px solid var(--line);
-  color: var(--text);
-  padding: 8px 14px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  pointer-events: none;
-}
-.map-hud-chip b { font-size: 11px; display: block; color: var(--text); }
-.map-hud-chip span { font: 9px var(--mono); color: var(--blue); }
-
 .map-legend-overlay {
   position: absolute;
   bottom: 12px;
@@ -679,6 +716,65 @@ html[data-theme="dark"] .leaflet-tile {
 
 .map-foot { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 12px; font-size: 10px; color: var(--muted); }
 .map-foot b { font-family: var(--mono); color: var(--blue); }
+
+/* ============================================================================
+   VOYAGER DEDICATED TERMINAL STYLES
+   ============================================================================ */
+.voyager-detail-panel {
+  padding: 22px;
+  background: linear-gradient(135deg, var(--surface), var(--surface-solid));
+}
+
+.voyager-toggle-btns {
+  display: flex;
+  gap: 8px;
+}
+.voyager-toggle-btns button.active {
+  background: var(--purple);
+  color: #fff;
+  border-color: var(--purple);
+}
+
+.voyager-metrics-terminal-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin: 18px 0 14px;
+}
+
+.voyager-spec-box {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+}
+.voyager-spec-box small { font-size: 8px; color: var(--dim); letter-spacing: 0.8px; margin-bottom: 4px; }
+.voyager-spec-box strong { font: 700 16px var(--mono); color: var(--text); margin-bottom: 2px; }
+.voyager-spec-box span { font: 10px var(--mono); color: var(--blue); }
+
+.voyager-instruments-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.instrument-tag {
+  font: 10px var(--mono);
+  padding: 5px 10px;
+  border-radius: 8px;
+  background: var(--surface-solid);
+  border: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.instrument-tag.green span { color: var(--green); }
+.instrument-tag.orange span { color: var(--orange); }
+.instrument-tag.blue span { color: var(--blue); }
 
 /* Spotlight Launch Card & NASA T-Minus Mission Clock */
 .launch-spotlight-card {
@@ -933,7 +1029,6 @@ html[data-theme="dark"] .leaflet-tile {
 .apod-foot { display: flex; justify-content: space-between; align-items: center; margin-top: 14px; font-size: 10px; }
 .apod-foot a { color: var(--blue); text-decoration: underline; }
 
-/* Symmetrical Two-Row Earthquake & Hazard Cards */
 .dual-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
 .earthquake-feed { display: flex; flex-direction: column; gap: 10px; max-height: 480px; overflow-y: auto; }
 .quake-row {
@@ -1025,7 +1120,7 @@ html[data-theme="dark"] .leaflet-tile {
 .area-pill.active, .wiki-pill.active { background: var(--blue); color: #fff; border-color: var(--blue); }
 
 .intel-brief-box { padding: 14px 18px; border-radius: 14px; background: color-mix(in srgb, var(--blue-soft) 40%, var(--surface-solid)); border: 1px solid var(--line); margin-bottom: 16px; min-width: 0; }
-.intel-brief-head { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+.intel-brief-head { display: flex; justify-content: space-between; align-items: center; flex-wrap: gap: 10px; }
 .intel-brief-head h3 { font-size: 18px; margin-top: 4px; overflow-wrap: anywhere; }
 
 .intel-metrics-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
@@ -1096,11 +1191,7 @@ html[data-theme="dark"] .leaflet-tile {
 
 .about-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
 .about-card { min-width: 0; }
-.about-span-two { grid-column: span 2; }
 .about-text { font-size: 12px; color: var(--muted); line-height: 1.65; margin: 8px 0 12px; }
-.about-highlights { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; padding: 12px 0; border-top: 1px solid var(--line); }
-.about-highlights small { font-size: 8px; color: var(--dim); display: block; margin-bottom: 2px; }
-.about-highlights b { font-size: 11px; }
 
 .developer-profile { display: flex; align-items: center; gap: 12px; margin-top: 10px; }
 .developer-avatar {
@@ -1116,49 +1207,6 @@ html[data-theme="dark"] .leaflet-tile {
 }
 .developer-profile h4 { font-size: 14px; margin-bottom: 2px; }
 .developer-profile small { font-size: 10px; color: var(--muted); }
-
-.ecosystem-cards-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 10px; }
-.ecosystem-card-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 14px;
-  border-radius: 14px;
-  background: var(--surface-solid);
-  border: 1px solid var(--line);
-  text-decoration: none;
-  transition: transform 0.18s, border-color 0.18s;
-}
-.ecosystem-card-item:hover { transform: translateY(-2px); border-color: var(--blue); }
-.eco-icon {
-  width: 38px;
-  height: 38px;
-  border-radius: 10px;
-  display: grid;
-  place-items: center;
-  font-weight: 800;
-  font-size: 13px;
-  flex-shrink: 0;
-}
-.eco-icon.blue { background: rgba(10, 132, 255, 0.18); color: var(--blue); }
-.eco-icon.orange { background: rgba(255, 159, 10, 0.18); color: var(--orange); }
-.eco-icon.green { background: rgba(48, 209, 88, 0.18); color: var(--green); }
-.ecosystem-card-item b { font-size: 12px; display: block; color: var(--text); }
-.ecosystem-card-item small { font-size: 10px; color: var(--muted); }
-.eco-arrow { margin-left: auto; color: var(--blue); font-size: 14px; }
-
-.sources-pill-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
-.source-link-chip {
-  padding: 7px 12px;
-  border-radius: 99px;
-  background: var(--surface-solid);
-  border: 1px solid var(--line);
-  font: 11px var(--mono);
-  color: var(--blue);
-  text-decoration: none;
-  transition: border-color 0.15s;
-}
-.source-link-chip:hover { border-color: var(--blue); }
 
 .primary-button {
   background: var(--blue);
@@ -1225,7 +1273,6 @@ html[data-theme="dark"] .leaflet-tile {
 }
 .toast.show { opacity: 1; transform: translate(-50%, 0); }
 
-/* Mobile Bottom Dock (5 Clean Touch Targets) */
 .mobile-dock { display: none; }
 
 @media (max-width: 900px) {
@@ -1247,9 +1294,6 @@ html[data-theme="dark"] .leaflet-tile {
   .intel-metrics-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .epic-stats-strip { grid-template-columns: repeat(2, 1fr); }
   .about-grid { grid-template-columns: 1fr; }
-  .about-span-two { grid-column: span 1; }
-  .ecosystem-cards-row { grid-template-columns: 1fr; }
-  .about-highlights { grid-template-columns: 1fr; }
 
   .mobile-dock {
     display: flex;
@@ -1284,7 +1328,6 @@ html[data-theme="dark"] .leaflet-tile {
   .dock-link.active { color: var(--blue); font-weight: 600; }
 }
 
-/* Centered Mobile Connection Status Popover */
 @media (max-width: 600px) {
   .top-actions { gap: 6px; }
   .beacon-label { display: none; }
@@ -1297,9 +1340,7 @@ html[data-theme="dark"] .leaflet-tile {
     width: calc(100vw - 32px) !important;
     max-width: 320px !important;
   }
-  .network-popover-bubble.open {
-    transform: translateX(-50%) translateY(0) scale(1) !important;
-  }
+  .network-popover-bubble.open { transform: translateX(-50%) translateY(0) scale(1) !important; }
   .popover-caret { display: none !important; }
   .install-pill-btn {
     padding: 6px 8px;
@@ -1580,16 +1621,6 @@ html[data-theme="dark"] .leaflet-tile {
 .sheet-opt-icon { font-size: 24px; flex-shrink: 0; }
 .sheet-opt-title { font-size: 13.5px; display: block; }
 .sheet-opt-meta { font-size: 10px; color: var(--muted); display: block; }
-.sheet-opt-right {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 2px;
-  flex-shrink: 0;
-  margin-left: 12px;
-}
-.sheet-opt-size { font: 700 12px var(--mono); color: var(--text); }
-.sheet-opt-time { font: 700 10.5px var(--mono); color: var(--green); }
 .apple-sheet-cancel-btn {
   width: 100%;
   padding: 14px;
@@ -1688,6 +1719,7 @@ html[data-theme="dark"] .leaflet-tile {
   border-radius: 10px;
   display: grid;
   place-items: center;
+  font-size: 18px;
   flex-shrink: 0;
 }
 .more-item-icon.blue { background: rgba(41, 151, 255, 0.18); color: var(--blue); }
