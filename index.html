@@ -110,7 +110,6 @@
         </div>
 
         <div class="top-actions">
-          <!-- Compact Network Status Pill & Right-Aligned Dropdown Popover -->
           <div class="network-status-wrapper" id="network-status-wrapper">
             <button class="network-beacon-btn" id="network-beacon-btn" type="button" aria-label="Network Telemetry Status">
               <span class="status-dot pulse-dot"></span>
@@ -204,7 +203,7 @@
             </article>
 
             <!-- Card 2: Voyager 1 & 2 Interstellar Tracker -->
-            <article class="metric-card card-accent-purple clickable-card" id="voyager-metric-card" data-goto="satellites" title="Click to inspect deep-space radar">
+            <article class="metric-card card-accent-purple clickable-card" id="voyager-metric-card" data-goto="satellites" title="Click to inspect deep-space terminal">
               <div class="metric-top">
                 <span id="voyager-active-name">VOYAGER 1 (INTERSTELLAR)</span>
                 <span class="metric-symbol purple">🛰️</span>
@@ -218,7 +217,7 @@
               <div class="voyager-milestone-ticker" id="voyager-milestone-text">
                 Passed Heliopause · Streaking into deep interstellar space at 17 km/s
               </div>
-              <div class="metric-bottom">NASA Deep Space Network (DSN) ↗</div>
+              <div class="metric-bottom">Deep Space Network (DSN) · Tap for details ↗</div>
             </article>
 
             <!-- Card 3: Next Rocket Countdown with NASA T-Minus HUD Clock -->
@@ -320,36 +319,40 @@
           <div class="section-title">
             <div>
               <div class="eyebrow">ORBITAL SITUATIONAL AWARENESS</div>
-              <h2>Interactive Planetary Map &amp; Tracking</h2>
+              <h2>Interactive Planetary Map &amp; Spacecraft Tracking</h2>
             </div>
           </div>
 
           <article class="surface map-card">
-            <!-- Satellite & Unified Rocket Search -->
+            <!-- Search -->
             <div class="sat-search-container">
               <div class="sat-search-input-box">
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                <input type="search" id="sat-search-input" placeholder="Search satellites, probes, or rockets (e.g., ISS, Starship, LVM3, Hubble, Falcon 9, NavIC)…" autocomplete="off">
+                <input type="search" id="sat-search-input" placeholder="Search satellites, stations, or deep-space probes (e.g., ISS, Chandrayaan, Hubble, Voyager 1, Starlink)…" autocomplete="off">
               </div>
               <div id="sat-search-dropdown" class="autocomplete-dropdown" hidden></div>
             </div>
 
             <!-- Single-Line Horizontally Scrollable Fleet Presets Slider -->
             <div class="sat-presets-bar">
-              <span class="sat-select-lbl">FLEET PRESETS:</span>
-              <button class="sat-chip active" data-sat-id="25544" data-sat-name="ISS (ZARYA)">ISS (Zarya)</button>
-              <button class="sat-chip" data-sat-id="48274" data-sat-name="CSS TIANHE (TIANGONG)">Tiangong (CSS)</button>
+              <span class="sat-select-lbl">ACTIVE FLEET:</span>
+              <button class="sat-chip active" data-sat-id="25544" data-sat-name="ISS (ZARYA)">🛰️ ISS (Zarya)</button>
+              <button class="sat-chip" data-sat-id="48274" data-sat-name="CSS TIANHE (TIANGONG)">🛰️ Tiangong (CSS)</button>
               <button class="sat-chip" data-sat-id="57320" data-sat-name="CHANDRAYAAN-3 (ISRO)">🇮🇳 Chandrayaan-3</button>
               <button class="sat-chip" data-sat-id="43286" data-sat-name="NAVIC-1I (ISRO)">🇮🇳 NavIC-1I</button>
-              <button class="sat-chip" data-sat-id="20580" data-sat-name="HUBBLE SPACE TELESCOPE">Hubble (HST)</button>
-              <button class="sat-chip" data-sat-id="43013" data-sat-name="NOAA 20">NOAA-20</button>
-              <button class="sat-chip" data-sat-id="newly-deployed" data-sat-name="NEWLY DEPLOYED">🚀 Newly Deployed (30d)</button>
+              <button class="sat-chip" data-sat-id="20580" data-sat-name="HUBBLE SPACE TELESCOPE">🔭 Hubble (HST)</button>
+              <button class="sat-chip" data-sat-id="43013" data-sat-name="NOAA 20">🛰️ NOAA-20</button>
+              <button class="sat-chip" data-sat-id="new-eos08" data-sat-name="EOS-08 (ISRO SSLV)">🚀 EOS-08 (ISRO SSLV)</button>
+              <button class="sat-chip" data-sat-id="new-starlink" data-sat-name="STARLINK-31200">🚀 Starlink-31200</button>
+              <button class="sat-chip" data-sat-id="new-cygnus" data-sat-name="CYGNUS NG-21">🚀 Cygnus NG-21</button>
+              <button class="sat-chip" data-sat-id="voyager-1" data-sat-name="VOYAGER 1 (INTERSTELLAR)">🌌 Voyager 1 (Interstellar)</button>
+              <button class="sat-chip" data-sat-id="voyager-2" data-sat-name="VOYAGER 2 (INTERSTELLAR)">🌌 Voyager 2 (Interstellar)</button>
             </div>
 
-            <!-- Single-Line Horizontally Scrollable Map Layer Chips Toolbar -->
+            <!-- Map Layer Chips Toolbar -->
             <div class="map-toolbar-row">
               <div class="map-layer-chips">
-                <button class="layer-chip active" id="toggle-layer-iss">🛰️ Satellite Active</button>
+                <button class="layer-chip active" id="toggle-layer-iss">🛰️ Spacecraft Active</button>
                 <button class="layer-chip active" id="toggle-layer-quakes">🌍 Quakes (USGS)</button>
                 <button class="layer-chip active" id="toggle-layer-hazards">🌋 Hazards (EONET)</button>
                 <button class="layer-chip active" id="toggle-layer-track">⌖ Ground Track</button>
@@ -359,6 +362,7 @@
             <div class="map-viewport-wrapper">
               <div id="sat-map" class="map"></div>
 
+              <!-- Top-Left Telemetry HUD Overlay (No longer overlapped by zoom buttons) -->
               <div class="map-hud-chip" id="map-hud-overlay">
                 <span class="live-dot pulse-dot"></span>
                 <div>
@@ -382,6 +386,53 @@
               <div><span>VELOCITY: </span><b id="map-vel">—</b></div>
             </div>
           </article>
+
+          <!-- DEDICATED VOYAGER 1 & 2 INTERSTELLAR TERMINAL -->
+          <article class="surface voyager-detail-panel" id="voyager-interstellar-panel" style="margin-top: 20px;">
+            <div class="card-heading">
+              <div>
+                <div class="eyebrow">NASA DEEP SPACE NETWORK (DSN) · INTERSTELLAR MISSION STATUS</div>
+                <h3 id="voyager-terminal-title">Voyager 1 &amp; 2 Deep Space Telemetry</h3>
+                <p id="voyager-terminal-desc">Live calculation of distance from Sun and Earth, 1-way radio light travel delay, and scientific instrument status beyond the Heliopause.</p>
+              </div>
+              <div class="voyager-toggle-btns">
+                <button class="apple-btn-secondary active" id="vbtn-1">Voyager 1</button>
+                <button class="apple-btn-secondary" id="vbtn-2">Voyager 2</button>
+              </div>
+            </div>
+
+            <div class="voyager-metrics-terminal-grid">
+              <div class="voyager-spec-box">
+                <small>DISTANCE FROM SUN / EARTH</small>
+                <strong id="v-spec-km">24,538,000,000 km</strong>
+                <span id="v-spec-au">~164.02 AU (Astronomical Units)</span>
+              </div>
+              <div class="voyager-spec-box">
+                <small>1-WAY LIGHT TRAVEL TIME</small>
+                <strong id="v-spec-light">22h 45m 12s</strong>
+                <span>Radio photons travelling at c</span>
+              </div>
+              <div class="voyager-spec-box">
+                <small>HELIOPAUSE EXIT DATE</small>
+                <strong id="v-spec-exit">August 25, 2012</strong>
+                <span id="v-spec-region">True Interstellar Plasma</span>
+              </div>
+              <div class="voyager-spec-box">
+                <small>ESCAPE VELOCITY</small>
+                <strong id="v-spec-speed">17.0 km/s</strong>
+                <span id="v-spec-constellation">Heading into Constellation Ophiuchus</span>
+              </div>
+            </div>
+
+            <div class="voyager-instruments-strip">
+              <div class="instrument-tag green"><span>●</span> Cosmic Ray Subsystem (CRS): <b>ACTIVE</b></div>
+              <div class="instrument-tag green"><span>●</span> Low-Energy Charged Particles (LECP): <b>ACTIVE</b></div>
+              <div class="instrument-tag green"><span>●</span> Magnetometer (MAG): <b>ACTIVE</b></div>
+              <div class="instrument-tag green"><span>●</span> Plasma Wave Subsystem (PWS): <b>ACTIVE</b></div>
+              <div class="instrument-tag orange"><span>●</span> RTG Nuclear Power: <b>~220 Watts (Conserving)</b></div>
+              <div class="instrument-tag blue"><span>●</span> Golden Record Onboard: <b>Intact for 1B+ Years</b></div>
+            </div>
+          </article>
         </section>
 
         <!-- 3. ROCKETS & FLIGHTS -->
@@ -393,7 +444,6 @@
             </div>
           </div>
 
-          <!-- Spotlight Card with NASA T-Minus Mission Clock -->
           <article class="surface launch-spotlight-card">
             <div class="spotlight-left">
               <div class="spotlight-tags">
@@ -438,7 +488,7 @@
             <div>
               <div class="eyebrow">INTERPLANETARY OBSERVATIONS</div>
               <h2>Interplanetary Exploration: Earth &amp; Mars</h2>
-              <p><b>T&amp;C Note:</b> Earth images take 24–48 hours for NASA to calibrate, while Mars rover photos are transmitted in batches via orbital relays based on Martian Sols. You can tap any photo to view it full-screen, download it, or share it.</p>
+              <p><b>T&amp;C Note:</b> Earth images take 24–48 hours for NASA to calibrate, while Mars rover photos are transmitted in batches via orbital relays based on Martian Sols. Tap any photo to view full-screen, download, or share.</p>
             </div>
           </div>
 
@@ -446,7 +496,7 @@
             <div class="card-heading">
               <div>
                 <h3 id="epic-title">Daily Portrait of Planet Earth (DSCOVR EPIC)</h3>
-                <p id="epic-caption">Streaming NASA EPIC telescope capture from the Sun-Earth L1 point 1 million miles away. Tap photo to open in-app lightbox with download &amp; share.</p>
+                <p id="epic-caption">Streaming NASA EPIC telescope capture from the Sun-Earth L1 point 1 million miles away.</p>
               </div>
               <span class="small-chip blue">NASA DSCOVR EPIC</span>
             </div>
@@ -647,7 +697,7 @@
           <article class="surface intel-panel">
             <div class="intel-search-wrapper">
               <div class="intel-search-box">
-                <input id="intel-area-input" type="search" placeholder="Search any village, mandal, city, or district worldwide (e.g., Warangal, Dallas, Guntur, Tokyo)…" autocomplete="off">
+                <input id="intel-area-input" type="search" placeholder="Search any city or district worldwide…" autocomplete="off">
                 <button id="intel-search-btn" class="primary-button" type="button">Analyze <span>↗</span></button>
               </div>
               <div id="intel-suggestions" class="autocomplete-dropdown" hidden></div>
@@ -672,8 +722,7 @@
               </div>
             </div>
 
-            <!-- Live Weather Metrics Suite (Open-Meteo) -->
-            <div class="eyebrow" style="margin: 16px 0 8px;">ATMOSPHERIC WEATHER CONDITIONS (OPEN-METEO)</div>
+            <div class="eyebrow" style="margin: 16px 0 8px;">ATMOSPHERIC CONDITIONS (OPEN-METEO)</div>
             <div class="intel-metrics-grid" style="margin-bottom: 18px;">
               <div class="intel-metric-card">
                 <div class="metric-top"><span>TEMPERATURE</span><span class="metric-symbol blue">🌡️</span></div>
@@ -703,7 +752,6 @@
               </div>
             </div>
 
-            <!-- Air Quality & Radiation Sensors -->
             <div class="eyebrow" style="margin: 16px 0 8px;">AIR QUALITY &amp; RADIATION SENSORS</div>
             <div class="intel-metrics-grid">
               <div class="intel-metric-card">
@@ -730,7 +778,7 @@
                   <strong id="intel-pm10">—</strong>
                   <span class="status-tag" id="intel-pm10-badge">Safe</span>
                 </div>
-                <small id="intel-pm10-sub">Road dust, pollen &amp; construction particles</small>
+                <small id="intel-pm10-sub">Road dust &amp; pollen</small>
               </div>
 
               <div class="intel-metric-card">
@@ -739,7 +787,7 @@
                   <strong id="intel-no2">—</strong>
                   <span class="status-tag" id="intel-no2-badge">Low</span>
                 </div>
-                <small id="intel-no2-sub">Urban traffic &amp; combustion emissions</small>
+                <small id="intel-no2-sub">Urban traffic combustion</small>
               </div>
 
               <div class="intel-metric-card">
@@ -748,7 +796,7 @@
                   <strong id="intel-solar">—</strong>
                   <span class="status-tag" id="intel-solar-badge">Normal</span>
                 </div>
-                <small id="intel-solar-sub">Direct sunlight radiation reaching ground</small>
+                <small id="intel-solar-sub">Direct sunlight radiation</small>
               </div>
             </div>
           </article>
@@ -766,7 +814,7 @@
           <article class="surface wiki-panel">
             <div class="wiki-search-box-wrapper">
               <div class="wiki-search-box">
-                <input id="wiki-query-input" type="search" placeholder="Type any mission, spacecraft, or planet (e.g., Chandrayaan-3, Gaganyaan, Artemis)..." autocomplete="off">
+                <input id="wiki-query-input" type="search" placeholder="Search any mission, spacecraft, or planet..." autocomplete="off">
                 <button id="wiki-search-btn" class="primary-button" type="button">Search <span>↗</span></button>
               </div>
               <div id="wiki-suggestions" class="autocomplete-dropdown" hidden></div>
@@ -776,10 +824,10 @@
               <button class="wiki-pill active" data-topic="Chandrayaan-3">Chandrayaan-3</button>
               <button class="wiki-pill" data-topic="Indian Space Research Organisation">ISRO</button>
               <button class="wiki-pill" data-topic="James Webb Space Telescope">James Webb</button>
-              <button class="wiki-pill" data-topic="Artemis program">Artemis</button>
+              <button class="wiki-pill" data-topic="Voyager 1">Voyager 1</button>
+              <button class="wiki-pill" data-topic="Voyager 2">Voyager 2</button>
               <button class="wiki-pill" data-topic="Gaganyaan">Gaganyaan</button>
               <button class="wiki-pill" data-topic="SpaceX Starship">Starship</button>
-              <button class="wiki-pill" data-topic="Hubble Space Telescope">Hubble</button>
             </div>
 
             <div id="wiki-card" class="wiki-result-card">
@@ -827,8 +875,8 @@
 
             <div class="alerts-header-row" style="margin-top:20px;">
               <div>
-                <h3>Real-Time Spacecraft Alerts Configuration</h3>
-                <p class="muted">Toggle fleet alerts or use Select All. Click Test Alert to verify banners and sounds.</p>
+                <h3>Real-Time Alerts Configuration</h3>
+                <p class="muted">Toggle fleet alerts or use Select All. Click Test Alert to verify.</p>
               </div>
               <button class="subtle-button" id="toggle-all-alerts-btn">Select All</button>
             </div>
@@ -837,7 +885,7 @@
               <label class="toggle-row">
                 <div>
                   <b>Spacecraft &amp; Station Overhead Pass Alert</b>
-                  <small>Notify when ISS, Tiangong (CSS), Hubble, or newly deployed satellites cross your regional horizon (&lt;1,500 km)</small>
+                  <small>Notify when ISS, Tiangong (CSS), Hubble, or newly deployed spacecraft pass overhead (&lt;1,500 km)</small>
                 </div>
                 <input type="checkbox" checked class="apple-toggle alert-checkbox" id="toggle-iss">
               </label>
@@ -911,13 +959,8 @@
                 <span class="status-pill"><i class="pulse-dot"></i> Source Trusted by T&C</span>
               </div>
               <p class="about-text">
-                T&amp;C Space Hub is built on the principle of <b>zero mathematical simulation and zero fake telemetry</b>. Every metric, coordinate, countdown, and photo is streamed directly from official space agencies and public scientific observatories.
+                T&amp;C Space Hub streams verified scientific telemetry directly from official space agencies including ISRO, NASA, ESA, USGS, and NOAA SWPC.
               </p>
-              <div class="about-highlights">
-                <div><small>SATELLITES</small><b>Live Keplerian &amp; Doppler Sensors</b></div>
-                <div><small>ASTRONOMY</small><b>Direct NASA Science Observatory</b></div>
-                <div><small>PLANETARY</small><b>USGS Seismic Network + NOAA SWPC</b></div>
-              </div>
             </article>
 
             <article class="surface about-card">
@@ -935,66 +978,6 @@
                   <small>Architect &amp; Lead Developer · Tasty &amp; Comfort Network</small>
                 </div>
               </div>
-              <p class="about-text" style="margin-top:12px;">
-                Engineered with pure Web standards, Apple Interface Guidelines, Fluid hardware-accelerated CSS, Leaflet GIS, and Cloud Messaging for cross-platform performance.
-              </p>
-            </article>
-
-            <article class="surface about-card about-span-two">
-              <div class="card-heading">
-                <div>
-                  <div class="eyebrow">THE T&amp;C NETWORK</div>
-                  <h3>Explore the T&amp;C Ecosystem</h3>
-                  <p>Discover our other independent platforms and public web services.</p>
-                </div>
-              </div>
-              <div class="ecosystem-cards-row">
-                <a class="ecosystem-card-item" href="https://tastyandcomfort.github.io/T-C/" target="_blank" rel="noopener">
-                  <span class="eco-icon blue">T&amp;C</span>
-                  <div>
-                    <b>T&amp;C Stall</b>
-                    <small>Official Storefront &amp; Main Portal</small>
-                  </div>
-                  <span class="eco-arrow">↗</span>
-                </a>
-                <a class="ecosystem-card-item" href="https://tastyandcomfort.github.io/news/" target="_blank" rel="noopener">
-                  <span class="eco-icon orange">N</span>
-                  <div>
-                    <b>T&amp;C News Hub</b>
-                    <small>Real-time Global News &amp; Updates</small>
-                  </div>
-                  <span class="eco-arrow">↗</span>
-                </a>
-                <a class="ecosystem-card-item" href="https://tastyandcomfort.github.io/Farmer/" target="_blank" rel="noopener">
-                  <span class="eco-icon green">F</span>
-                  <div>
-                    <b>T&amp;C Farmer</b>
-                    <small>Agricultural Intelligence &amp; Crop Support</small>
-                  </div>
-                  <span class="eco-arrow">↗</span>
-                </a>
-              </div>
-            </article>
-
-            <article class="surface about-card about-span-two">
-              <div class="card-heading">
-                <div>
-                  <div class="eyebrow">TRANSPARENCY</div>
-                  <h3>Data Sources &amp; Public Endpoints</h3>
-                </div>
-              </div>
-              <div class="sources-pill-grid">
-                <a class="source-link-chip" href="https://api.nasa.gov/" target="_blank" rel="noopener">NASA ↗</a>
-                <a class="source-link-chip" href="https://images-api.nasa.gov/" target="_blank" rel="noopener">NASA Image &amp; Raw Video Library ↗</a>
-                <a class="source-link-chip" href="https://science.nasa.gov/apod/" target="_blank" rel="noopener">NASA Science ↗</a>
-                <a class="source-link-chip" href="https://epic.gsfc.nasa.gov/" target="_blank" rel="noopener">NASA DSCOVR EPIC ↗</a>
-                <a class="source-link-chip" href="https://wheretheiss.at/" target="_blank" rel="noopener">The ISS ↗</a>
-                <a class="source-link-chip" href="https://earthquake.usgs.gov/" target="_blank" rel="noopener">Earthquake Hazards ↗</a>
-                <a class="source-link-chip" href="https://www.swpc.noaa.gov/" target="_blank" rel="noopener">Space Weather ↗</a>
-                <a class="source-link-chip" href="https://lldev.thespacedevs.com/" target="_blank" rel="noopener">Launch (ISRO/SpaceX) ↗</a>
-                <a class="source-link-chip" href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo Air Quality &amp; Sensors ↗</a>
-                <a class="source-link-chip" href="https://en.wikipedia.org/api/rest_v1/" target="_blank" rel="noopener">Wikimedia ↗</a>
-              </div>
             </article>
           </div>
         </section>
@@ -1003,7 +986,7 @@
     </main>
   </div>
 
-  <!-- Mobile Bottom Frosted Navigation Dock (5 Clean Touch Targets) -->
+  <!-- Mobile Bottom Frosted Navigation Dock -->
   <nav class="mobile-dock" aria-label="Mobile Navigation">
     <a class="dock-link active" href="#overview" data-nav="overview">
       <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
@@ -1030,88 +1013,40 @@
   <!-- Apple-Style "More •••" Mobile Menu Sheet -->
   <div class="more-sheet-backdrop" id="more-sheet-backdrop" aria-hidden="true">
     <div class="more-sheet-dialog" role="dialog" aria-label="More Space Hub Sections">
-      <div class="more-sheet-handle-bar">
-        <div class="more-sheet-pill-bar"></div>
-      </div>
+      <div class="more-sheet-handle-bar"><div class="more-sheet-pill-bar"></div></div>
       <div class="more-sheet-header">
         <h4>All Space Hub Modules</h4>
         <small class="muted">Live telemetry, scientific instruments &amp; settings</small>
       </div>
       <div class="more-sheet-grid">
         <a class="more-sheet-item" href="#interplanetary" data-nav="interplanetary">
-          <span class="more-item-icon blue">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="8" cy="9" r="1.5"/><circle cx="15" cy="14" r="2"/></svg>
-          </span>
-          <div>
-            <b>Earth &amp; Mars</b>
-            <small>DSCOVR 1M Miles &amp; Rovers</small>
-          </div>
+          <span class="more-item-icon blue">🪐</span>
+          <div><b>Earth &amp; Mars</b><small>DSCOVR &amp; Rovers</small></div>
           <span class="more-item-arrow">›</span>
         </a>
-
         <a class="more-sheet-item" href="#space-weather" data-nav="space-weather">
-          <span class="more-item-icon orange">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/></svg>
-          </span>
-          <div>
-            <b>Space Weather</b>
-            <small>Solar Flares &amp; Kp Index</small>
-          </div>
+          <span class="more-item-icon orange">☀️</span>
+          <div><b>Space Weather</b><small>Solar Flares &amp; Kp Index</small></div>
           <span class="more-item-arrow">›</span>
         </a>
-
         <a class="more-sheet-item" href="#cosmos-hazards" data-nav="cosmos-hazards">
-          <span class="more-item-icon purple">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-          </span>
-          <div>
-            <b>Cosmos &amp; Hazards</b>
-            <small>NASA APOD, JPL &amp; Quakes</small>
-          </div>
+          <span class="more-item-icon purple">☄️</span>
+          <div><b>Cosmos &amp; Hazards</b><small>NASA APOD, JPL &amp; Quakes</small></div>
           <span class="more-item-arrow">›</span>
         </a>
-
         <a class="more-sheet-item" href="#intel-brief" data-nav="intel-brief">
-          <span class="more-item-icon teal">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-          </span>
-          <div>
-            <b>Area Intel Brief</b>
-            <small>Global AQI &amp; Solar Flux</small>
-          </div>
+          <span class="more-item-icon teal">🗺️</span>
+          <div><b>Area Intel Brief</b><small>Global AQI &amp; Solar Flux</small></div>
           <span class="more-item-arrow">›</span>
         </a>
-
         <a class="more-sheet-item" href="#wiki" data-nav="wiki">
-          <span class="more-item-icon green">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-          </span>
-          <div>
-            <b>Space Wiki</b>
-            <small>Live Wikimedia Explorer</small>
-          </div>
+          <span class="more-item-icon green">📚</span>
+          <div><b>Space Wiki</b><small>Wikimedia Explorer</small></div>
           <span class="more-item-arrow">›</span>
         </a>
-
         <a class="more-sheet-item" href="#settings" data-nav="settings">
-          <span class="more-item-icon blue">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83-2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-          </span>
-          <div>
-            <b>Preferences &amp; Alerts</b>
-            <small>Push Notifications &amp; Passes</small>
-          </div>
-          <span class="more-item-arrow">›</span>
-        </a>
-
-        <a class="more-sheet-item" href="#about" data-nav="about">
-          <span class="more-item-icon purple">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
-          </span>
-          <div>
-            <b>About T&amp;C Space</b>
-            <small>Manifest, Ecosystem &amp; Credits</small>
-          </div>
+          <span class="more-item-icon blue">⚙️</span>
+          <div><b>Preferences &amp; Alerts</b><small>Push Notifications &amp; Passes</small></div>
           <span class="more-item-arrow">›</span>
         </a>
       </div>
@@ -1123,31 +1058,19 @@
   <div class="epic-lightbox-backdrop" id="universal-media-lightbox" aria-hidden="true">
     <div class="epic-lightbox-dialog" role="dialog" aria-label="Media Preview">
       <button class="lightbox-close-btn" id="close-universal-lightbox-btn" aria-label="Close Lightbox">✕</button>
-      
       <div class="lightbox-img-wrap" id="universal-lightbox-container">
-        <img id="universal-lightbox-img" src="" alt="Full Space Media Preview">
-        <video id="universal-lightbox-video" 
-               playsinline 
-               webkit-playsinline 
-               x5-playsinline 
-               controls 
-               controlsList="nodownload noplaybackrate" 
-               disablePictureInPicture 
-               style="display:none; width:100%; max-height:65vh; object-fit:contain; border-radius:12px;"></video>
-        
+        <img id="universal-lightbox-img" src="" alt="Space Media Preview">
+        <video id="universal-lightbox-video" playsinline controls style="display:none; width:100%; max-height:65vh; object-fit:contain; border-radius:12px;"></video>
         <div id="universal-lightbox-audio-wrap" class="lightbox-audio-wrap">
           <div class="audio-avatar-icon">🎙️</div>
-          <div class="audio-player-box">
-            <audio id="universal-lightbox-audio" controls preload="metadata"></audio>
-          </div>
+          <div class="audio-player-box"><audio id="universal-lightbox-audio" controls></audio></div>
         </div>
       </div>
-
       <div class="lightbox-footer">
         <div class="lightbox-meta">
           <b id="universal-lightbox-title">Space Telemetry Capture</b>
           <span id="universal-lightbox-time">Timestamp: —</span>
-          <span id="universal-lightbox-raw-tag" class="small-chip blue" style="margin-top:4px; display:inline-block;">RESOLVING 100% RAW MASTER...</span>
+          <span id="universal-lightbox-raw-tag" class="small-chip blue" style="margin-top:4px; display:inline-block;">RESOLVED MASTER</span>
         </div>
         <div class="lightbox-actions">
           <button id="universal-download-btn" class="apple-btn-secondary">⬇ Download Asset</button>
@@ -1157,39 +1080,24 @@
     </div>
   </div>
 
-  <!-- Apple-Style Frosted Download Action Sheet Modal -->
+  <!-- Download Action Sheet Modal -->
   <div class="apple-sheet-backdrop" id="download-action-sheet-backdrop" aria-hidden="true">
     <div class="apple-sheet-dialog" role="dialog" aria-label="Choose Download Format">
       <div class="apple-sheet-header">
         <h4>Download Space Asset</h4>
-        <p>Estimated using your live connection: <b id="sheet-net-speed" style="color:var(--blue);">-- Mbps</b></p>
+        <p>Direct download to device storage</p>
       </div>
       <div class="apple-sheet-options">
         <button type="button" class="apple-sheet-option-btn primary" id="sheet-download-opt">
           <div class="sheet-opt-left">
             <span class="sheet-opt-icon">⚡</span>
-            <div>
-              <b class="sheet-opt-title">Optimized File</b>
-              <small class="sheet-opt-meta">Instant saving · Pristine screen clarity</small>
-            </div>
-          </div>
-          <div class="sheet-opt-right">
-            <span class="sheet-opt-size" id="sheet-opt-size">~2.8 MB</span>
-            <span class="sheet-opt-time" id="sheet-opt-time">~2 sec</span>
+            <div><b class="sheet-opt-title">Optimized File</b><small class="sheet-opt-meta">Instant saving</small></div>
           </div>
         </button>
-
         <button type="button" class="apple-sheet-option-btn" id="sheet-download-raw">
           <div class="sheet-opt-left">
             <span class="sheet-opt-icon">📷</span>
-            <div>
-              <b class="sheet-opt-title">Raw File</b>
-              <small class="sheet-opt-meta" id="sheet-raw-format">Master sensor format</small>
-            </div>
-          </div>
-          <div class="sheet-opt-right">
-            <span class="sheet-opt-size" id="sheet-raw-size">~34.0 MB</span>
-            <span class="sheet-opt-time" id="sheet-raw-time">~18 sec</span>
+            <div><b class="sheet-opt-title">Raw Master File</b><small class="sheet-opt-meta">Full resolution sensor data</small></div>
           </div>
         </button>
       </div>
