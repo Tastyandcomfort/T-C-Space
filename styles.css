@@ -82,7 +82,7 @@ button { font-family: inherit; }
   flex-shrink: 0;
 }
 
-/* --- Compact Network Indicator & Right-Aligned Dropdown Popover --- */
+/* Compact Network Indicator & Right-Aligned Dropdown Popover */
 .network-status-wrapper {
   position: relative;
   display: inline-flex;
@@ -390,11 +390,51 @@ button { font-family: inherit; }
   border-radius: 18px;
   padding: 18px 20px;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
 }
 .metric-top { display: flex; justify-content: space-between; font-size: 8px; font-weight: 750; letter-spacing: 0.9px; color: var(--dim); }
-.metric-card strong { font: 700 24px var(--mono); margin: 12px 0 2px; display: block; letter-spacing: -0.5px; overflow-wrap: anywhere; }
+.metric-card strong { font: 700 24px var(--mono); margin: 10px 0 2px; display: block; letter-spacing: -0.5px; overflow-wrap: anywhere; }
 .metric-card small { font-size: 10px; color: var(--muted); }
-.metric-bottom { margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--line); font-size: 9px; color: var(--muted); }
+.metric-bottom { margin-top: auto; padding-top: 10px; border-top: 1px solid var(--line); font-size: 9px; color: var(--muted); }
+
+/* Rotating Satellite Carousel & Voyager Card Styling */
+.sat-carousel-content { margin: 4px 0 8px; }
+.sat-carousel-subline, .voyager-subline {
+  font-size: 10.5px;
+  color: var(--muted);
+  font-family: var(--mono);
+}
+.sat-carousel-subline b, .voyager-subline b { color: var(--blue); }
+.sat-dots-indicator {
+  display: flex;
+  gap: 5px;
+  margin-top: 6px;
+  margin-bottom: 4px;
+}
+.sat-dot-pip {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--line);
+  transition: background 0.2s, transform 0.2s;
+}
+.sat-dot-pip.active {
+  background: var(--blue);
+  transform: scale(1.3);
+}
+
+.voyager-counter-box { margin: 4px 0 6px; }
+.voyager-milestone-ticker {
+  font-size: 9.5px;
+  color: var(--orange);
+  line-height: 1.4;
+  margin-top: 4px;
+  padding: 4px 6px;
+  background: rgba(255, 180, 84, 0.1);
+  border-radius: 6px;
+  border-left: 2px solid var(--orange);
+}
 
 .two-col-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
 .card-eyebrow { font-size: 9px; font-weight: 750; color: var(--blue); letter-spacing: 0.8px; margin-bottom: 6px; }
@@ -430,7 +470,7 @@ button { font-family: inherit; }
   outline: none;
 }
 
-/* --- Tracking Fleet Presets: Horizontal Slider --- */
+/* Tracking Fleet Presets: Horizontal Slider */
 .sat-presets-bar {
   display: flex;
   align-items: center;
@@ -464,7 +504,7 @@ button { font-family: inherit; }
 }
 .sat-chip.active { background: var(--blue); color: #fff; border-color: var(--blue); }
 
-/* --- Map Layer Chips: Single Horizontal Slidable Row on Mobile --- */
+/* Map Layer Chips: Single Horizontal Slidable Row on Mobile */
 .map-toolbar-row { margin-bottom: 12px; }
 .map-layer-chips {
   display: flex;
@@ -496,9 +536,7 @@ html[data-theme="dark"] .leaflet-tile {
 }
 .leaflet-control-attribution { display: none !important; }
 
-/* ============================================================================
-   Leaflet Re-Themed Apple Frosted Glass Popups (Dark & Light Adaptive)
-   ============================================================================ */
+/* Re-Themed Apple Frosted Glass Leaflet Popups */
 .leaflet-popup-content-wrapper {
   background: var(--surface-solid) !important;
   backdrop-filter: var(--blur) !important;
@@ -524,9 +562,7 @@ html[data-theme="dark"] .leaflet-tile {
   font-size: 14px !important;
 }
 
-/* ============================================================================
-   Model 1: Aerospace Tactical HUD Satellite Marker & Theme-Adaptive Tag
-   ============================================================================ */
+/* Realistic Spacecraft Marker & HUD */
 .aerospace-hud-marker {
   position: relative;
   display: flex;
@@ -535,7 +571,6 @@ html[data-theme="dark"] .leaflet-tile {
   justify-content: center;
   pointer-events: auto;
 }
-
 .hud-reticle-box {
   position: relative;
   width: 52px;
@@ -543,12 +578,9 @@ html[data-theme="dark"] .leaflet-tile {
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
 }
-
-@keyframes hudCompassSweep {
-  100% { transform: rotate(360deg); }
-}
-
+@keyframes hudCompassSweep { 100% { transform: rotate(360deg); } }
 .hud-compass-ring {
   position: absolute;
   width: 36px;
@@ -558,13 +590,11 @@ html[data-theme="dark"] .leaflet-tile {
   animation: hudCompassSweep 16s linear infinite;
   pointer-events: none;
 }
-
 @keyframes hudSonarPulse {
   0% { transform: scale(0.6); opacity: 0.95; }
   65% { transform: scale(2.4); opacity: 0.25; }
   100% { transform: scale(3.2); opacity: 0; }
 }
-
 .hud-radar-pulse {
   position: absolute;
   width: 20px;
@@ -574,10 +604,7 @@ html[data-theme="dark"] .leaflet-tile {
   animation: hudSonarPulse 2.4s infinite cubic-bezier(0.1, 0.7, 0.4, 1);
   pointer-events: none;
 }
-.hud-radar-pulse.delay {
-  animation-delay: 1.2s;
-}
-
+.hud-radar-pulse.delay { animation-delay: 1.2s; }
 .hud-crosshair-svg {
   position: relative;
   z-index: 3;
@@ -604,9 +631,7 @@ html[data-theme="dark"] .leaflet-tile {
   cursor: pointer;
   transition: background 0.2s, color 0.2s, border-color 0.2s;
 }
-.hud-micro-tag:hover {
-  border-color: var(--hud-accent, #2997ff);
-}
+.hud-micro-tag:hover { border-color: var(--hud-accent, #2997ff); }
 
 .map-hud-chip {
   position: absolute;
@@ -655,7 +680,7 @@ html[data-theme="dark"] .leaflet-tile {
 .map-foot { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 12px; font-size: 10px; color: var(--muted); }
 .map-foot b { font-family: var(--mono); color: var(--blue); }
 
-/* --- Spotlight Launch Card & NASA T-Minus Mission Clock --- */
+/* Spotlight Launch Card & NASA T-Minus Mission Clock */
 .launch-spotlight-card {
   display: grid;
   grid-template-columns: minmax(0, 1.4fr) minmax(0, 0.8fr);
@@ -694,22 +719,9 @@ html[data-theme="dark"] .leaflet-tile {
   border-radius: 10px;
   min-width: 52px;
 }
-.clock-segment b {
-  font: 800 24px var(--mono);
-  color: var(--text);
-  line-height: 1;
-}
-.clock-segment small {
-  font: 700 8px var(--mono);
-  color: var(--muted);
-  margin-top: 4px;
-  letter-spacing: 0.5px;
-}
-.clock-colon {
-  font: 800 20px var(--mono);
-  color: var(--orange);
-  margin-bottom: 14px;
-}
+.clock-segment b { font: 800 24px var(--mono); color: var(--text); line-height: 1; }
+.clock-segment small { font: 700 8px var(--mono); color: var(--muted); margin-top: 4px; letter-spacing: 0.5px; }
+.clock-colon { font: 800 20px var(--mono); color: var(--orange); margin-bottom: 14px; }
 .countdown-foot { font-size: 10px; color: var(--muted); overflow-wrap: anywhere; }
 
 .launches-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; min-width: 0; }
@@ -940,11 +952,7 @@ html[data-theme="dark"] .leaflet-tile {
   gap: 10px;
   width: 100%;
 }
-.quake-row-top b {
-  font-size: 11.5px;
-  color: var(--text);
-  overflow-wrap: anywhere;
-}
+.quake-row-top b { font-size: 11.5px; color: var(--text); overflow-wrap: anywhere; }
 .quake-row-bottom {
   display: flex;
   justify-content: space-between;
@@ -954,9 +962,7 @@ html[data-theme="dark"] .leaflet-tile {
   border-top: 1px solid var(--line);
   font-size: 9.5px;
 }
-.quake-row-bottom small {
-  color: var(--muted);
-}
+.quake-row-bottom small { color: var(--muted); }
 .mag-box { width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; font: 700 12px var(--mono); flex-shrink: 0; }
 .mag-box.green { background: var(--green-soft); color: var(--green); }
 .mag-box.orange { background: rgba(255, 180, 84, 0.2); color: var(--orange); }
@@ -1219,7 +1225,7 @@ html[data-theme="dark"] .leaflet-tile {
 }
 .toast.show { opacity: 1; transform: translate(-50%, 0); }
 
-/* --- Mobile Bottom Dock (5 Clean Touch Targets) --- */
+/* Mobile Bottom Dock (5 Clean Touch Targets) */
 .mobile-dock { display: none; }
 
 @media (max-width: 900px) {
@@ -1324,7 +1330,7 @@ html[data-theme="dark"] .leaflet-tile {
   .neo-list-scroll { grid-template-columns: 1fr; }
 }
 
-/* --- Planetary Explorer Styles --- */
+/* Planetary Explorer Styles */
 .planetary-panel { padding: 22px; }
 .planetary-chips-scroll {
   display: flex;
@@ -1508,7 +1514,7 @@ html[data-theme="dark"] .leaflet-tile {
   .planetary-card-media { height: 180px; }
 }
 
-/* --- Apple-Style Download Action Sheet --- */
+/* Apple-Style Download Action Sheet */
 .apple-sheet-backdrop {
   position: fixed;
   inset: 0;
@@ -1602,7 +1608,7 @@ html[data-theme="dark"] .leaflet-tile {
   .apple-sheet-dialog { margin-bottom: 0; }
 }
 
-/* --- Apple-Style "More •••" Mobile Bottom Sheet --- */
+/* Apple-Style "More •••" Mobile Bottom Sheet */
 .more-sheet-backdrop {
   position: fixed;
   inset: 0;
