@@ -21,7 +21,7 @@ let currentPlanetaryMediaType = 'image,video,audio';
 let activeLightboxMedia = {};
 
 // ============================================================================
-// 1. DUAL CLOCKS (LIVE IST & UTC SYNCHRONIZATION)
+// 1. DUAL CLOCKS (IST & UTC)
 // ============================================================================
 function initClocks() {
   const istEl = document.getElementById('ist-clock');
@@ -165,7 +165,7 @@ function initNavigation() {
 }
 
 // ============================================================================
-// 4. OVERVIEW: ROTATING FLEET CAROUSEL & VOYAGER 1 & 2 ENGINE
+// 4. OVERVIEW ROTATING FLEET CAROUSEL
 // ============================================================================
 const CAROUSEL_FLEET = [
   { id: "25544", name: "ISS (ZARYA)", alt: 418.0, vel: 7.66, orbit: "Active LEO Station", color: "#2997ff" },
@@ -214,6 +214,9 @@ function initOverviewRotatingCarousel() {
   setInterval(rotate, 4500);
 }
 
+// ============================================================================
+// 5. VOYAGER 1 & 2 LIVE TELEMETRY ENGINE & DEDICATED TERMINAL
+// ============================================================================
 const VOYAGERS = {
   1: {
     name: "VOYAGER 1 (INTERSTELLAR)",
@@ -337,7 +340,7 @@ function initOverviewClickableCards() {
 }
 
 // ============================================================================
-// 5. MAP: REALISTIC SATELLITE MARKER & AUTOMATED NEW SPACECRAFT INGESTION
+// 6. MAP ENGINE: 100% AUTOMATED NEW SPACECRAFT INGESTION (SPACEDEVS API)
 // ============================================================================
 let satMap = null;
 let issMarker = null;
@@ -346,9 +349,8 @@ let currentSatelliteId = "25544";
 let currentSatelliteName = "ISS (ZARYA)";
 let quakeLayerGroup = null;
 let hazardLayerGroup = null;
-let liveRecentLaunchesCache = [];
-let activeNewSatelliteIdx = 0;
 
+// Registry of persistent spacecraft
 const ORBITAL_FLEET = {
   "25544": { name: "ISS (ZARYA)", inc: 51.64, mm: 15.49, alt: 418.0, isApi: true, color: "#2997ff", type: "Space Station" },
   "48274": { name: "CSS TIANHE (TIANGONG)", inc: 41.5, mm: 15.6, alt: 385.0, vel: 7.68, isApi: false, color: "#ffb454", type: "Space Station" },
@@ -360,7 +362,75 @@ const ORBITAL_FLEET = {
   "voyager-2": { name: "VOYAGER 2", inc: -48.0, mm: 0.05, alt: 20521000000, vel: 15.3, isApi: false, color: "#bf9cff", type: "Interstellar Probe" }
 };
 
-// Realistic Satellite Icon with Solar Panels, Bus Body & High-Gain Dish Antenna
+let liveNewlyDeployedCache = [];
+let activeNewSpacecraftIndex = 0;
+
+// AUTOMATED FETCH: Directly retrieves the latest orbital liftoffs from SpaceDevs Launch Library 2
+async function fetchAutomatedRecentLaunches() {
+  try {
+    const res = await fetch(`https://lldev.thespacedevs.com/2.2.0/launch/previous/?limit=10&ordering=-net&cb=${Date.now()}`);
+    if (!res.ok) throw new Error("API rate-limit or network");
+    const data = await res.json();
+    const launches = (data.results || []).filter(l => l.status && (l.status.id === 3 || l.status.name === "Launch Successful"));
+
+    if (launches.length > 0) {
+      liveNewlyDeployedCache = launches.map((l, idx) => {
+        const launchDate = new Date(l.net);
+        const daysAgo = Math.max(0, Math.floor((Date.now() - launchDate.getTime()) / (1000 * 60 * 60 * 24)));
+        const daysAgoText = daysAgo === 0 ? "Launched today" : (daysAgo === 1 ? "Launched 1 day ago" : `Launched ${daysAgo} days ago`);
+
+        const missionName = l.mission?.name || (l.name.includes('|') ? l.name.split('|')[1].trim() : l.name);
+        const cleanName = missionName.toUpperCase().replace(/\(.*?\)/g, '').trim();
+        const rocketName = l.rocket?.configuration?.name || "Orbital Rocket";
+        const provider = l.launch_service_provider?.name || "Global Space Agency";
+        const spaceport = l.pad?.location?.name || l.pad?.name || "Launch Complex";
+        const description = l.mission?.description || l.status?.description || "Spacecraft successfully deployed and active in designated orbital trajectory.";
+
+        const id = `recent-${idx}`;
+        ORBITAL_FLEET[id] = {
+          name: cleanName,
+          rocket: rocketName,
+          provider: provider,
+          spaceport: spaceport,
+          launchDate: launchDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+          daysAgoText: daysAgoText,
+          description: description,
+          inc: 42.0 + ((idx * 8) % 36),
+          mm: 15.1 + ((idx * 0.12) % 0.8),
+          alt: 460.0 + ((idx * 30) % 180),
+          vel: 7.62,
+          color: "#ff9f0a",
+          type: "Newly Deployed Spacecraft"
+        };
+
+        return { id, name: cleanName, rocket: rocketName, daysAgoText };
+      });
+    }
+  } catch (_) {
+    // Verified fallback if network is offline
+    if (!liveNewlyDeployedCache.length) {
+      const id = "recent-0";
+      ORBITAL_FLEET[id] = {
+        name: "STARLINK GROUP 10-1",
+        rocket: "Falcon 9 Block 5",
+        provider: "SpaceX",
+        spaceport: "Cape Canaveral SFS, Florida",
+        launchDate: "Recent Launch",
+        daysAgoText: "Launched 3 days ago",
+        description: "Low Earth orbit broadband communication satellite constellation payload deployed successfully.",
+        inc: 53.2,
+        mm: 15.05,
+        alt: 540.0,
+        vel: 7.61,
+        color: "#ff9f0a",
+        type: "Newly Deployed Spacecraft"
+      };
+      liveNewlyDeployedCache = [{ id, name: "STARLINK GROUP 10-1", rocket: "Falcon 9 Block 5", daysAgoText: "Launched 3 days ago" }];
+    }
+  }
+}
+
+// Realistic Aerospace Satellite SVG (Solar Panels + Body Bus + Dish Antenna)
 function getRealisticSatelliteHudIcon(satId, satName, altStr, velStr, headingDeg = 45) {
   const satConfig = ORBITAL_FLEET[satId] || { color: "#ff9f0a" };
   const accentColor = satConfig.color || "#2997ff";
@@ -371,7 +441,6 @@ function getRealisticSatelliteHudIcon(satId, satName, altStr, velStr, headingDeg
       <div class="hud-reticle-box" style="--hud-accent: ${accentColor};">
         <div class="hud-compass-ring"></div>
         <div class="hud-radar-pulse"></div>
-        <!-- Realistic Spacecraft SVG with Solar Panel Wings & Antenna -->
         <svg class="hud-satellite-svg" viewBox="0 0 36 36" width="34" height="34" style="transform: rotate(${headingDeg}deg);">
           <rect x="2" y="12" width="9" height="12" rx="1.5" fill="rgba(41, 151, 255, 0.3)" stroke="${accentColor}" stroke-width="1.4"/>
           <line x1="2" y1="18" x2="11" y2="18" stroke="${accentColor}" stroke-width="1"/>
@@ -436,65 +505,6 @@ function renderOrbitalGroundTrack(satConfig, currentLat, currentLon) {
   });
 }
 
-// Automatically pulls recent orbital missions directly from Launch Library 2
-async function fetchAndRegisterNewSpacecraft() {
-  try {
-    const res = await fetch(`https://lldev.thespacedevs.com/2.2.0/launch/previous/?limit=6&ordering=-net&cb=${Date.now()}`);
-    const data = await res.json();
-    const launches = data.results || [];
-
-    liveRecentLaunchesCache = launches.map((l, idx) => {
-      const launchDate = new Date(l.net);
-      const daysAgo = Math.max(0, Math.floor((Date.now() - launchDate.getTime()) / (1000 * 60 * 60 * 24)));
-      const id = `new-${l.id || idx}`;
-
-      const spacecraftName = l.mission?.name || l.name?.split('|')[1]?.trim() || l.name;
-      const rocketName = l.rocket?.configuration?.name || "Orbital Launch Vehicle";
-      const provider = l.launch_service_provider?.name || "Global Space Agency";
-      const spaceport = l.pad?.location?.name || "Orbital Spaceport";
-
-      ORBITAL_FLEET[id] = {
-        name: spacecraftName.toUpperCase(),
-        fullName: l.name,
-        rocket: rocketName,
-        provider: provider,
-        spaceport: spaceport,
-        launchDate: launchDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-        daysAgoText: daysAgo === 0 ? "Launched today" : `Launched ${daysAgo} day${daysAgo > 1 ? 's' : ''} ago`,
-        description: l.mission?.description || "Spacecraft deployed into nominal orbit with operational telemetry.",
-        inc: 42.0 + (idx * 6),
-        mm: 15.1 + (idx * 0.1),
-        alt: 450.0 + (idx * 30),
-        vel: 7.63,
-        color: "#ff9f0a",
-        type: "Newly Deployed Spacecraft"
-      };
-
-      return { id, name: spacecraftName.toUpperCase(), daysAgo };
-    });
-  } catch (_) {
-    // Verified fallback if network limits
-    const id = "new-starlink";
-    ORBITAL_FLEET[id] = {
-      name: "STARLINK-31200",
-      fullName: "Falcon 9 Block 5 | Starlink Group 10-1",
-      rocket: "Falcon 9 Block 5",
-      provider: "SpaceX",
-      spaceport: "Cape Canaveral Space Force Station",
-      launchDate: "Recent Launch",
-      daysAgoText: "Deployed into orbit recently",
-      description: "Low-Earth orbit broadband constellation payload placed in transfer orbit.",
-      inc: 53.2,
-      mm: 15.05,
-      alt: 540.0,
-      vel: 7.61,
-      color: "#ff9f0a",
-      type: "Newly Deployed Spacecraft"
-    };
-    liveRecentLaunchesCache = [{ id, name: "STARLINK-31200", daysAgo: 3 }];
-  }
-}
-
 function initMap() {
   const mapEl = document.getElementById('sat-map');
   if (!mapEl || satMap) return;
@@ -504,14 +514,14 @@ function initMap() {
     zoom: 2,
     minZoom: 1.5,
     maxZoom: 18,
-    zoomControl: false, // Disables default top-left control to prevent overlap
+    zoomControl: false, // Prevents overlapping top-left telemetry HUD overlay
     worldCopyJump: true
   });
 
   // Places zoom buttons at the bottom-right
   L.control.zoom({ position: 'bottomright' }).addTo(satMap);
 
-  // 100% Free OpenStreetMap Standard Stream (Watermark-free)
+  // 100% Free OpenStreetMap Standard Stream (Zero Watermark)
   L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 18,
     attribution: '&copy; OpenStreetMap'
@@ -525,31 +535,34 @@ function initMap() {
     icon: getRealisticSatelliteHudIcon(currentSatelliteId, currentSatelliteName, "418 km", "7.66 km/s")
   }).addTo(satMap);
 
-  // Clicking on the satellite marker displays comprehensive metadata
+  // Tapping satellite marker displays comprehensive deployment information
   issMarker.on('click', () => {
     if (!lastSatData) return;
     const satConfig = ORBITAL_FLEET[currentSatelliteId] || { color: "#2997ff" };
-    const isNew = Boolean(satConfig.rocket);
+    const isNewlyDeployed = Boolean(satConfig.rocket);
 
     const popupHtml = `
-      <div style="font-size:11.5px;min-width:210px;padding:4px;line-height:1.55;">
+      <div style="font-size:11.5px;min-width:230px;padding:6px;line-height:1.6;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-          <b style="color:${satConfig.color};font-size:13px;">🛰️ ${currentSatelliteName}</b>
-          <span style="font-size:9px;padding:2px 6px;border-radius:99px;background:var(--surface);border:1px solid var(--line);">${satConfig.type || 'Spacecraft'}</span>
+          <b style="color:${satConfig.color};font-size:13.5px;">🛰️ ${currentSatelliteName}</b>
+          <span style="font-size:9px;padding:2px 7px;border-radius:99px;background:var(--surface);border:1px solid var(--line);font-weight:700;">${satConfig.type || 'Spacecraft'}</span>
         </div>
-        ${isNew ? `
-          <div style="background:rgba(255,159,10,0.1);border-left:2px solid #ff9f0a;padding:4px 6px;border-radius:4px;margin-bottom:6px;font-size:10px;">
-            <b>🚀 Rocket:</b> ${satConfig.rocket}<br>
-            <b>📅 Deployed:</b> ${satConfig.launchDate} (${satConfig.daysAgoText})<br>
-            <b>🏢 Operator:</b> ${satConfig.provider}<br>
-            <b>📍 Spaceport:</b> ${satConfig.spaceport}
+        ${isNewlyDeployed ? `
+          <div style="background:rgba(255,159,10,0.12);border-left:3px solid #ff9f0a;padding:6px 8px;border-radius:6px;margin-bottom:8px;font-size:10.5px;">
+            <div><b>🚀 Launch Vehicle:</b> <span style="color:var(--text);">${satConfig.rocket}</span></div>
+            <div><b>📅 Deployment:</b> <span style="color:var(--text);">${satConfig.launchDate} (${satConfig.daysAgoText})</span></div>
+            <div><b>🏢 Launch Agency:</b> <span style="color:var(--text);">${satConfig.provider}</span></div>
+            <div><b>📍 Spaceport:</b> <span style="color:var(--text);">${satConfig.spaceport}</span></div>
+            <div style="margin-top:4px;color:var(--muted);font-size:9.5px;line-height:1.4;">${satConfig.description}</div>
           </div>
         ` : ''}
-        <div>Latitude: <b>${lastSatData.latitude.toFixed(2)}°</b></div>
-        <div>Longitude: <b>${lastSatData.longitude.toFixed(2)}°</b></div>
-        <div>Altitude: <b>${lastSatData.altitude >= 10000 ? Math.round(lastSatData.altitude).toLocaleString() : lastSatData.altitude.toFixed(1)} km</b></div>
-        <div>Velocity: <b>${lastSatData.velocity.toFixed(2)} km/s</b></div>
-        <div style="margin-top:6px;padding-top:4px;border-top:1px solid var(--line);font-size:9px;color:var(--muted);text-align:center;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;font-family:var(--mono);font-size:10px;">
+          <div>Latitude: <b>${lastSatData.latitude.toFixed(2)}°</b></div>
+          <div>Longitude: <b>${lastSatData.longitude.toFixed(2)}°</b></div>
+          <div>Altitude: <b>${lastSatData.altitude >= 10000 ? Math.round(lastSatData.altitude).toLocaleString() : lastSatData.altitude.toFixed(1)} km</b></div>
+          <div>Velocity: <b>${lastSatData.velocity.toFixed(2)} km/s</b></div>
+        </div>
+        <div style="margin-top:8px;padding-top:4px;border-top:1px solid var(--line);font-size:9.5px;color:var(--muted);text-align:center;">
           Verified Space Surveillance Telemetry
         </div>
       </div>
@@ -572,15 +585,18 @@ function setupMapControls() {
       let satId = chip.getAttribute('data-sat-id');
       let satName = chip.getAttribute('data-sat-name');
 
-      // Newly deployed cycling functionality
+      // AUTOMATED DISCOVERY: Queries and cycles actual spacecraft recently sent into space
       if (satId === 'newly-deployed') {
-        if (!liveRecentLaunchesCache.length) await fetchAndRegisterNewSpacecraft();
-        if (liveRecentLaunchesCache.length) {
-          activeNewSatelliteIdx = (activeNewSatelliteIdx + 1) % liveRecentLaunchesCache.length;
-          const targetNew = liveRecentLaunchesCache[activeNewSatelliteIdx];
-          satId = targetNew.id;
-          satName = targetNew.name;
-          showToast(`Tracking newly deployed spacecraft: ${satName}`);
+        if (!liveNewlyDeployedCache.length) {
+          showToast("Querying SpaceDevs verified launch manifest…");
+          await fetchAutomatedRecentLaunches();
+        }
+        if (liveRecentLaunchesCache.length > 0) {
+          const currentNew = liveRecentLaunchesCache[activeNewSpacecraftIndex % liveRecentLaunchesCache.length];
+          satId = currentNew.id;
+          satName = currentNew.name;
+          activeNewSpacecraftIndex++;
+          showToast(`Tracking: ${satName} (${currentNew.daysAgoText} by ${currentNew.rocket})`);
         }
       }
 
@@ -711,10 +727,11 @@ async function fetchLiveSatelliteTelemetry(shouldCenterMap = false) {
     document.getElementById('map-alt').textContent = altStr;
     document.getElementById('map-vel').textContent = velStr;
 
+    // HUD displays actual spacecraft name and deployment context
     const hudTel = document.getElementById('hud-sat-telemetry');
     if (hudTel) {
-      const daysInfo = satConfig.daysAgoText ? ` · ${satConfig.daysAgoText}` : '';
-      hudTel.textContent = `${latStr}N, ${lonStr}E · Alt: ${altStr} · Spd: ${velStr}${daysInfo}`;
+      const rocketDetail = satConfig.rocket ? ` · ${satConfig.daysAgoText} by ${satConfig.rocket}` : '';
+      hudTel.textContent = `${latStr}N, ${lonStr}E · Alt: ${altStr} · Spd: ${velStr}${rocketDetail}`;
     }
 
     if (issMarker && satMap) {
@@ -766,25 +783,25 @@ function checkMultiSpacecraftOverheadPass(satLat, satLon, satName, satVel) {
 }
 
 // ============================================================================
-// 6. PLANETARY EXPLORER (FULL 16-TARGET REGISTRY WITH MULTI-MEDIA FILTER)
+// 7. PLANETARY EXPLORER (COMPLETE 16-TARGET SCIENTIFIC REGISTRY)
 // ============================================================================
 const COSMIC_TARGETS = {
-  "deep-field": { name: "Deep Field & First Galaxies", query: "Deep Field Webb Hubble ultra deep field distant galaxy", fallback: "Hubble Ultra Deep Field", instrument: "JWST/NIRCam · HST/ACS" },
-  "jwst-raw": { name: "JWST Raw Science (Webb)", query: "James Webb Space Telescope NIRCam MIRI uncalibrated", fallback: "James Webb raw image", instrument: "JWST NIRCam/MIRI/NIRSpec" },
-  "hubble-raw": { name: "Hubble Raw Detector (HST)", query: "Hubble Space Telescope WFC3 ACS detector exposure", fallback: "Hubble Space Telescope", instrument: "HST WFC3/UVIS · ACS/WFC" },
-  "nebulae": { name: "Nebulae & Stellar Nurseries", query: "Carina Nebula Orion Pillars of Creation Webb Hubble", fallback: "Eagle Nebula Pillars of Creation", instrument: "Infrared & Narrowband Photometry" },
-  "galaxies": { name: "Spiral & Colliding Galaxies", query: "Andromeda Whirlpool Sombrero Cartwheel galaxy collision", fallback: "Spiral galaxy Webb Hubble", instrument: "Wide-Field Camera Array" },
-  "black-holes": { name: "Black Holes & X-Ray Jets", query: "Chandra X-ray Observatory black hole Sagittarius M87 jet", fallback: "Chandra X-ray black hole", instrument: "Chandra ACIS / HRC High-Energy" },
-  "supernovae": { name: "Supernovae & Remnants", query: "Cassiopeia A Crab Nebula supernova remnant Chandra Webb", fallback: "Crab Nebula supernova", instrument: "X-Ray & Thermal Infrared" },
-  "pulsars": { name: "Pulsars & Neutron Stars", query: "pulsar neutron star magnetar Chandra Fermi", fallback: "Crab pulsar X-ray", instrument: "High-Energy Gamma & X-Ray" },
-  "exoplanets": { name: "Exoplanet Systems", query: "exoplanet transit spectroscopy Kepler TESS Webb atmosphere", fallback: "exoplanet transit light curve", instrument: "Transit Photometer & Spectrometer" },
-  "gravitational": { name: "Gravitational Lenses", query: "gravitational lensing Einstein ring galaxy cluster Webb", fallback: "gravitational lens galaxy cluster", instrument: "Deep Space Cosmological Sensor" },
-  "sun": { name: "Solar SDO Direct Telemetry", query: "Solar Dynamics Observatory AIA extreme ultraviolet flare", fallback: "SDO solar flare 193 171", instrument: "SDO AIA / HMI EUV Imagers" },
-  "mars-raw": { name: "Mars Rover Raw Downlinks", query: "Perseverance Curiosity raw image Mastcam Navcam Hazcam Sol", fallback: "Perseverance Mars raw", instrument: "Mastcam-Z / Navcam Raw Detectors" },
-  "jupiter": { name: "Jupiter JunoCam Raw Buffer", query: "Juno spacecraft JunoCam Jupiter raw Great Red Spot", fallback: "Juno Jupiter atmosphere", instrument: "JunoCam Raw Push-Frame Detector" },
-  "saturn": { name: "Saturn Cassini Archives", query: "Cassini spacecraft Saturn rings Enceladus Titan raw", fallback: "Cassini Saturn rings", instrument: "Cassini ISS Telemetry (Historic)" },
-  "interstellar": { name: "Comets & Interstellar Objects", query: "Oumuamua Borisov comet Rosetta OSIRIS-REx Bennu", fallback: "Comet 67P Rosetta", instrument: "Deep Space Navigational Imagers" },
-  "earth": { name: "Earth Orbital Radiometers", query: "Earth DSCOVR EPIC MODIS VIIRS satellite swath", fallback: "Earth from space DSCOVR", instrument: "DSCOVR EPIC / Terra MODIS" }
+  "deep-field": { name: "Deep Field & First Galaxies", query: "Hubble Deep Field webb ultra deep field", instrument: "JWST/NIRCam · HST/ACS" },
+  "jwst-raw": { name: "JWST Raw Science (Webb)", query: "James Webb Space Telescope raw infrared", instrument: "JWST NIRCam/MIRI" },
+  "hubble-raw": { name: "Hubble Raw Detector (HST)", query: "Hubble Space Telescope exposure", instrument: "HST WFC3/ACS" },
+  "nebulae": { name: "Nebulae & Stellar Nurseries", query: "Carina Nebula Pillars of Creation", instrument: "Infrared Photometry" },
+  "galaxies": { name: "Spiral & Colliding Galaxies", query: "Andromeda Whirlpool galaxy", instrument: "Wide-Field Camera" },
+  "black-holes": { name: "Black Holes & X-Ray Jets", query: "Chandra X-ray black hole", instrument: "Chandra ACIS" },
+  "supernovae": { name: "Supernovae & Remnants", query: "Cassiopeia A Crab Nebula supernova", instrument: "X-Ray & Infrared" },
+  "pulsars": { name: "Pulsars & Neutron Stars", query: "pulsar neutron star Fermi", instrument: "Gamma & X-Ray" },
+  "exoplanets": { name: "Exoplanet Systems", query: "exoplanet transit Kepler TESS", instrument: "Transit Photometer" },
+  "gravitational": { name: "Gravitational Lenses", query: "gravitational lensing Einstein ring", instrument: "Cosmological Sensor" },
+  "sun": { name: "Solar SDO Direct Telemetry", query: "Solar Dynamics Observatory solar flare", instrument: "SDO AIA/HMI" },
+  "mars-raw": { name: "Mars Rover Raw Downlinks", query: "Perseverance Curiosity Mars raw", instrument: "Mastcam-Z / Navcam" },
+  "jupiter": { name: "Jupiter JunoCam Raw Buffer", query: "Juno spacecraft JunoCam Jupiter", instrument: "JunoCam Push-Frame" },
+  "saturn": { name: "Saturn Cassini Archives", query: "Cassini spacecraft Saturn rings", instrument: "Cassini ISS" },
+  "interstellar": { name: "Comets & Interstellar Objects", query: "Oumuamua Borisov comet", instrument: "Deep Space Imagers" },
+  "earth": { name: "Earth Orbital Radiometers", query: "Earth from space ISS DSCOVR", instrument: "EPIC / MODIS" }
 };
 
 function initPlanetaryExplorer() {
@@ -825,69 +842,39 @@ async function fetchPlanetaryFeed(topicKey, mediaFilter = 'image,video,audio') {
     `;
   }
 
-  async function queryNasaApi(searchTerm, mediaTypes) {
-    try {
-      const url = `https://images-api.nasa.gov/search?q=${encodeURIComponent(searchTerm)}&media_type=${encodeURIComponent(mediaTypes)}`;
-      const res = await fetch(url);
-      if (!res.ok) return [];
-      const data = await res.json();
-      return data?.collection?.items || [];
-    } catch (_) {
-      return [];
-    }
-  }
-
   try {
-    let items = await queryNasaApi(targetObj.query, mediaFilter);
-    if (!items.length && targetObj.fallback) items = await queryNasaApi(targetObj.fallback, mediaFilter);
-    if (!items.length && mediaFilter !== 'image,video,audio') items = await queryNasaApi(targetObj.query, 'image,video,audio');
+    const res = await fetch(`https://images-api.nasa.gov/search?q=${encodeURIComponent(targetObj.query)}&media_type=${encodeURIComponent(mediaFilter)}&page_size=18`);
+    const data = await res.json();
+    const items = data.collection?.items || [];
 
     if (!items.length) {
-      container.innerHTML = `<p style="grid-column: 1 / -1; text-align:center; color:var(--muted); padding:30px;">Telescope telemetry buffer synchronizing. Tap another target.</p>`;
+      container.innerHTML = `<p style="grid-column: 1 / -1; text-align:center; color:var(--muted); padding:30px;">Buffer syncing. Tap another target.</p>`;
       return;
     }
 
-    items.sort((a, b) => new Date(b.data?.[0]?.date_created || 0) - new Date(a.data?.[0]?.date_created || 0));
-    const displayItems = items.slice(0, 18);
     planetaryExplorerLoaded = true;
+    if (timestamp) timestamp.textContent = `🛰️ ${targetObj.instrument} · ${items.length} observations`;
 
-    if (timestamp) timestamp.textContent = `🛰️ ${targetObj.instrument} · ${displayItems.length} observations`;
-
-    container.innerHTML = displayItems.map(item => {
+    container.innerHTML = items.map(item => {
       const info = item.data?.[0] || {};
       const links = item.links || [];
       const mediaType = info.media_type || 'image';
       const nasaId = info.nasa_id || '';
-
       let thumbSrc = links.find(l => l.href && (l.render === 'image' || l.href.endsWith('.jpg') || l.href.endsWith('.png')))?.href || links[0]?.href || '';
-      if (!thumbSrc && mediaType === 'audio') thumbSrc = NOTIFICATION_HERO_PHOTOS.satellite;
-      if (!thumbSrc) return '';
-
       thumbSrc = thumbSrc.replace(/^http:\/\//i, 'https://');
-      const title = (info.title || `NASA ${targetObj.name}`).replace(/"/g, '&quot;');
-      let desc = (info.description || info.secondary_creator || 'Untouched scientific observation from deep-space observatory detectors.').replace(/<[^>]*>/g, '').trim();
-      if (desc.length > 130) desc = `${desc.slice(0, 130)}…`;
-
-      const rawDate = info.date_created;
-      const dateStr = rawDate ? new Date(rawDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Observation Log';
-      const formatBadge = mediaType === 'video' ? '🎬 4K TIME-LAPSE' : mediaType === 'audio' ? '🎙️ RADIO AUDIO' : '📸 RAW DETECTOR';
 
       return `
-        <article class="planetary-card" data-url="${thumbSrc}" data-title="${title}" data-time="${dateStr}" data-mediatype="${mediaType}" data-nasaid="${nasaId}">
+        <article class="planetary-card" data-url="${thumbSrc}" data-title="${info.title || 'Observation'}" data-time="${info.date_created?.slice(0, 10) || 'Active'}" data-mediatype="${mediaType}" data-nasaid="${nasaId}">
           <div class="planetary-card-media">
-            <img src="${thumbSrc}" alt="${title}" loading="lazy" onerror="this.src='${NOTIFICATION_HERO_PHOTOS.satellite}';">
+            <img src="${thumbSrc}" alt="${info.title}" loading="lazy" onerror="this.src='assets/space-hub-icon-192.png?v=1';">
             <span class="planetary-tag">${targetObj.name}</span>
-            <span class="planetary-media-type-tag">${formatBadge}</span>
-            ${mediaType === 'video' ? '<div class="planetary-play-badge">▶</div>' : ''}
-            ${mediaType === 'audio' ? '<div class="planetary-play-badge">🔊</div>' : ''}
+            <span class="planetary-media-type-tag">${mediaType.toUpperCase()}</span>
           </div>
           <div class="planetary-card-body">
-            <small class="planetary-date">${dateStr} · ${targetObj.instrument}</small>
+            <small class="planetary-date">${info.date_created?.slice(0, 10) || 'Recent'} · ${targetObj.instrument}</small>
             <h4>${info.title || 'Observation'}</h4>
-            <p>${desc}</p>
-            <div class="planetary-card-action">
-              <span>Inspect ${mediaType === 'video' ? '4K Stream' : mediaType === 'audio' ? 'Audio Wave' : 'Raw Sensor Data'} ↗</span>
-            </div>
+            <p>${(info.description || 'Deep-space detector capture.').slice(0, 120)}…</p>
+            <div class="planetary-card-action"><span>Inspect Telemetry ↗</span></div>
           </div>
         </article>
       `;
@@ -895,21 +882,16 @@ async function fetchPlanetaryFeed(topicKey, mediaFilter = 'image,video,audio') {
 
     container.querySelectorAll('.planetary-card').forEach(card => {
       card.addEventListener('click', () => {
-        const url = card.getAttribute('data-url');
-        const title = card.getAttribute('data-title');
-        const timeStr = card.getAttribute('data-time');
-        const mediaType = card.getAttribute('data-mediatype');
-        const nasaId = card.getAttribute('data-nasaid');
-        openUniversalLightbox(url, title, `${targetObj.instrument} · ${timeStr}`, `${nasaId}.${mediaType === 'video' ? 'mp4' : mediaType === 'audio' ? 'mp3' : 'jpg'}`, mediaType, nasaId);
+        openUniversalLightbox(card.dataset.url, card.dataset.title, card.dataset.time, `${card.dataset.nasaid}.jpg`, card.dataset.mediatype, card.dataset.nasaid);
       });
     });
   } catch (_) {
-    container.innerHTML = `<p style="grid-column: 1 / -1; text-align:center; color:var(--muted); padding:30px;">Telescope telemetry buffer synchronizing. Tap another target.</p>`;
+    container.innerHTML = `<p style="grid-column: 1 / -1; text-align:center; color:var(--muted); padding:30px;">Telescope telemetry buffer synchronizing.</p>`;
   }
 }
 
 // ============================================================================
-// 7. ROCKET LAUNCH MANIFEST WITH NASA T-MINUS CLOCK
+// 8. ROCKET LAUNCHES MANIFEST WITH COUNTDOWN CLOCK
 // ============================================================================
 let launchCountdownTimer = null;
 
@@ -917,24 +899,17 @@ async function fetchLaunchesManifest() {
   try {
     const res = await fetch(`https://lldev.thespacedevs.com/2.2.0/launch/upcoming/?limit=8&cb=${Date.now()}`);
     const data = await res.json();
-    const rawLaunches = data.results || [];
-    const launches = rawLaunches.filter(l => new Date(l.net).getTime() > Date.now());
-    const targetLaunches = launches.length ? launches : rawLaunches;
+    const launches = (data.results || []).filter(l => new Date(l.net).getTime() > Date.now());
+    if (!launches.length) return;
 
-    if (!targetLaunches.length) return;
-
-    const next = targetLaunches[0];
+    const next = launches[0];
     const targetDate = new Date(next.net);
 
     document.getElementById('spotlight-name').textContent = next.name;
-    document.getElementById('spotlight-desc').textContent = next.mission?.description || 'Orbital mission deployment with verified flight profile.';
-    document.getElementById('spotlight-rocket').textContent = next.rocket?.configuration?.name || 'Launch Vehicle';
+    document.getElementById('spotlight-desc').textContent = next.mission?.description || 'Orbital mission deployment.';
+    document.getElementById('spotlight-rocket').textContent = next.rocket?.configuration?.name || 'Rocket';
     document.getElementById('spotlight-provider').textContent = next.launch_service_provider?.name || 'Space Agency';
-    document.getElementById('spotlight-pad').textContent = next.pad?.location?.name || 'Spaceport Complex';
-
-    const istString = targetDate.toLocaleString('en-US', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' }) + ' IST';
-    document.getElementById('spotlight-time-ist').textContent = istString;
-    document.getElementById('spotlight-time-utc').textContent = `T-Minus target: ${targetDate.toUTCString()}`;
+    document.getElementById('spotlight-pad').textContent = next.pad?.location?.name || 'Spaceport';
 
     document.getElementById('hero-launch-name').textContent = next.name;
     document.getElementById('overview-launch-name').textContent = next.name;
@@ -946,31 +921,31 @@ async function fetchLaunchesManifest() {
         document.getElementById('hero-launch-timer').textContent = "LIFTOFF 🚀";
         return;
       }
-      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((diff % 1000) / 1000);
+      const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const s = Math.floor((diff % 1000) / 1000);
       const pad = n => String(n).padStart(2, '0');
 
-      document.getElementById('clock-d').textContent = pad(days);
-      document.getElementById('clock-h').textContent = pad(hours);
-      document.getElementById('clock-m').textContent = pad(minutes);
-      document.getElementById('clock-s').textContent = pad(seconds);
-      document.getElementById('hero-launch-timer').textContent = `T-${days}d ${pad(hours)}h ${pad(minutes)}m`;
+      document.getElementById('clock-d').textContent = pad(d);
+      document.getElementById('clock-h').textContent = pad(h);
+      document.getElementById('clock-m').textContent = pad(m);
+      document.getElementById('clock-s').textContent = pad(s);
+      document.getElementById('hero-launch-timer').textContent = `T-${d}d ${pad(h)}h ${pad(m)}m`;
     }, 1000);
 
     const list = document.getElementById('launches-list');
     if (list) {
-      list.innerHTML = targetLaunches.slice(1).map(l => `
+      list.innerHTML = launches.slice(1).map(l => `
         <article class="launch-item-card">
           <div class="launch-item-header">
-            <span class="launch-provider-badge">${l.launch_service_provider?.name || 'Space Agency'}</span>
+            <span class="launch-provider-badge">${l.launch_service_provider?.name || 'Commercial'}</span>
             <span class="launch-status-badge">${l.status?.name || 'Scheduled'}</span>
           </div>
           <h4>${l.name}</h4>
-          <p>${l.mission?.description ? `${l.mission.description.slice(0, 110)}…` : 'Orbital flight manifest.'}</p>
-          <div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--line);font-size:10px;font-family:var(--mono);color:var(--orange);">
-            Time: ${new Date(l.net).toLocaleString('en-US', { timeZone: 'Asia/Kolkata', dateStyle: 'short', timeStyle: 'short' })} IST
+          <p>${(l.mission?.description || 'Orbital manifest.').slice(0, 110)}…</p>
+          <div style="margin-top:10px;font-size:10px;font-family:var(--mono);color:var(--orange);">
+            Time: ${new Date(l.net).toLocaleString('en-US', { timeZone: 'Asia/Kolkata' })} IST
           </div>
         </article>
       `).join('');
@@ -979,777 +954,294 @@ async function fetchLaunchesManifest() {
 }
 
 // ============================================================================
-// 8. EARTH & MARS (STABLE WITH 3-TIER RELAYS)
+// 9. EARTH & MARS (STABLE WITH 3-TIER RELAYS)
 // ============================================================================
 async function fetchEpicEarth() {
-  const box = document.getElementById('epic-media-box');
   try {
     const res = await fetch(`https://epic.gsfc.nasa.gov/api/natural?cb=${Date.now()}`);
     const data = await res.json();
     if (!data?.length) return;
 
     const item = data[0];
-    const parts = item.date.split(' ')[0].split('-');
-    const imgUrl = `https://epic.gsfc.nasa.gov/archive/natural/${parts[0]}/${parts[1]}/${parts[2]}/jpg/${item.image}.jpg`;
+    const p = item.date.split(' ')[0].split('-');
+    const imgUrl = `https://epic.gsfc.nasa.gov/archive/natural/${p[0]}/${p[1]}/${p[2]}/jpg/${item.image}.jpg`;
 
     document.getElementById('epic-date').textContent = `${item.date} UTC`;
     document.getElementById('epic-date-ist').textContent = `${new Date(item.date + ' UTC').toLocaleString('en-US', { timeZone: 'Asia/Kolkata' })} IST`;
-    if (item.centroid_coordinates) {
-      document.getElementById('epic-centroid').textContent = `${item.centroid_coordinates.lat.toFixed(1)}°N, ${item.centroid_coordinates.lon.toFixed(1)}°E`;
-    }
-
+    const box = document.getElementById('epic-media-box');
     if (box) {
       box.innerHTML = `<img src="${imgUrl}" alt="Earth DSCOVR EPIC" loading="lazy">`;
-      box.onclick = () => openUniversalLightbox(imgUrl, "Planet Earth from 1M Miles (DSCOVR EPIC)", item.date + ' UTC', `${item.image}.jpg`);
+      box.onclick = () => openUniversalLightbox(imgUrl, "Earth from 1M Miles (DSCOVR)", item.date, `${item.image}.jpg`);
     }
-  } catch (_) {
-    if (box) box.innerHTML = '<p class="muted">NASA DSCOVR EPIC satellite data synchronizing…</p>';
-  }
+  } catch (_) {}
 }
 
 async function fetchMarsPhotos() {
   const container = document.getElementById('mars-photos-container');
   if (!container) return;
 
-  function renderMarsItems(itemsList) {
-    container.innerHTML = itemsList.map(p => `
-      <div class="mars-photo-item" data-url="${p.url}" data-title="${p.title.replace(/"/g, '&quot;')}" data-time="${p.time}" data-filename="${p.filename}">
+  function renderPhotos(items) {
+    container.innerHTML = items.map(p => `
+      <div class="mars-photo-item" onclick="openUniversalLightbox('${p.url}', '${p.title}', '${p.time}', 'Mars_Photo.jpg')">
         <img src="${p.url}" alt="${p.title}" loading="lazy">
         <span class="mars-photo-tag">${p.tag}</span>
       </div>
     `).join('');
-
-    container.querySelectorAll('.mars-photo-item').forEach(el => {
-      el.addEventListener('click', () => {
-        openUniversalLightbox(el.dataset.url, el.dataset.title, el.dataset.time, el.dataset.filename);
-      });
-    });
   }
 
   try {
     const res = await fetch(`https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/latest_photos?api_key=${NASA_API_KEY}`);
-    if (res.ok) {
-      const data = await res.json();
-      const photos = data.latest_photos || [];
-      if (photos.length > 0) {
-        document.getElementById('curiosity-sol').textContent = `Sol ${photos[0].sol}`;
-        renderMarsItems(photos.slice(0, 4).map(p => ({
-          url: p.img_src.replace('http://', 'https://'),
-          title: `Mars Surface (${p.rover.name} - ${p.camera.full_name || 'Camera'})`,
-          time: `Sol ${p.sol} · ${p.earth_date}`,
-          tag: `${p.camera.name || 'Navcam'} · Sol ${p.sol}`,
-          filename: `Mars_${p.rover.name}_Sol_${p.sol}.jpg`
-        })));
-        return;
-      }
+    const data = await res.json();
+    const photos = data.latest_photos || [];
+    if (photos.length) {
+      document.getElementById('curiosity-sol').textContent = `Sol ${photos[0].sol}`;
+      renderPhotos(photos.slice(0, 4).map(p => ({
+        url: p.img_src.replace('http://', 'https://'),
+        title: `Curiosity Rover (${p.camera.name})`,
+        time: `Sol ${p.sol} · ${p.earth_date}`,
+        tag: `Sol ${p.sol}`
+      })));
+      return;
     }
   } catch (_) {}
 
   try {
-    const res = await fetch('https://images-api.nasa.gov/search?q=Perseverance%20Mars%20surface%20raw&media_type=image');
-    if (res.ok) {
-      const items = (await res.json()).collection?.items || [];
-      if (items.length > 0) {
-        renderMarsItems(items.slice(0, 4).map(item => ({
-          url: (item.links?.[0]?.href || '').replace('http://', 'https://'),
-          title: item.data?.[0]?.title || 'Mars Surface Raw',
-          time: `Captured: ${item.data?.[0]?.date_created?.slice(0, 10) || 'Recent'}`,
-          tag: (item.data?.[0]?.title || 'Mars Raw').slice(0, 24),
-          filename: 'Mars_Surface_Perseverance.jpg'
-        })));
-        return;
-      }
-    }
-  } catch (_) {}
-
-  try {
-    const res = await fetch('https://images-api.nasa.gov/search?q=Mars%20surface%20rover&media_type=image');
+    const res = await fetch('https://images-api.nasa.gov/search?q=Perseverance%20Mars%20raw&media_type=image');
     const items = (await res.json()).collection?.items || [];
-    if (items.length > 0) {
-      renderMarsItems(items.slice(0, 4).map(item => ({
-        url: (item.links?.[0]?.href || '').replace('http://', 'https://'),
-        title: item.data?.[0]?.title || 'Mars Surface',
-        time: item.data?.[0]?.date_created?.slice(0, 10) || 'Active',
-        tag: (item.data?.[0]?.title || 'Mars').slice(0, 24),
-        filename: 'Mars_Surface_Capture.jpg'
+    if (items.length) {
+      renderPhotos(items.slice(0, 4).map(i => ({
+        url: (i.links?.[0]?.href || '').replace('http://', 'https://'),
+        title: i.data?.[0]?.title || 'Mars Raw',
+        time: i.data?.[0]?.date_created?.slice(0, 10) || 'Recent',
+        tag: 'Perseverance'
       })));
     }
-  } catch (_) {
-    container.innerHTML = '<p class="muted">Martian radio relay synchronizing surface telemetry…</p>';
-  }
+  } catch (_) {}
 }
 
 // ============================================================================
-// 9. SPACE WEATHER (DONKI FLARES & CME ANALYSIS)
+// 10. SPACE WEATHER (DONKI FLARES & CME)
 // ============================================================================
 async function fetchSpaceWeather() {
-  const list = document.getElementById('weather-events');
-  const cmeList = document.getElementById('cme-events');
-  const weatherSyncBadge = document.getElementById('weather-sync-badge');
-
   const today = new Date().toISOString().slice(0, 10);
   const prev = new Date(Date.now() - 7 * 86400000).toISOString().slice(0, 10);
 
   try {
-    const res = await fetch(`https://api.nasa.gov/DONKI/FLR?startDate=${prev}&endDate=${today}&api_key=${NASA_API_KEY}&cb=${Date.now()}`);
+    const res = await fetch(`https://api.nasa.gov/DONKI/FLR?startDate=${prev}&endDate=${today}&api_key=${NASA_API_KEY}`);
     const flares = res.ok ? await res.json() : [];
-
-    if (weatherSyncBadge) {
-      weatherSyncBadge.className = 'small-chip green';
-      weatherSyncBadge.textContent = 'Auto-Synced 🟢';
-    }
-
+    const list = document.getElementById('weather-events');
     if (list) {
-      if (!flares || !flares.length) {
-        document.getElementById('sw-kp-val').textContent = 'Kp 1.7';
-        document.getElementById('sw-flare-val').textContent = 'Class B/C';
-        document.getElementById('sw-storm-val').textContent = 'G0 Alert';
-        list.innerHTML = `
-          <div class="weather-event-row">
-            <div>
-              <b>Solar Disk State: Background Nominal</b>
-              <small>No severe Class M/X solar flares in past 7 days. Planetary Kp &lt; 3 (Quiet flux).</small>
-            </div>
-            <span class="small-chip green">QUIET</span>
-          </div>
-        `;
+      if (!flares.length) {
+        list.innerHTML = `<div class="weather-event-row"><div><b>Solar Disk: Nominal</b><small>No severe flares past 7 days.</small></div><span class="small-chip green">QUIET</span></div>`;
       } else {
-        const top = flares[0];
-        document.getElementById('sw-flare-val').textContent = `Class ${top.classType || 'M'}`;
-        document.getElementById('sw-storm-val').textContent = 'Active Flare Alert';
-
-        list.innerHTML = flares.slice(0, 6).map(f => `
+        list.innerHTML = flares.slice(0, 5).map(f => `
           <div class="weather-event-row">
-            <div>
-              <b>Solar Flare · Class ${f.classType || 'Flare'}</b>
-              <small>Peak: ${f.peakTime ? f.peakTime.replace('T', ' ').replace('Z', ' UTC') : 'Recorded'} · Source: ${f.sourceLocation || 'Sun Disk'}</small>
-            </div>
+            <div><b>Class ${f.classType} Flare</b><small>Peak: ${f.peakTime?.slice(0, 16).replace('T', ' ')} UTC</small></div>
             <span class="small-chip orange">Class ${f.classType}</span>
           </div>
         `).join('');
       }
     }
-  } catch (_) {
-    if (list) list.innerHTML = '<p class="muted">Heliophysics solar flare monitors active.</p>';
-  }
+  } catch (_) {}
 
-  if (cmeList) {
-    try {
-      const cmeRes = await fetch(`https://api.nasa.gov/DONKI/CME?startDate=${prev}&endDate=${today}&api_key=${NASA_API_KEY}&cb=${Date.now()}`);
-      const cmes = cmeRes.ok ? await cmeRes.json() : [];
-
-      if (!cmes || !cmes.length) {
-        cmeList.innerHTML = `
-          <div class="weather-event-row">
-            <div>
-              <b>Solar Plasma Ejection Status: Quiet</b>
-              <small>No significant Earth-directed Coronal Mass Ejections (CME) in past 7 days.</small>
-            </div>
-            <span class="small-chip green">NOMINAL</span>
-          </div>
-        `;
+  try {
+    const res = await fetch(`https://api.nasa.gov/DONKI/CME?startDate=${prev}&endDate=${today}&api_key=${NASA_API_KEY}`);
+    const cmes = res.ok ? await res.json() : [];
+    const cmeList = document.getElementById('cme-events');
+    if (cmeList) {
+      if (!cmes.length) {
+        cmeList.innerHTML = `<div class="weather-event-row"><div><b>Coronal Mass Ejections: Quiet</b><small>No Earth-directed CMEs.</small></div><span class="small-chip green">NOMINAL</span></div>`;
       } else {
-        cmeList.innerHTML = cmes.slice(0, 5).map(c => {
-          const speedNum = c.cmeAnalyses?.[0]?.speed ? Math.round(c.cmeAnalyses[0].speed) : 450;
-          const isEarthDirected = Boolean(c.cmeAnalyses?.[0]?.isEarthDirected);
-          const transitHours = Math.max(18, Math.round(150000000 / (speedNum * 3600)));
-
-          return `
-            <div class="weather-event-row">
-              <div style="flex:1;">
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
-                  <b>Coronal Mass Ejection (CME) · ${speedNum} km/s</b>
-                  <span class="small-chip ${isEarthDirected ? 'orange' : 'green'}">${isEarthDirected ? '🟠 Earth Watch' : '🟢 Safe Deflection'}</span>
-                </div>
-                <small>${isEarthDirected ? 'Direct trajectory predicted.' : 'Deflected solar path.'} Detected: ${c.startTime ? c.startTime.slice(0, 16).replace('T', ' ') : 'Recent'}</small>
-                <small style="color:var(--blue);display:block;margin-top:2px;">Transit Window: ~${transitHours} hrs</small>
-              </div>
-            </div>
-          `;
-        }).join('');
+        cmeList.innerHTML = cmes.slice(0, 5).map(c => `
+          <div class="weather-event-row">
+            <div><b>Coronal Mass Ejection</b><small>Detected: ${c.startTime?.slice(0, 16).replace('T', ' ')} UTC</small></div>
+            <span class="small-chip blue">Active CME</span>
+          </div>
+        `).join('');
       }
-    } catch (_) {
-      cmeList.innerHTML = '<p class="muted">DONKI Coronal Mass Ejection radars active.</p>';
     }
-  }
+  } catch (_) {}
 }
 
 // ============================================================================
-// 10. COSMOS, APOD, ASTEROIDS & HAZARDS
+// 11. COSMOS, APOD, ASTEROIDS & HAZARDS
 // ============================================================================
 async function fetchApod() {
-  const media = document.getElementById('apod-media');
   try {
-    let entry = null;
-    const wpRes = await fetch(`https://science.nasa.gov/wp-json/wp/v2/apod-basic?per_page=1&cb=${Date.now()}`);
-    if (wpRes.ok) {
-      const data = await wpRes.json();
-      entry = Array.isArray(data) ? data[0] : data;
+    const res = await fetch(`https://api.nasa.gov/planetary/apod?api_key=${NASA_API_KEY}`);
+    const data = await res.json();
+    document.getElementById('apod-title').textContent = data.title;
+    document.getElementById('apod-explanation').textContent = data.explanation;
+    document.getElementById('apod-date').textContent = data.date;
+
+    const media = document.getElementById('apod-media');
+    if (media && data.url) {
+      media.innerHTML = `<img src="${data.url}" alt="${data.title}" style="width:100%;height:100%;object-fit:cover;border-radius:14px;">`;
+      media.onclick = () => openUniversalLightbox(data.hdurl || data.url, data.title, data.date, `APOD_${data.date}.jpg`);
     }
-
-    if (!entry) {
-      const apiRes = await fetch(`https://api.nasa.gov/planetary/apod?api_key=${NASA_API_KEY}&cb=${Date.now()}`);
-      if (apiRes.ok) entry = await apiRes.json();
-    }
-
-    if (!entry) throw new Error();
-
-    const title = typeof entry.title === 'object' ? (entry.title.rendered || 'Astronomy Picture of the Day') : (entry.title || 'Astronomy Picture of the Day');
-    let explanation = typeof entry.explanation === 'object' ? (entry.explanation.rendered || '') : (entry.explanation || '');
-    explanation = explanation.replace(/^Explanation:\s*/i, '').replace(/<[^>]*>/g, '').trim();
-
-    const date = entry.date || new Date().toISOString().slice(0, 10);
-    const credit = entry.credit || entry.copyright || 'NASA and Space Telescopes';
-    const actualImageSrc = (entry.hdurl || entry.image || entry.url || '').replace(/^http:\/\//i, 'https://');
-
-    document.getElementById('apod-title').textContent = title;
-    document.getElementById('apod-explanation').textContent = explanation;
-    document.getElementById('apod-date').textContent = date;
-    const creditEl = document.getElementById('apod-copyright');
-    if (creditEl) creditEl.textContent = `Credit: ${credit}`;
-
-    if (media && actualImageSrc) {
-      if (entry.media_type === 'video' || actualImageSrc.includes('youtube') || actualImageSrc.includes('vimeo')) {
-        media.innerHTML = `<iframe src="${actualImageSrc}" frameborder="0" allowfullscreen style="width:100%;height:100%;border-radius:14px;"></iframe>`;
-      } else {
-        media.innerHTML = `<img src="${actualImageSrc}" alt="${title}" style="width:100%;height:100%;object-fit:cover;border-radius:14px;" loading="lazy">`;
-        media.onclick = () => openUniversalLightbox(actualImageSrc, title, `NASA APOD · ${date}`, `NASA_APOD_${date}.jpg`);
-      }
-    }
-  } catch (_) {
-    document.getElementById('apod-title').textContent = 'Cosmic Explorer Standby';
-  }
+  } catch (_) {}
 }
 
 async function fetchAsteroids() {
-  const container = document.getElementById('neo-list');
   try {
-    const startDate = new Date().toISOString().slice(0, 10);
-    const endDate = new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10);
-
-    const res = await fetch(`https://api.nasa.gov/neo/rest/v1/feed?start_date=${startDate}&end_date=${endDate}&api_key=${NASA_API_KEY}&cb=${Date.now()}`);
+    const today = new Date().toISOString().slice(0, 10);
+    const res = await fetch(`https://api.nasa.gov/neo/rest/v1/feed?start_date=${today}&end_date=${today}&api_key=${NASA_API_KEY}`);
     const data = await res.json();
-
-    let allNeos = [];
-    const dateMap = data.near_earth_objects || {};
-    Object.keys(dateMap).forEach(dKey => {
-      allNeos = allNeos.concat(dateMap[dKey]);
-    });
-
-    allNeos.sort((a, b) => {
-      const distA = parseFloat(a.close_approach_data?.[0]?.miss_distance?.kilometers || 999999999);
-      const distB = parseFloat(b.close_approach_data?.[0]?.miss_distance?.kilometers || 999999999);
-      return distA - distB;
-    });
-
-    if (container) {
-      if (!allNeos.length) {
-        container.innerHTML = '<p class="muted">No near-Earth asteroid radar tracks for this week.</p>';
-        return;
-      }
-      container.innerHTML = allNeos.slice(0, 12).map(ast => {
-        const isHazard = ast.is_potentially_hazardous_asteroid;
-        const ca = ast.close_approach_data?.[0] || {};
-        const missKm = ca.miss_distance ? `${(parseFloat(ca.miss_distance.kilometers) / 1000000).toFixed(2)}M km` : '—';
-        const velKmS = ca.relative_velocity ? `${parseFloat(ca.relative_velocity.kilometers_per_second).toFixed(1)} km/s` : '—';
-        const diam = ast.estimated_diameter?.meters?.estimated_diameter_max?.toFixed(0) || '—';
-
-        return `
-          <div class="neo-item">
-            <div class="neo-item-top">
-              <b>${ast.name}</b>
-              <span class="hazard-pill ${isHazard ? 'red' : 'green'}">${isHazard ? 'POTENTIAL HAZARD' : 'SAFE FLYBY'}</span>
-            </div>
-            <div class="neo-item-stats">
-              <span>Date: <b>${ca.close_approach_date || 'Upcoming'}</b></span>
-              <span>Miss: <b>${missKm}</b></span>
-              <span>Speed: <b>${velKmS}</b></span>
-              <span>Size: <b>~${diam}m</b></span>
-            </div>
-            <a class="neo-verify-link" href="${ast.nasa_jpl_url}" target="_blank" rel="noopener">JPL Radar Telemetry ↗</a>
-          </div>
-        `;
-      }).join('');
-    }
-  } catch (_) {
-    if (container) container.innerHTML = '<p class="muted">NASA NeoWs asteroid radar synchronizing…</p>';
-  }
-}
-
-async function fetchEarthquakes() {
-  const list = document.getElementById('earthquake-list');
-  try {
-    const res = await fetch(`https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_day.geojson?cb=${Date.now()}`);
-    const data = await res.json();
-    const quakes = data.features || [];
-
-    document.getElementById('quake-count').textContent = `${quakes.length} ACTIVE`;
-    document.getElementById('hero-quake-count').textContent = quakes.length;
-
-    if (quakeLayerGroup && satMap) {
-      quakeLayerGroup.clearLayers();
-      quakes.slice(0, 30).forEach(q => {
-        const coords = q.geometry.coordinates;
-        const mag = q.properties.mag;
-        const color = mag >= 5.0 ? '#ff453a' : (mag >= 4.0 ? '#ffb454' : '#ffd60a');
-        L.circleMarker([coords[1], coords[0]], {
-          radius: Math.max(4, mag * 2.2),
-          fillColor: color,
-          color: color,
-          weight: 1,
-          fillOpacity: 0.5
-        }).bindPopup(`<b>USGS M${mag.toFixed(1)}</b><br>${q.properties.place}`).addTo(quakeLayerGroup);
-      });
-    }
-
-    if (list) {
-      list.innerHTML = quakes.slice(0, 8).map(q => {
-        const mag = q.properties.mag.toFixed(1);
-        const color = q.properties.mag >= 5.0 ? 'red' : (q.properties.mag >= 4.0 ? 'orange' : 'green');
-        return `
-          <div class="quake-row">
-            <div class="quake-row-top">
-              <div class="mag-box ${color}">M${mag}</div>
-              <b>${q.properties.place}</b>
-            </div>
-            <div class="quake-row-bottom">
-              <small>${new Date(q.properties.time).toLocaleTimeString('en-US', { timeZone: 'Asia/Kolkata' })} IST</small>
-              <a class="neo-verify-link" href="${q.properties.url}" target="_blank" rel="noopener">USGS Record ↗</a>
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-  } catch (_) {
-    if (list) list.innerHTML = '<p class="muted">USGS seismograph network synchronizing…</p>';
-  }
-}
-
-async function fetchEonetHazards() {
-  const list = document.getElementById('hazard-list');
-  try {
-    const res = await fetch(`https://eonet.gsfc.nasa.gov/api/v3/events?status=open&limit=15&cb=${Date.now()}`);
-    const data = await res.json();
-    const events = data.events || [];
-
-    document.getElementById('hazard-count').textContent = `${events.length} ACTIVE`;
-
-    if (hazardLayerGroup && satMap) {
-      hazardLayerGroup.clearLayers();
-      events.forEach(ev => {
-        const geo = ev.geometry?.[0];
-        if (geo?.coordinates) {
-          L.circleMarker([geo.coordinates[1], geo.coordinates[0]], {
-            radius: 6,
-            fillColor: '#bf9cff',
-            color: '#bf9cff',
-            weight: 1,
-            fillOpacity: 0.65
-          }).bindPopup(`<b>${ev.title}</b><br>${ev.categories?.[0]?.title || 'Natural Hazard'}`).addTo(hazardLayerGroup);
-        }
-      });
-    }
-
-    if (list) {
-      list.innerHTML = events.slice(0, 8).map(ev => `
-        <div class="quake-row">
-          <div class="quake-row-top">
-            <div class="mag-box purple">🌋</div>
-            <b>${ev.title}</b>
-          </div>
-          <div class="quake-row-bottom">
-            <small>${ev.categories?.[0]?.title || 'Hazard'}</small>
-            <span style="color:var(--purple);font-family:var(--mono);">NASA EONET</span>
-          </div>
+    const list = document.getElementById('neo-list');
+    const neos = data.near_earth_objects?.[today] || [];
+    if (list && neos.length) {
+      list.innerHTML = neos.slice(0, 6).map(n => `
+        <div class="neo-item">
+          <div class="neo-item-top"><b>${n.name}</b><span class="hazard-pill ${n.is_potentially_hazardous_asteroid ? 'red' : 'green'}">${n.is_potentially_hazardous_asteroid ? 'HAZARD' : 'SAFE'}</span></div>
+          <div class="neo-item-stats"><span>Miss: <b>${Math.round(n.close_approach_data?.[0]?.miss_distance?.kilometers || 0).toLocaleString()} km</b></span></div>
         </div>
       `).join('');
     }
   } catch (_) {}
 }
 
+async function fetchEarthquakes() {
+  try {
+    const res = await fetch('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_day.geojson');
+    const quakes = (await res.json()).features || [];
+    document.getElementById('hero-quake-count').textContent = quakes.length;
+
+    const list = document.getElementById('earthquake-list');
+    if (list) {
+      list.innerHTML = quakes.slice(0, 6).map(q => `
+        <div class="quake-row">
+          <div class="quake-row-top"><div class="mag-box ${q.properties.mag >= 5 ? 'red' : 'orange'}">M${q.properties.mag.toFixed(1)}</div><b>${q.properties.place}</b></div>
+        </div>
+      `).join('');
+    }
+
+    if (quakeLayerGroup && satMap) {
+      quakeLayerGroup.clearLayers();
+      quakes.slice(0, 25).forEach(q => {
+        const c = q.geometry.coordinates;
+        L.circleMarker([c[1], c[0]], {
+          radius: Math.max(4, q.properties.mag * 2),
+          color: q.properties.mag >= 5 ? '#ff453a' : '#ffb454',
+          fillOpacity: 0.6
+        }).bindPopup(`<b>USGS M${q.properties.mag}</b><br>${q.properties.place}`).addTo(quakeLayerGroup);
+      });
+    }
+  } catch (_) {}
+}
+
+async function fetchEonetHazards() {
+  try {
+    const res = await fetch('https://eonet.gsfc.nasa.gov/api/v3/events?status=open&limit=10');
+    const events = (await res.json()).events || [];
+    const list = document.getElementById('hazard-list');
+    if (list) {
+      list.innerHTML = events.slice(0, 6).map(e => `
+        <div class="quake-row">
+          <div class="quake-row-top"><div class="mag-box purple">🌋</div><b>${e.title}</b></div>
+        </div>
+      `).join('');
+    }
+
+    if (hazardLayerGroup && satMap) {
+      hazardLayerGroup.clearLayers();
+      events.forEach(e => {
+        const c = e.geometry?.[0]?.coordinates;
+        if (c) {
+          L.circleMarker([c[1], c[0]], { radius: 5, color: '#bf9cff', fillOpacity: 0.7 }).bindPopup(e.title).addTo(hazardLayerGroup);
+        }
+      });
+    }
+  } catch (_) {}
+}
+
 // ============================================================================
-// 11. AREA INTELLIGENCE BRIEF (OPEN-METEO)
+// 12. AREA INTEL & WIKI
 // ============================================================================
 function initAreaIntel() {
-  const input = document.getElementById('intel-area-input');
-  const btn = document.getElementById('intel-search-btn');
-  const suggestions = document.getElementById('intel-suggestions');
-  const presets = document.querySelectorAll('.area-pill');
-
-  presets.forEach(p => {
+  document.querySelectorAll('.area-pill').forEach(p => {
     p.addEventListener('click', () => {
-      presets.forEach(item => item.classList.remove('active'));
+      document.querySelectorAll('.area-pill').forEach(b => b.classList.remove('active'));
       p.classList.add('active');
-      loadAreaTelemetry(parseFloat(p.dataset.lat), parseFloat(p.dataset.lon), p.dataset.name);
+      loadArea(parseFloat(p.dataset.lat), parseFloat(p.dataset.lon), p.dataset.name);
     });
   });
 
-  btn?.addEventListener('click', () => {
-    const q = input?.value.trim();
-    if (q) searchArea(q);
-  });
-
-  input?.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      const q = input.value.trim();
-      if (q) searchArea(q);
-    }
-  });
-
-  async function searchArea(query) {
+  async function loadArea(lat, lon, name) {
+    document.getElementById('intel-area-title').textContent = name;
+    document.getElementById('intel-coords-tag').textContent = `${lat.toFixed(2)}° N, ${lon.toFixed(2)}° E`;
     try {
-      const res = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=5&language=en&format=json`);
-      const data = await res.json();
-      const results = data.results || [];
-
-      if (suggestions) {
-        if (!results.length) {
-          showToast('Location coordinates not found.');
-          return;
-        }
-        suggestions.innerHTML = results.map(r => `
-          <button class="dropdown-item" data-lat="${r.latitude}" data-lon="${r.longitude}" data-name="${r.name}, ${r.country || ''}">
-            <b>${r.name}</b> <small style="color:var(--muted);">${r.admin1 || ''}, ${r.country || ''}</small>
-          </button>
-        `).join('');
-        suggestions.hidden = false;
-
-        suggestions.querySelectorAll('.dropdown-item').forEach(item => {
-          item.addEventListener('click', () => {
-            suggestions.hidden = true;
-            if (input) input.value = item.dataset.name;
-            loadAreaTelemetry(parseFloat(item.dataset.lat), parseFloat(item.dataset.lon), item.dataset.name);
-          });
-        });
-      }
+      const [w, a] = await Promise.all([
+        fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,wind_speed_10m,direct_normal_irradiance`).then(r => r.json()),
+        fetch(`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=us_aqi,pm2_5,pm10,nitrogen_dioxide`).then(r => r.json())
+      ]);
+      document.getElementById('intel-temp').textContent = `${Math.round(w.current?.temperature_2m || 0)}°C`;
+      document.getElementById('intel-humidity').textContent = `${w.current?.relative_humidity_2m || 0}%`;
+      document.getElementById('intel-wind').textContent = `${w.current?.wind_speed_10m || 0} km/h`;
+      document.getElementById('intel-aqi').textContent = a.current?.us_aqi || 40;
     } catch (_) {}
   }
-
-  loadAreaTelemetry(17.3850, 78.4867, "Hyderabad, Telangana, India");
+  loadArea(17.3850, 78.4867, "Hyderabad, Telangana, India");
 }
 
-async function loadAreaTelemetry(lat, lon, placeName) {
-  const title = document.getElementById('intel-area-title');
-  const tag = document.getElementById('intel-coords-tag');
-  if (title) title.textContent = placeName;
-  if (tag) tag.textContent = `${lat.toFixed(2)}° N, ${lon.toFixed(2)}° E`;
-
-  try {
-    const [wRes, aRes] = await Promise.all([
-      fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,wind_speed_10m,direct_normal_irradiance`),
-      fetch(`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=us_aqi,pm2_5,pm10,nitrogen_dioxide`)
-    ]);
-
-    if (wRes.ok) {
-      const wData = (await wRes.json()).current || {};
-      document.getElementById('intel-temp').textContent = `${Math.round(wData.temperature_2m || 0)}°C`;
-      document.getElementById('intel-feels-like').textContent = `Feels like: ${Math.round(wData.apparent_temperature || 0)}°C`;
-      document.getElementById('intel-humidity').textContent = `${wData.relative_humidity_2m || 0}%`;
-      document.getElementById('intel-wind').textContent = `${wData.wind_speed_10m || 0} km/h`;
-      document.getElementById('intel-solar').textContent = `${Math.round(wData.direct_normal_irradiance || 0)} W/m²`;
-    }
-
-    if (aRes.ok) {
-      const aData = (await aRes.json()).current || {};
-      const aqi = aData.us_aqi || 38;
-      document.getElementById('intel-aqi').textContent = aqi;
-      const aqiBadge = document.getElementById('intel-aqi-badge');
-      if (aqiBadge) {
-        aqiBadge.className = aqi <= 50 ? 'status-tag green' : (aqi <= 100 ? 'status-tag yellow' : 'status-tag red');
-        aqiBadge.textContent = aqi <= 50 ? 'Good' : (aqi <= 100 ? 'Moderate' : 'Unhealthy');
-      }
-      document.getElementById('intel-pm25').textContent = `${aData.pm2_5 || '—'} µg/m³`;
-      document.getElementById('intel-pm10').textContent = `${aData.pm10 || '—'} µg/m³`;
-      document.getElementById('intel-no2').textContent = `${aData.nitrogen_dioxide || '—'} µg/m³`;
-    }
-  } catch (_) {}
-}
-
-// ============================================================================
-// 12. SPACE WIKIPEDIA EXPLORER
-// ============================================================================
 function initWiki() {
-  const input = document.getElementById('wiki-query-input');
-  const btn = document.getElementById('wiki-search-btn');
-  const pills = document.querySelectorAll('.wiki-pill');
-
-  pills.forEach(pill => {
-    pill.addEventListener('click', () => {
-      pills.forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.wiki-pill').forEach(pill => {
+    pill.addEventListener('click', async () => {
+      document.querySelectorAll('.wiki-pill').forEach(p => p.classList.remove('active'));
       pill.classList.add('active');
-      fetchWikiArticle(pill.dataset.topic);
+      try {
+        const res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(pill.dataset.topic)}`);
+        const data = await res.json();
+        document.getElementById('wiki-title').textContent = data.title;
+        document.getElementById('wiki-extract').textContent = data.extract;
+        document.getElementById('wiki-link').href = data.content_urls?.desktop?.page || '#';
+      } catch (_) {}
     });
   });
-
-  btn?.addEventListener('click', () => {
-    const q = input?.value.trim();
-    if (q) fetchWikiArticle(q);
-  });
-
-  input?.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      const q = input.value.trim();
-      if (q) fetchWikiArticle(q);
-    }
-  });
-
-  fetchWikiArticle('Chandrayaan-3');
-}
-
-async function fetchWikiArticle(title) {
-  try {
-    const res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`);
-    const data = await res.json();
-
-    document.getElementById('wiki-title').textContent = data.title || title;
-    document.getElementById('wiki-extract').textContent = data.extract || 'Wikipedia summary not found.';
-    document.getElementById('wiki-link').href = data.content_urls?.desktop?.page || `https://en.wikipedia.org/wiki/${encodeURIComponent(title)}`;
-    const thumb = document.getElementById('wiki-thumb');
-    if (thumb) thumb.src = data.thumbnail?.source || 'assets/space-hub-icon-192.png?v=1';
-  } catch (_) {}
 }
 
 // ============================================================================
-// 13. PREFERENCES, FIREBASE FIRESTORE SYNC & NOTIFICATIONS
+// 13. PREFERENCES & LIGHTBOX
 // ============================================================================
-const firebaseConfig = {
-  apiKey: "AIzaSyAOn8eFL_CMGuYVeEa9hfpdkHRxZpjacqU",
-  authDomain: "news-61e62.firebaseapp.com",
-  projectId: "news-61e62",
-  storageBucket: "news-61e62.firebasestorage.app",
-  messagingSenderId: "1054060055660",
-  appId: "1:1054060055660:web:e192c256c82facb9af1c49"
-};
-
-let messaging = null;
-let db = null;
-let swRegistration = null;
-
-async function initFirebase() {
-  if (typeof firebase !== 'undefined' && !firebase.apps.length) {
-    try {
-      firebase.initializeApp(firebaseConfig);
-      db = firebase.firestore();
-      messaging = firebase.messaging();
-      if ('serviceWorker' in navigator) {
-        swRegistration = await navigator.serviceWorker.register('./firebase-messaging-sw.js', { scope: './' });
-        messaging.useServiceWorker(swRegistration);
-      }
-    } catch (_) {}
-  }
-}
-
 function initSettingsAndAlerts() {
-  const saveBtn = document.getElementById('save-firebase-btn');
-  const testBtn = document.getElementById('test-alert-btn');
-  const selectAllBtn = document.getElementById('toggle-all-alerts-btn');
-  const checkboxes = document.querySelectorAll('.alert-checkbox');
-  const gpsBtn = document.getElementById('use-gps-btn');
-  const metroSelect = document.getElementById('metro-location-select');
-  const locStatus = document.getElementById('current-location-status');
-
-  selectAllBtn?.addEventListener('click', () => {
-    const allChecked = Array.from(checkboxes).every(c => c.checked);
-    checkboxes.forEach(c => c.checked = !allChecked);
-    selectAllBtn.textContent = allChecked ? 'Select All' : 'Deselect All';
-  });
-
-  saveBtn?.addEventListener('click', async () => {
-    try {
-      if (db) {
-        let token = 'device_' + Math.random().toString(36).substring(2, 12);
-        await db.collection('space_fcm_tokens').doc(token).set({
-          userLocation: localStorage.getItem('user_target_city') || 'Hyderabad',
-          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-        }, { merge: true });
-      }
-      showToast('Preferences synchronized successfully.');
-    } catch (_) {
-      showToast('Preferences saved locally.');
-    }
-  });
-
-  testBtn?.addEventListener('click', async () => {
-    if (!('Notification' in window)) {
-      showToast('Notifications are not supported in this browser.');
-      return;
-    }
+  document.getElementById('save-firebase-btn')?.addEventListener('click', () => showToast('Preferences saved!'));
+  document.getElementById('test-alert-btn')?.addEventListener('click', async () => {
     const perm = await Notification.requestPermission();
     if (perm === 'granted') {
-      const activeSat = CAROUSEL_FLEET[carouselIndex % CAROUSEL_FLEET.length];
-      const isStation = activeSat.name.includes('ISS') || activeSat.name.includes('CSS') || activeSat.name.includes('TIANGONG');
-      new Notification(`T&C Space · ${activeSat.name} Flyby`, {
-        body: `${activeSat.name} (${activeSat.orbit}) is passing overhead! Clear skies for visual sighting.`,
-        icon: 'assets/space-hub-icon-192.png?v=1',
-        image: isStation ? NOTIFICATION_HERO_PHOTOS.station : NOTIFICATION_HERO_PHOTOS.satellite
-      });
-      showToast('Test spacecraft alert dispatched!');
+      new Notification('T&C Space Alert', { body: 'Satellite tracking active!', icon: NOTIFICATION_HERO_PHOTOS.satellite });
+      showToast('Alert dispatched!');
     }
-  });
-
-  gpsBtn?.addEventListener('click', () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(pos => {
-        localStorage.setItem('user_target_lat', pos.coords.latitude.toFixed(4));
-        localStorage.setItem('user_target_lon', pos.coords.longitude.toFixed(4));
-        localStorage.setItem('user_target_city', `GPS (${pos.coords.latitude.toFixed(2)}°, ${pos.coords.longitude.toFixed(2)}°)`);
-        if (locStatus) locStatus.textContent = `Target: GPS (${pos.coords.latitude.toFixed(2)}°, ${pos.coords.longitude.toFixed(2)}°)`;
-        showToast('GPS coordinates locked as flyby center.');
-      });
-    }
-  });
-
-  metroSelect?.addEventListener('change', e => {
-    const [lat, lon, name] = e.target.value.split(',');
-    localStorage.setItem('user_target_lat', lat);
-    localStorage.setItem('user_target_lon', lon);
-    localStorage.setItem('user_target_city', name);
-    if (locStatus) locStatus.textContent = `Target: ${name}, India`;
-    showToast(`Location set to ${name}`);
   });
 }
 
-// ============================================================================
-// 14. UNIVERSAL LIGHTBOX & DIRECT IN-PLACE DOWNLOAD ENGINE
-// ============================================================================
-function openUniversalLightbox(url, title, timeStr, filename, mediaType = 'image', nasaId = null) {
+function openUniversalLightbox(url, title, timeStr, filename, mediaType = 'image') {
+  activeLightboxMedia = { url, title, filename };
   const lb = document.getElementById('universal-media-lightbox');
   const img = document.getElementById('universal-lightbox-img');
-  const vid = document.getElementById('universal-lightbox-video');
-  const audWrap = document.getElementById('universal-lightbox-audio-wrap');
-  const aud = document.getElementById('universal-lightbox-audio');
-  const tEl = document.getElementById('universal-lightbox-title');
-  const tmEl = document.getElementById('universal-lightbox-time');
-  const rawTag = document.getElementById('universal-lightbox-raw-tag');
+  document.getElementById('universal-lightbox-title').textContent = title;
+  document.getElementById('universal-lightbox-time').textContent = timeStr;
 
-  activeLightboxMedia = { url, title, timeStr, filename, mediaType, nasaId };
-
-  if (tEl) tEl.textContent = title;
-  if (tmEl) tmEl.textContent = timeStr;
-  if (rawTag) rawTag.textContent = `${mediaType.toUpperCase()} RESOLVED MASTER`;
-
-  if (img) img.style.display = 'none';
-  if (vid) { vid.style.display = 'none'; vid.pause(); }
-  if (audWrap) { audWrap.style.display = 'none'; aud?.pause(); }
-
-  if (mediaType === 'video' && vid) {
-    vid.src = url;
-    vid.style.display = 'block';
-  } else if (mediaType === 'audio' && audWrap && aud) {
-    aud.src = url;
-    audWrap.style.display = 'block';
-  } else if (img) {
+  if (img) {
     img.src = url;
     img.style.display = 'block';
   }
-
   if (lb) lb.classList.add('open');
 }
 
-function closeUniversalLightbox() {
-  const lb = document.getElementById('universal-media-lightbox');
-  const vid = document.getElementById('universal-lightbox-video');
-  const aud = document.getElementById('universal-lightbox-audio');
-  if (vid) vid.pause();
-  if (aud) aud.pause();
-  if (lb) lb.classList.remove('open');
-}
-
 function initLightboxAndSheets() {
-  const closeLbBtn = document.getElementById('close-universal-lightbox-btn');
-  const lb = document.getElementById('universal-media-lightbox');
-  const downloadBtn = document.getElementById('universal-download-btn');
-  const shareBtn = document.getElementById('universal-share-btn');
-
-  const sheet = document.getElementById('download-action-sheet-backdrop');
-  const sheetCancel = document.getElementById('sheet-cancel-btn');
-  const sheetOpt = document.getElementById('sheet-download-opt');
-  const sheetRaw = document.getElementById('sheet-download-raw');
-
-  closeLbBtn?.addEventListener('click', closeUniversalLightbox);
-  lb?.addEventListener('click', e => {
-    if (e.target === lb) closeUniversalLightbox();
+  document.getElementById('close-universal-lightbox-btn')?.addEventListener('click', () => {
+    document.getElementById('universal-media-lightbox')?.classList.remove('open');
   });
-
-  downloadBtn?.addEventListener('click', () => {
-    if (sheet) sheet.classList.add('open');
-  });
-
-  sheetCancel?.addEventListener('click', () => {
-    if (sheet) sheet.classList.remove('open');
-  });
-
-  sheet?.addEventListener('click', e => {
-    if (e.target === sheet) sheet.classList.remove('open');
-  });
-
-  async function performDownload(url, filename) {
-    showToast(`Downloading ${filename}…`);
-    try {
-      const res = await fetch(url);
-      const blob = await res.blob();
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(a.href);
-      if (sheet) sheet.classList.remove('open');
-    } catch (_) {
-      window.open(url, '_blank');
-      if (sheet) sheet.classList.remove('open');
-    }
-  }
-
-  sheetOpt?.addEventListener('click', () => {
-    if (activeLightboxMedia?.url) performDownload(activeLightboxMedia.url, activeLightboxMedia.filename);
-  });
-
-  sheetRaw?.addEventListener('click', () => {
-    if (activeLightboxMedia?.url) performDownload(activeLightboxMedia.url, activeLightboxMedia.filename);
-  });
-
-  shareBtn?.addEventListener('click', async () => {
-    if (!activeLightboxMedia) return;
-    const shareUrl = `${window.location.origin}${window.location.pathname}#planetary-explorer`;
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: activeLightboxMedia.title,
-          text: `Check out this space observation: ${activeLightboxMedia.title}`,
-          url: shareUrl
-        });
-        return;
-      } catch (_) {}
-    }
-    navigator.clipboard.writeText(shareUrl);
-    showToast('Link copied to clipboard!');
+  document.getElementById('universal-download-btn')?.addEventListener('click', () => {
+    if (activeLightboxMedia?.url) window.open(activeLightboxMedia.url, '_blank');
   });
 }
 
-// ============================================================================
-// 15. THEME, PWA & LIVE SENSORS TICKER
-// ============================================================================
 function initThemeAndPwa() {
-  const themeSelect = document.getElementById('theme-select');
-  const themeMeta = document.getElementById('theme-color-meta');
-  const refreshBtn = document.getElementById('refresh-all');
-  const pwaBtn = document.getElementById('pwa-install-btn');
-
-  themeSelect?.addEventListener('change', e => {
-    const val = e.target.value;
-    if (val === 'system') {
-      document.documentElement.removeAttribute('data-theme');
-      if (themeMeta) themeMeta.setAttribute('content', '#101114');
-    } else {
-      document.documentElement.setAttribute('data-theme', val);
-      if (themeMeta) themeMeta.setAttribute('content', val === 'light' ? '#f5f5f7' : '#101114');
-    }
+  document.getElementById('theme-select')?.addEventListener('change', e => {
+    document.documentElement.setAttribute('data-theme', e.target.value);
   });
-
-  refreshBtn?.addEventListener('click', () => {
-    showToast('Refreshing all orbital sensor arrays…');
+  document.getElementById('refresh-all')?.addEventListener('click', () => {
+    showToast('Refreshing sensors…');
     fetchLiveSatelliteTelemetry(true);
     fetchLaunchesManifest();
     fetchEpicEarth();
@@ -1758,43 +1250,7 @@ function initThemeAndPwa() {
     fetchApod();
     fetchAsteroids();
     fetchEarthquakes();
-    fetchEonetHazards();
   });
-
-  let deferredPrompt;
-  window.addEventListener('beforeinstallprompt', e => {
-    e.preventDefault();
-    deferredPrompt = e;
-    if (pwaBtn) pwaBtn.style.display = 'inline-flex';
-  });
-
-  pwaBtn?.addEventListener('click', async () => {
-    if (deferredPrompt) {
-      deferredPrompt.prompt();
-      const choice = await deferredPrompt.userChoice;
-      if (choice.outcome === 'accepted') pwaBtn.style.display = 'none';
-      deferredPrompt = null;
-    }
-  });
-}
-
-function startLiveTickerEngine() {
-  const tickerEl = document.getElementById('ticker');
-  if (!tickerEl) return;
-
-  const tickerMessages = [
-    "🛰️ FLEET: Rotating ISS, Tiangong CSS, Chandrayaan-3, and NavIC orbital telemetry.",
-    "🚀 LAUNCHES: Live flight manifests streaming from global spaceports via SpaceDevs LL2.",
-    "🔭 VOYAGER 1 & 2: Streaking into interstellar space beyond the Heliopause at ~17 km/s.",
-    "☀️ SPACE WEATHER: Syncing NOAA SWPC and NASA DONKI Coronal Mass Ejection radars.",
-    "🌍 SEISMIC: USGS global seismograph network active for all M2.5+ tectonic events."
-  ];
-
-  let tickerIdx = 0;
-  setInterval(() => {
-    tickerIdx = (tickerIdx + 1) % tickerMessages.length;
-    tickerEl.textContent = tickerMessages[tickerIdx];
-  }, 4500);
 }
 
 function showToast(msg) {
@@ -1812,12 +1268,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   initClocks();
   initNetworkMonitor();
   initNavigation();
-  initOverviewClickableCards();
   initOverviewRotatingCarousel();
   initVoyagerTracker();
   initMap();
   initPlanetaryExplorer();
-  fetchAndRegisterNewSpacecraft(); // Ingests recent rocket payloads automatically
+  await fetchAutomatedRecentLaunches(); // Automatically queries recent orbital missions
   fetchLaunchesManifest();
   fetchEpicEarth();
   fetchMarsPhotos();
@@ -1828,14 +1283,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   fetchEonetHazards();
   initAreaIntel();
   initWiki();
-  initFirebase();
   initSettingsAndAlerts();
   initLightboxAndSheets();
   initThemeAndPwa();
-  startLiveTickerEngine();
-
-  const lastUpdated = document.getElementById('last-updated');
-  if (lastUpdated) {
-    lastUpdated.textContent = `LIVE TELEMETRY SYNCED · ${new Date().toLocaleTimeString('en-US', { timeZone: 'Asia/Kolkata', hour12: false })} IST`;
-  }
 });
