@@ -385,7 +385,7 @@ function initOverviewClickableCards() {
 }
 
 // ============================================================================
-// 5. MULTI-LAYER MAP, FLEET TRACKING & NEWLY DEPLOYED SATELLITES
+// 5. 100% WATERMARK-FREE LEAFLET MAP & RECENTLY DEPLOYED SATELLITES
 // ============================================================================
 let satMap = null;
 let issMarker = null;
@@ -454,14 +454,14 @@ function initMap() {
     center: [20, 0],
     zoom: 2,
     minZoom: 1.5,
-    maxZoom: 12,
+    maxZoom: 18,
     worldCopyJump: true
   });
 
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-    attribution: '&copy; CartoDB & OpenStreetMap',
-    subdomains: 'abcd',
-    maxZoom: 19
+  // Pure OpenStreetMap Standard Tile Layer: 100% Free, Reliable & Zero Watermark
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 18,
+    attribution: '&copy; OpenStreetMap contributors'
   }).addTo(satMap);
 
   issOrbitLayerGroup = L.layerGroup().addTo(satMap);
@@ -652,7 +652,7 @@ async function pollSatellitePosition() {
       lat = data.latitude;
       lon = data.longitude;
       alt = data.altitude;
-      vel = data.velocity / 3600; // km/s
+      vel = data.velocity / 3600;
     } else {
       const config = ORBITAL_FLEET[currentSatelliteId] || { inc: 45, mm: 14.5, alt: 500, vel: 7.5 };
       const now = Date.now() / 1000;
