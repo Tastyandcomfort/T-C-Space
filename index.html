@@ -110,14 +110,12 @@
         </div>
 
         <div class="top-actions">
-          <!-- Compact Network Status Pill & Right-Aligned Dropdown Popover -->
           <div class="network-status-wrapper" id="network-status-wrapper">
             <button class="network-beacon-btn" id="network-beacon-btn" type="button" aria-label="Network Telemetry Status">
               <span class="status-dot pulse-dot"></span>
               <span class="beacon-label" id="net-text">Checking…</span>
             </button>
             
-            <!-- Speech Bubble Popover Hanging Directly Below (Right-Aligned) -->
             <div class="network-popover-bubble" id="network-popover-bubble" aria-hidden="true">
               <div class="popover-caret"></div>
               <div class="popover-content">
@@ -186,21 +184,43 @@
             <div class="ticker-time">all-time progress</div>
           </div>
 
+          <!-- Rebalanced 4-Card Overview Grid -->
           <div class="metrics-grid">
-            <article class="metric-card card-accent-blue clickable-card" data-goto="satellites" title="Click to view full Satellite Tracker &amp; Map">
-              <div class="metric-top"><span>ACTIVE SAT ALTITUDE</span><span class="metric-symbol blue">◎</span></div>
-              <strong id="iss-alt"><div class="apple-spinner"></div></strong>
-              <small id="active-sat-name-sub">International Space Station</small>
-              <div class="metric-bottom">WhereTheISS.at live API ↗</div>
+            <!-- Card 1: Unified Rotating Spacecraft Fleet Carousel -->
+            <article class="metric-card card-accent-blue clickable-card" id="sat-carousel-card" data-goto="satellites" title="Click to track spacecraft live on map">
+              <div class="metric-top">
+                <span id="carousel-sat-name">ISS (ZARYA)</span>
+                <span class="metric-symbol blue" id="carousel-sat-dot">●</span>
+              </div>
+              <div class="sat-carousel-content">
+                <strong id="carousel-sat-alt">418.0 km</strong>
+                <div class="sat-carousel-subline">
+                  <span>Speed: <b id="carousel-sat-vel">7.66 km/s</b></span> · <span id="carousel-sat-orbit">LEO</span>
+                </div>
+              </div>
+              <div class="sat-dots-indicator" id="sat-dots-bar"></div>
+              <div class="metric-bottom">Rotating active fleet · Tap to map ↗</div>
             </article>
 
-            <article class="metric-card card-accent-purple clickable-card" data-goto="satellites" title="Click to view orbital velocity on map">
-              <div class="metric-top"><span>ORBITAL VELOCITY</span><span class="metric-symbol purple">⌁</span></div>
-              <strong id="iss-velocity"><div class="apple-spinner"></div></strong>
-              <small>kilometres per second</small>
-              <div class="metric-bottom">Relative to surface ↗</div>
+            <!-- Card 2: Voyager 1 & 2 Interstellar Tracker -->
+            <article class="metric-card card-accent-purple clickable-card" id="voyager-metric-card" data-goto="satellites" title="Click to inspect deep-space radar">
+              <div class="metric-top">
+                <span id="voyager-active-name">VOYAGER 1 (INTERSTELLAR)</span>
+                <span class="metric-symbol purple">🛰️</span>
+              </div>
+              <div class="voyager-counter-box">
+                <strong id="voyager-distance-km">24,538,000,000 km</strong>
+                <div class="voyager-subline">
+                  <span id="voyager-distance-au">~164.0 AU</span> · Delay: <b id="voyager-light-delay">22h 45m</b>
+                </div>
+              </div>
+              <div class="voyager-milestone-ticker" id="voyager-milestone-text">
+                Passed Heliopause · Streaking into deep interstellar space at 17 km/s
+              </div>
+              <div class="metric-bottom">Deep Space Network (DSN) · Tap for details ↗</div>
             </article>
 
+            <!-- Card 3: Next Rocket Countdown with NASA T-Minus HUD Clock -->
             <article class="metric-card card-accent-orange clickable-card" data-goto="launches" title="Click to view full Launch Manifest">
               <div class="metric-top"><span>NEXT LAUNCH T-MINUS</span><span class="metric-symbol orange">🚀</span></div>
               <strong id="hero-launch-timer"><div class="apple-spinner"></div></strong>
@@ -208,6 +228,7 @@
               <div class="metric-bottom" id="hero-launch-provider">Launch Library 2 ↗</div>
             </article>
 
+            <!-- Card 4: Global Earthquakes & Natural Events -->
             <article class="metric-card card-accent-green clickable-card" data-goto="cosmos-hazards" title="Click to view USGS Earthquakes">
               <div class="metric-top"><span>GLOBAL EARTHQUAKES</span><span class="metric-symbol green">◈</span></div>
               <strong id="hero-quake-count"><div class="apple-spinner"></div></strong>
@@ -306,29 +327,32 @@
             <div class="sat-search-container">
               <div class="sat-search-input-box">
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                <input type="search" id="sat-search-input" placeholder="Search satellite by name (e.g., Chandrayaan, Starlink, Hubble, Tiangong, NavIC)…" autocomplete="off">
+                <input type="search" id="sat-search-input" placeholder="Search satellites, probes, or rockets (e.g., ISS, Starlink, Chandrayaan, Hubble, Voyager 1)…" autocomplete="off">
               </div>
               <div id="sat-search-dropdown" class="autocomplete-dropdown" hidden></div>
             </div>
 
             <!-- Single-Line Horizontally Scrollable Fleet Presets Slider -->
-            <div class="sat-presets-bar">
-              <span class="sat-select-lbl">FLEET PRESETS:</span>
-              <button class="sat-chip active" data-sat-id="25544" data-sat-name="ISS (ZARYA)">ISS (Zarya)</button>
+            <div class="sat-presets-bar" id="sat-presets-bar">
+              <span class="sat-select-lbl">ACTIVE FLEET:</span>
+              <button class="sat-chip active" data-sat-id="25544" data-sat-name="ISS (ZARYA)">🛰️ ISS (Zarya)</button>
+              <button class="sat-chip" data-sat-id="48274" data-sat-name="CSS TIANHE (TIANGONG)">🛰️ Tiangong (CSS)</button>
               <button class="sat-chip" data-sat-id="57320" data-sat-name="CHANDRAYAAN-3 (ISRO)">🇮🇳 Chandrayaan-3</button>
               <button class="sat-chip" data-sat-id="43286" data-sat-name="NAVIC-1I (ISRO)">🇮🇳 NavIC-1I</button>
-              <button class="sat-chip" data-sat-id="48274" data-sat-name="CSS TIANHE (TIANGONG)">Tiangong (CSS)</button>
-              <button class="sat-chip" data-sat-id="20580" data-sat-name="HUBBLE SPACE TELESCOPE">Hubble (HST)</button>
-              <button class="sat-chip" data-sat-id="43013" data-sat-name="NOAA 20">NOAA-20</button>
+              <button class="sat-chip" data-sat-id="20580" data-sat-name="HUBBLE SPACE TELESCOPE">🔭 Hubble (HST)</button>
+              <button class="sat-chip" data-sat-id="43013" data-sat-name="NOAA 20">🛰️ NOAA-20</button>
+              <button class="sat-chip" data-sat-id="newly-deployed" data-sat-name="NEWLY DEPLOYED" id="newly-deployed-btn">🚀 Newly Deployed (30d)</button>
+              <button class="sat-chip" data-sat-id="voyager-1" data-sat-name="VOYAGER 1 (INTERSTELLAR)">🌌 Voyager 1 (Interstellar)</button>
+              <button class="sat-chip" data-sat-id="voyager-2" data-sat-name="VOYAGER 2 (INTERSTELLAR)">🌌 Voyager 2 (Interstellar)</button>
             </div>
 
             <!-- Single-Line Horizontally Scrollable Map Layer Chips Toolbar -->
             <div class="map-toolbar-row">
               <div class="map-layer-chips">
-                <button class="layer-chip active" id="toggle-layer-iss"> Satellite Active</button>
-                <button class="layer-chip active" id="toggle-layer-quakes"> Quakes (USGS)</button>
-                <button class="layer-chip active" id="toggle-layer-hazards"> Hazards (EONET)</button>
-                <button class="layer-chip active" id="toggle-layer-track"> Ground Track</button>
+                <button class="layer-chip active" id="toggle-layer-iss">🛰️ Spacecraft Active</button>
+                <button class="layer-chip active" id="toggle-layer-quakes">🌍 Quakes (USGS)</button>
+                <button class="layer-chip active" id="toggle-layer-hazards">🌋 Hazards (EONET)</button>
+                <button class="layer-chip active" id="toggle-layer-track">⌖ Ground Track</button>
               </div>
             </div>
 
@@ -356,6 +380,53 @@
               <div><span>LONGITUDE: </span><b id="map-lon">—</b></div>
               <div><span>ALTITUDE: </span><b id="map-alt">—</b></div>
               <div><span>VELOCITY: </span><b id="map-vel">—</b></div>
+            </div>
+          </article>
+
+          <!-- DEDICATED VOYAGER 1 & 2 INTERSTELLAR TERMINAL -->
+          <article class="surface voyager-detail-panel" id="voyager-interstellar-panel" style="margin-top: 20px;">
+            <div class="card-heading">
+              <div>
+                <div class="eyebrow">NASA DEEP SPACE NETWORK (DSN) · INTERSTELLAR MISSION STATUS</div>
+                <h3 id="voyager-terminal-title">Voyager 1 &amp; 2 Deep Space Telemetry</h3>
+                <p id="voyager-terminal-desc">Live calculation of distance from Sun and Earth, 1-way radio light travel delay, and scientific instrument status beyond the Heliopause.</p>
+              </div>
+              <div class="voyager-toggle-btns">
+                <button class="apple-btn-secondary active" id="vbtn-1">Voyager 1</button>
+                <button class="apple-btn-secondary" id="vbtn-2">Voyager 2</button>
+              </div>
+            </div>
+
+            <div class="voyager-metrics-terminal-grid">
+              <div class="voyager-spec-box">
+                <small>DISTANCE FROM SUN / EARTH</small>
+                <strong id="v-spec-km">24,538,000,000 km</strong>
+                <span id="v-spec-au">~164.02 AU (Astronomical Units)</span>
+              </div>
+              <div class="voyager-spec-box">
+                <small>1-WAY LIGHT TRAVEL TIME</small>
+                <strong id="v-spec-light">22h 45m 12s</strong>
+                <span>Radio photons travelling at c</span>
+              </div>
+              <div class="voyager-spec-box">
+                <small>HELIOPAUSE EXIT DATE</small>
+                <strong id="v-spec-exit">August 25, 2012</strong>
+                <span id="v-spec-region">True Interstellar Plasma</span>
+              </div>
+              <div class="voyager-spec-box">
+                <small>ESCAPE VELOCITY</small>
+                <strong id="v-spec-speed">17.0 km/s</strong>
+                <span id="v-spec-constellation">Heading into Constellation Ophiuchus</span>
+              </div>
+            </div>
+
+            <div class="voyager-instruments-strip">
+              <div class="instrument-tag green"><span>●</span> Cosmic Ray Subsystem (CRS): <b>ACTIVE</b></div>
+              <div class="instrument-tag green"><span>●</span> Low-Energy Charged Particles (LECP): <b>ACTIVE</b></div>
+              <div class="instrument-tag green"><span>●</span> Magnetometer (MAG): <b>ACTIVE</b></div>
+              <div class="instrument-tag green"><span>●</span> Plasma Wave Subsystem (PWS): <b>ACTIVE</b></div>
+              <div class="instrument-tag orange"><span>●</span> RTG Nuclear Power: <b>~220 Watts (Conserving)</b></div>
+              <div class="instrument-tag blue"><span>●</span> Golden Record Onboard: <b>Intact for 1B+ Years</b></div>
             </div>
           </article>
         </section>
@@ -568,7 +639,7 @@
           <article class="surface neo-panel">
             <div class="card-heading">
               <div>
-                <h3>NASA Near-Earth Asteroid Radar (NeoWs Live)</h3>
+                <h3>NASA Near-Earth Asteroid Radar (7-Day Approach Feed)</h3>
               </div>
               <span class="small-chip blue">NASA JPL NeoWs</span>
             </div>
@@ -584,7 +655,10 @@
                   <h3>USGS Global Seismic Network</h3>
                   <p>Live earthquake sensor log (M 2.5+ past 24h).</p>
                 </div>
-                <span class="small-chip green" id="quake-count">USGS LIVE</span>
+                <div style="display:flex;gap:6px;align-items:center;">
+                  <span class="small-chip green">USGS SEISMIC</span>
+                  <span class="small-chip" id="quake-count">LIVE</span>
+                </div>
               </div>
               <div id="earthquake-list" class="earthquake-feed">
                 <div class="loading-state"><div class="apple-spinner"></div><p>Contacting USGS seismographs…</p></div>
@@ -597,7 +671,10 @@
                   <h3>NASA EONET Active Hazards</h3>
                   <p>Wildfires, active volcanoes, and severe storms.</p>
                 </div>
-                <span class="small-chip blue" id="hazard-count">NASA EONET</span>
+                <div style="display:flex;gap:6px;align-items:center;">
+                  <span class="small-chip purple">NASA EONET</span>
+                  <span class="small-chip" id="hazard-count">LIVE</span>
+                </div>
               </div>
               <div id="hazard-list" class="earthquake-feed">
                 <div class="loading-state"><div class="apple-spinner"></div><p>Querying NASA EONET sensors…</p></div>
@@ -779,8 +856,8 @@
           <article class="surface settings-card">
             <div class="user-location-setting-box">
               <div class="eyebrow">OVERHEAD PASS LOCATION</div>
-              <h4 style="margin:4px 0 6px;">Satellite Flyby Proximity Target</h4>
-              <p class="muted">Set your location to trigger notifications when satellites pass overhead.</p>
+              <h4 style="margin:4px 0 6px;">Spacecraft Flyby Proximity Target</h4>
+              <p class="muted">Set your location to trigger live notifications when space stations or satellites pass overhead.</p>
 
               <div class="location-btn-row">
                 <button class="apple-btn-secondary" id="use-gps-btn">Use Current GPS Location</button>
@@ -799,7 +876,7 @@
             <div class="alerts-header-row" style="margin-top:20px;">
               <div>
                 <h3>Real-Time Alerts Configuration</h3>
-                <p class="muted">Check alerts to enable or use Select All. Click Test Alert to verify.</p>
+                <p class="muted">Toggle fleet alerts or use Select All. Click Test Alert to verify.</p>
               </div>
               <button class="subtle-button" id="toggle-all-alerts-btn">Select All</button>
             </div>
@@ -807,18 +884,18 @@
             <div class="toggle-list">
               <label class="toggle-row">
                 <div>
-                  <b>Raw Cosmic &amp; Deep Space Discoveries</b>
-                  <small>Notify on new raw telescope captures from JWST, Hubble &amp; Mars rovers</small>
+                  <b>Spacecraft &amp; Station Overhead Pass Alert</b>
+                  <small>Notify when ISS, Tiangong (CSS), Hubble, or newly deployed spacecraft pass overhead (&lt;1,500 km)</small>
                 </div>
-                <input type="checkbox" checked class="apple-toggle alert-checkbox" id="toggle-cosmic">
+                <input type="checkbox" checked class="apple-toggle alert-checkbox" id="toggle-iss">
               </label>
 
               <label class="toggle-row">
                 <div>
-                  <b>Satellite Overhead Pass Alert</b>
-                  <small>Notify when satellite elevation crosses your regional horizon (&lt;1,500 km)</small>
+                  <b>Raw Cosmic &amp; Deep Space Discoveries</b>
+                  <small>Notify on new raw telescope captures from JWST, Hubble &amp; Mars rovers</small>
                 </div>
-                <input type="checkbox" checked class="apple-toggle alert-checkbox" id="toggle-iss">
+                <input type="checkbox" checked class="apple-toggle alert-checkbox" id="toggle-cosmic">
               </label>
 
               <label class="toggle-row">
@@ -1066,7 +1143,7 @@
 
         <a class="more-sheet-item" href="#settings" data-nav="settings">
           <span class="more-item-icon blue">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83-2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1 2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83-2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
           </span>
           <div>
             <b>Preferences &amp; Alerts</b>
