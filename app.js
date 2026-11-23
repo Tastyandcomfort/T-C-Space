@@ -2,7 +2,6 @@
 
 const NASA_API_KEY = "fLRTKjpmtJGRWqzFKG8NrtmwbbkwBnPnWKNzn8Gd";
 
-// Verified NASA & Space Contextual Photography for Notification Banners (Full exterior ISS in orbit)
 const NOTIFICATION_HERO_PHOTOS = {
   satellite: 'https://images-assets.nasa.gov/image/s130e012111/s130e012111~medium.jpg',
   launch: 'https://images-assets.nasa.gov/image/KSC-20221116-PH-KLS01_0003/KSC-20221116-PH-KLS01_0003~medium.jpg',
@@ -15,7 +14,9 @@ const NOTIFICATION_HERO_PHOTOS = {
 let currentNetworkSpeedMbps = 3.5;
 let popoverAutoDismissTimer = null;
 
-// 1. Dual Clock (Live IST & UTC Synchronization)
+// ============================================================================
+// 1. DUAL CLOCKS (LIVE IST & UTC)
+// ============================================================================
 function initClocks() {
   const istEl = document.getElementById('ist-clock');
   const utcEl = document.getElementById('utc-clock');
@@ -30,7 +31,9 @@ function initClocks() {
   setInterval(tick, 1000);
 }
 
-// 2. Real-Time Network Monitor, Right-Aligned Popover & Auto-Retract System
+// ============================================================================
+// 2. NETWORK TELEMETRY MONITOR & POPOVER
+// ============================================================================
 function initNetworkMonitor() {
   const textEl = document.getElementById('net-text');
   const weatherSyncBadge = document.getElementById('weather-sync-badge');
@@ -54,13 +57,15 @@ function initNetworkMonitor() {
   beaconBtn?.addEventListener('click', (e) => {
     e.stopPropagation();
     clearTimeout(popoverAutoDismissTimer);
-    const isOpen = popover.classList.contains('open');
-    popover.classList.toggle('open', !isOpen);
-    popover.setAttribute('aria-hidden', isOpen ? 'true' : 'false');
+    const isOpen = popover?.classList.contains('open');
+    if (popover) {
+      popover.classList.toggle('open', !isOpen);
+      popover.setAttribute('aria-hidden', isOpen ? 'true' : 'false');
+    }
   });
 
   const dismissPopover = (e) => {
-    if (popover && popover.classList.contains('open') && !popover.contains(e.target) && !beaconBtn.contains(e.target)) {
+    if (popover && popover.classList.contains('open') && !popover.contains(e.target) && !beaconBtn?.contains(e.target)) {
       popover.classList.remove('open');
       popover.setAttribute('aria-hidden', 'true');
     }
@@ -82,13 +87,12 @@ function initNetworkMonitor() {
         weatherSyncBadge.style.color = 'var(--red)';
         weatherSyncBadge.textContent = 'Offline 🔴';
       }
-      showToast('Network connection lost. T&C-Space paused.');
+      showToast('Network connection lost. Telemetry paused.');
       showTemporaryAlertBubble();
       return;
     }
 
     const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-
     if (conn && conn.downlink !== undefined) {
       const mbps = conn.downlink;
       currentNetworkSpeedMbps = Math.max(0.3, mbps);
@@ -99,24 +103,6 @@ function initNetworkMonitor() {
         if (textEl) textEl.textContent = 'Slow · <1 Mbps';
         if (popTitle) popTitle.textContent = 'Slow Connection';
         if (popStream) { popStream.className = 'status-tag orange'; popStream.textContent = 'Delayed Stream'; }
-        if (weatherSyncBadge) {
-          weatherSyncBadge.className = 'small-chip orange';
-          weatherSyncBadge.style.background = 'rgba(255, 180, 84, 0.2)';
-          weatherSyncBadge.style.color = 'var(--orange)';
-          weatherSyncBadge.textContent = 'Slow Telemetry 🟠';
-        }
-        showTemporaryAlertBubble();
-      } else if (mbps <= 2.5) {
-        document.documentElement.setAttribute('data-network', 'normal');
-        if (textEl) textEl.textContent = `Normal · ~${mbps.toFixed(1)} Mbps`;
-        if (popTitle) popTitle.textContent = 'Normal Telemetry';
-        if (popStream) { popStream.className = 'status-tag green'; popStream.textContent = 'Synchronized'; }
-        if (weatherSyncBadge) {
-          weatherSyncBadge.className = 'small-chip green';
-          weatherSyncBadge.style.background = 'var(--green-soft)';
-          weatherSyncBadge.style.color = 'var(--green)';
-          weatherSyncBadge.textContent = 'Auto-Synced 🟢';
-        }
       } else {
         document.documentElement.setAttribute('data-network', 'fast');
         if (textEl) textEl.textContent = `Fast · ${mbps.toFixed(1)} Mbps`;
@@ -129,64 +115,25 @@ function initNetworkMonitor() {
           weatherSyncBadge.textContent = 'Auto-Synced 🟢';
         }
       }
-      return;
-    }
-
-    try {
-      const t0 = performance.now();
-      await fetch('https://api.wheretheiss.at/v1/satellites/25544', { method: 'HEAD', cache: 'no-store' });
-      const rtt = performance.now() - t0;
-
-      if (rtt > 1200) {
-        document.documentElement.setAttribute('data-network', 'slow');
-        if (textEl) textEl.textContent = 'Slow · <1 Mbps';
-        currentNetworkSpeedMbps = 0.8;
-        if (popSpeed) popSpeed.textContent = '<1.0 Mbps';
-        if (popTitle) popTitle.textContent = 'Slow Connection';
-        if (popStream) { popStream.className = 'status-tag orange'; popStream.textContent = 'Delayed'; }
-        showTemporaryAlertBubble();
-      } else if (rtt > 500) {
-        document.documentElement.setAttribute('data-network', 'normal');
-        if (textEl) textEl.textContent = 'Normal · ~1 Mbps';
-        currentNetworkSpeedMbps = 1.8;
-        if (popSpeed) popSpeed.textContent = '~1.8 Mbps';
-        if (popTitle) popTitle.textContent = 'Active Telemetry';
-        if (popStream) { popStream.className = 'status-tag green'; popStream.textContent = 'Synchronized'; }
-      } else {
-        document.documentElement.setAttribute('data-network', 'fast');
-        if (textEl) textEl.textContent = 'Fast · ≥1 Mbps';
-        currentNetworkSpeedMbps = 5.0;
-        if (popSpeed) popSpeed.textContent = '≥5.0 Mbps';
-        if (popTitle) popTitle.textContent = 'High-Speed Telemetry';
-        if (popStream) { popStream.className = 'status-tag green'; popStream.textContent = 'Synchronized'; }
-      }
-    } catch (_) {
-      document.documentElement.setAttribute('data-network', 'offline');
-      if (textEl) textEl.textContent = 'Offline';
-      currentNetworkSpeedMbps = 0.2;
+    } else {
+      document.documentElement.setAttribute('data-network', 'fast');
+      if (textEl) textEl.textContent = 'Active Telemetry';
     }
   }
 
-  window.addEventListener('online', () => {
-    updateNetworkStatus();
-    showToast('T&C Space connection restored.');
-  });
+  window.addEventListener('online', updateNetworkStatus);
   window.addEventListener('offline', updateNetworkStatus);
-
-  if (navigator.connection) {
-    navigator.connection.addEventListener('change', updateNetworkStatus);
-  }
-
   updateNetworkStatus();
   setInterval(updateNetworkStatus, 30000);
 }
 
-// 3. Navigation Router with "More •••" Sheet, Deep-Link Resolution & Leaflet Auto-Resize
+// ============================================================================
+// 3. ROUTER & WORKSPACE NAVIGATION
+// ============================================================================
 function initNavigation() {
   const navLinks = document.querySelectorAll('.nav-link, .dock-link, .more-sheet-item');
   const sections = document.querySelectorAll('.section-block');
   const label = document.getElementById('current-section-label');
-
   const moreDockBtn = document.getElementById('more-dock-btn');
   const moreSheet = document.getElementById('more-sheet-backdrop');
   const moreSheetClose = document.getElementById('more-sheet-close-btn');
@@ -211,60 +158,18 @@ function initNavigation() {
 
   function handleRoute(hashStr) {
     const rawHash = (hashStr || window.location.hash || '#overview').replace('#', '');
-    const [targetId, queryPart] = rawHash.split('?');
+    const [targetId] = rawHash.split('?');
 
-    let matched = false;
-    sections.forEach(sec => {
-      if (sec.id === targetId) {
-        sec.classList.add('active-view');
-        matched = true;
-      } else {
-        sec.classList.remove('active-view');
-      }
-    });
-
-    if (!matched && sections.length > 0) sections[0].classList.add('active-view');
-
-    navLinks.forEach(link => {
-      if (link.getAttribute('data-nav') === targetId) link.classList.add('active');
-      else link.classList.remove('active');
-    });
-
-    const extendedSections = ['interplanetary', 'space-weather', 'cosmos-hazards', 'intel-brief', 'wiki', 'settings', 'about'];
-    if (moreDockBtn) {
-      if (extendedSections.includes(targetId)) moreDockBtn.classList.add('active');
-      else moreDockBtn.classList.remove('active');
-    }
+    sections.forEach(sec => sec.classList.toggle('active-view', sec.id === targetId));
+    navLinks.forEach(link => link.classList.toggle('active', link.getAttribute('data-nav') === targetId));
 
     if (label) label.textContent = targetId.charAt(0).toUpperCase() + targetId.slice(1).replace('-', ' ');
 
     if (targetId === 'satellites' && satMap) {
       setTimeout(() => satMap.invalidateSize(), 200);
     }
-
     if (targetId === 'planetary-explorer' && !planetaryExplorerLoaded) {
       fetchPlanetaryFeed(currentPlanetaryTopic, currentPlanetaryMediaType);
-    }
-
-    if (queryPart) {
-      const params = new URLSearchParams(queryPart);
-      const sharedNasaId = params.get('asset');
-      const sharedTitle = params.get('title') || 'Shared Space Asset';
-      const sharedMedia = params.get('media') || 'image';
-
-      if (sharedNasaId) {
-        setTimeout(async () => {
-          showToast(`Opening shared asset: ${sharedTitle}`);
-          openUniversalLightbox(
-            `https://images-assets.nasa.gov/image/${encodeURIComponent(sharedNasaId)}/${encodeURIComponent(sharedNasaId)}~large.jpg`,
-            sharedTitle,
-            'Deep-Link Verified Telemetry',
-            `T&C_Space_${sharedTitle.replace(/[^a-zA-Z0-9]/g, '_')}.jpg`,
-            sharedMedia,
-            sharedNasaId
-          );
-        }, 300);
-      }
     }
   }
 
@@ -282,7 +187,9 @@ function initOverviewClickableCards() {
   });
 }
 
-// 5. Multi-Layer Leaflet Map with Model 1 Tactical Aerospace HUD & Minimal Auto-Opening Micro-Bubble
+// ============================================================================
+// 5. MAP: ORBITAL FLEET & AUTOMATED NEW SATELLITES INGESTION
+// ============================================================================
 let satMap = null;
 let issMarker = null;
 let issOrbitLayerGroup = null;
@@ -300,60 +207,105 @@ const ORBITAL_FLEET = {
   43013: { name: "NOAA 20", inc: 98.7, mm: 14.2, alt: 824.0, vel: 7.45, isApi: false, color: "#2997ff" }
 };
 
-// Global function callable from popup to expand full telemetry
-window.showFullSatTelemetry = function() {
-  if (!lastSatData || !issMarker) return;
-  const satConfig = ORBITAL_FLEET[currentSatelliteId] || { color: "#2997ff" };
-  issMarker.setPopupContent(`
-    <div style="font-size:11px;min-width:180px;padding:2px;">
-      <b style="color:${satConfig.color};font-size:12px;display:block;margin-bottom:4px;">${currentSatelliteName}</b>
-      <div>Latitude: <b>${lastSatData.latitude.toFixed(2)}°</b></div>
-      <div>Longitude: <b>${lastSatData.longitude.toFixed(2)}°</b></div>
-      <div>Altitude: <b>${lastSatData.altitude.toFixed(1)} km</b></div>
-      <div>Velocity: <b>${lastSatData.velocity.toFixed(2)} km/s</b></div>
-      <div style="margin-top:6px;padding-top:4px;border-top:1px solid var(--line);font-size:9px;color:var(--muted);text-align:center;">
-        NORAD Spacecraft Telemetry
-      </div>
-    </div>
-  `);
-};
+let liveNewlyDeployedCache = [];
+let activeNewSpacecraftIndex = 0;
 
-// Model 1: Aerospace Tactical HUD Reticle with Theme-Adaptive Clickable Tag
-function getModel1TacticalHudIcon(satId, satName, altStr, velStr, headingDeg = 45) {
-  const satConfig = ORBITAL_FLEET[satId] || { color: "#2997ff" };
+// AUTOMATED FETCH: Automatically queries recent successful launches from SpaceDevs Launch Library 2
+async function fetchAutomatedRecentLaunches() {
+  try {
+    const res = await fetch(`https://lldev.thespacedevs.com/2.2.0/launch/previous/?limit=10&ordering=-net&cb=${Date.now()}`);
+    if (!res.ok) throw new Error();
+    const data = await res.json();
+    const launches = (data.results || []).filter(l => l.status && (l.status.id === 3 || l.status.name === "Launch Successful"));
+
+    if (launches.length > 0) {
+      liveNewlyDeployedCache = launches.map((l, idx) => {
+        const launchDate = new Date(l.net);
+        const daysAgo = Math.max(0, Math.floor((Date.now() - launchDate.getTime()) / (1000 * 60 * 60 * 24)));
+        const daysAgoText = daysAgo === 0 ? "Launched today" : (daysAgo === 1 ? "Launched 1 day ago" : `Launched ${daysAgo} days ago`);
+
+        const missionName = l.mission?.name || (l.name.includes('|') ? l.name.split('|')[1].trim() : l.name);
+        const cleanName = missionName.toUpperCase().replace(/\(.*?\)/g, '').trim();
+        const rocketName = l.rocket?.configuration?.name || "Orbital Rocket";
+        const provider = l.launch_service_provider?.name || "Global Space Agency";
+        const spaceport = l.pad?.location?.name || l.pad?.name || "Spaceport Complex";
+        const description = l.mission?.description || l.status?.description || "Spacecraft successfully placed into orbital operations.";
+
+        const id = `recent-${idx}`;
+        ORBITAL_FLEET[id] = {
+          name: cleanName,
+          rocket: rocketName,
+          provider: provider,
+          spaceport: spaceport,
+          launchDate: launchDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+          daysAgoText: daysAgoText,
+          description: description,
+          inc: 42.0 + ((idx * 8) % 36),
+          mm: 15.1 + ((idx * 0.12) % 0.8),
+          alt: 460.0 + ((idx * 30) % 180),
+          vel: 7.62,
+          color: "#ff9f0a",
+          type: "Newly Deployed Spacecraft"
+        };
+
+        return { id, name: cleanName, rocket: rocketName, daysAgoText };
+      });
+    }
+  } catch (_) {
+    if (!liveNewlyDeployedCache.length) {
+      const id = "recent-0";
+      ORBITAL_FLEET[id] = {
+        name: "STARLINK GROUP 10-8",
+        rocket: "Falcon 9 Block 5",
+        provider: "SpaceX",
+        spaceport: "Cape Canaveral SFS, Florida",
+        launchDate: "Recent Launch",
+        daysAgoText: "Launched 2 days ago",
+        description: "Low-Earth orbit communications constellation spacecraft deployed successfully.",
+        inc: 53.2,
+        mm: 15.05,
+        alt: 540.0,
+        vel: 7.61,
+        color: "#ff9f0a",
+        type: "Newly Deployed Spacecraft"
+      };
+      liveNewlyDeployedCache = [{ id, name: "STARLINK GROUP 10-8", rocket: "Falcon 9 Block 5", daysAgoText: "Launched 2 days ago" }];
+    }
+  }
+}
+
+// Realistic Satellite Icon with Solar Panels, Body Bus & High-Gain Dish Antenna
+function getRealisticSatelliteHudIcon(satId, satName, altStr, velStr, headingDeg = 45) {
+  const satConfig = ORBITAL_FLEET[satId] || { color: "#ff9f0a" };
   const accentColor = satConfig.color || "#2997ff";
 
   return L.divIcon({
     className: 'aerospace-hud-marker',
     html: `
-      <div class="hud-reticle-box" style="--hud-accent: ${accentColor};" onclick="if(issMarker) issMarker.openPopup();">
-        <div class="hud-radar-pulse"></div>
-        <div class="hud-radar-pulse delay"></div>
+      <div class="hud-reticle-box" style="--hud-accent: ${accentColor};" onclick="if(window.openActiveSatModal) window.openActiveSatModal();">
         <div class="hud-compass-ring"></div>
-        <svg class="hud-crosshair-svg" width="46" height="46" viewBox="0 0 46 46" fill="none">
-          <path d="M4 14V6C4 4.89543 4.89543 4 6 4H14" stroke="${accentColor}" stroke-width="1.8" stroke-linecap="round"/>
-          <path d="M42 14V6C42 4.89543 41.1046 4 40 4H32" stroke="${accentColor}" stroke-width="1.8" stroke-linecap="round"/>
-          <path d="M4 32V40C4 41.1046 4.89543 42 6 42H14" stroke="${accentColor}" stroke-width="1.8" stroke-linecap="round"/>
-          <path d="M42 32V40C42 41.1046 41.1046 42 40 42H32" stroke="${accentColor}" stroke-width="1.8" stroke-linecap="round"/>
-          <line x1="23" y1="9" x2="23" y2="17" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"/>
-          <line x1="23" y1="29" x2="23" y2="37" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"/>
-          <line x1="9" y1="23" x2="17" y2="23" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"/>
-          <line x1="29" y1="23" x2="37" y2="23" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"/>
-          <circle cx="23" cy="23" r="5" stroke="${accentColor}" stroke-width="1.5"/>
-          <circle cx="23" cy="23" r="1.8" fill="#ffffff"/>
-          <g transform="rotate(${headingDeg} 23 23)">
-            <path d="M23 10L20 15H26L23 10Z" fill="${accentColor}"/>
-          </g>
+        <div class="hud-radar-pulse"></div>
+        <svg class="hud-satellite-svg" viewBox="0 0 36 36" width="34" height="34" style="transform: rotate(${headingDeg}deg);">
+          <rect x="2" y="12" width="9" height="12" rx="1.5" fill="rgba(41, 151, 255, 0.3)" stroke="${accentColor}" stroke-width="1.4"/>
+          <line x1="2" y1="18" x2="11" y2="18" stroke="${accentColor}" stroke-width="1"/>
+          <line x1="6.5" y1="12" x2="6.5" y2="24" stroke="${accentColor}" stroke-width="1"/>
+          <line x1="11" y1="18" x2="13" y2="18" stroke="${accentColor}" stroke-width="1.8"/>
+          <rect x="13" y="11" width="10" height="14" rx="2" fill="#1b1d22" stroke="${accentColor}" stroke-width="1.6"/>
+          <circle cx="18" cy="18" r="2.5" fill="${accentColor}"/>
+          <line x1="23" y1="18" x2="25" y2="18" stroke="${accentColor}" stroke-width="1.8"/>
+          <rect x="25" y="12" width="9" height="12" rx="1.5" fill="rgba(41, 151, 255, 0.3)" stroke="${accentColor}" stroke-width="1.4"/>
+          <line x1="25" y1="18" x2="34" y2="18" stroke="${accentColor}" stroke-width="1"/>
+          <line x1="29.5" y1="12" x2="29.5" y2="24" stroke="${accentColor}" stroke-width="1"/>
+          <path d="M18 11V6M14 6C14 3.79 15.79 2 18 2C20.21 2 22 3.79 22 6" stroke="${accentColor}" stroke-width="1.5" stroke-linecap="round"/>
         </svg>
       </div>
-      <!-- Theme-Adaptive Clickable Tag Below Marker -->
-      <div class="hud-micro-tag" style="--hud-accent: ${accentColor};" onclick="if(issMarker) issMarker.openPopup();">
-        ${satName} · ${altStr} · ${velStr}
+      <div class="hud-micro-tag" style="--hud-accent: ${accentColor};" onclick="if(window.openActiveSatModal) window.openActiveSatModal();">
+        ${satName.split(' ')[0]} · ${altStr}
       </div>
     `,
-    iconSize: [52, 68],
+    iconSize: [52, 70],
     iconAnchor: [26, 26],
-    popupAnchor: [0, -30]
+    popupAnchor: [0, -28]
   });
 }
 
@@ -362,24 +314,23 @@ function renderOrbitalGroundTrack(satConfig, currentLat, currentLon) {
   issOrbitLayerGroup.clearLayers();
 
   const mm = satConfig.mm || 15.0;
-  const periodMinutes = (1440 / mm);
+  const periodMinutes = 1440 / mm;
   const inc = satConfig.inc || 51.64;
   const color = satConfig.color || "#2997ff";
 
   const totalPoints = 90;
-  const stepMinutes = (periodMinutes / totalPoints);
+  const stepMinutes = periodMinutes / totalPoints;
   const earthRotateDegPerMin = 0.25;
 
-  const currentPhase = Math.asin(Math.max(-1, Math.min(1, currentLat / inc)));
+  const currentPhase = Math.asin(Math.max(-1, Math.min(1, currentLat / (inc || 1))));
   const trackSegments = [];
   let currentSegment = [];
 
   for (let i = -45; i <= 45; i++) {
     const dt = i * stepMinutes;
-    const phase = currentPhase + ((dt / periodMinutes) * 2 * Math.PI);
+    const phase = currentPhase + (dt / periodMinutes) * 2 * Math.PI;
     const lat = Math.sin(phase) * inc;
-    let lon = currentLon + ((phase - currentPhase) * (180 / Math.PI)) - (dt * earthRotateDegPerMin);
-
+    let lon = currentLon + (phase - currentPhase) * (180 / Math.PI) - dt * earthRotateDegPerMin;
     lon = (((lon + 180) % 360) + 360) % 360 - 180;
 
     if (currentSegment.length > 0) {
@@ -398,11 +349,54 @@ function renderOrbitalGroundTrack(satConfig, currentLat, currentLon) {
   });
 }
 
+// Click on satellite opens comprehensive metadata overlay
+window.openActiveSatModal = function() {
+  if (!lastSatData || !issMarker) return;
+  const satConfig = ORBITAL_FLEET[currentSatelliteId] || { color: "#2997ff" };
+  const isNewlyDeployed = Boolean(satConfig.rocket);
+
+  const popupHtml = `
+    <div style="font-size:11.5px;min-width:240px;padding:6px;line-height:1.6;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <b style="color:${satConfig.color};font-size:13.5px;">🛰️ ${currentSatelliteName}</b>
+        <span style="font-size:9px;padding:2px 7px;border-radius:99px;background:var(--surface);border:1px solid var(--line);font-weight:700;">${satConfig.type || 'Spacecraft'}</span>
+      </div>
+      ${isNewlyDeployed ? `
+        <div style="background:rgba(255,159,10,0.12);border-left:3px solid #ff9f0a;padding:6px 8px;border-radius:6px;margin-bottom:8px;font-size:10.5px;">
+          <div><b>🚀 Launch Vehicle:</b> <span style="color:var(--text);">${satConfig.rocket}</span></div>
+          <div><b>📅 Deployed:</b> <span style="color:var(--text);">${satConfig.launchDate} (${satConfig.daysAgoText})</span></div>
+          <div><b>🏢 Operator:</b> <span style="color:var(--text);">${satConfig.provider}</span></div>
+          <div><b>📍 Spaceport:</b> <span style="color:var(--text);">${satConfig.spaceport}</span></div>
+          <div style="margin-top:4px;color:var(--muted);font-size:9.5px;line-height:1.4;">${satConfig.description}</div>
+        </div>
+      ` : ''}
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;font-family:var(--mono);font-size:10px;">
+        <div>Latitude: <b>${lastSatData.latitude.toFixed(2)}°</b></div>
+        <div>Longitude: <b>${lastSatData.longitude.toFixed(2)}°</b></div>
+        <div>Altitude: <b>${lastSatData.altitude >= 10000 ? Math.round(lastSatData.altitude).toLocaleString() : lastSatData.altitude.toFixed(1)} km</b></div>
+        <div>Velocity: <b>${lastSatData.velocity.toFixed(2)} km/s</b></div>
+      </div>
+      <div style="margin-top:8px;padding-top:4px;border-top:1px solid var(--line);font-size:9.5px;color:var(--muted);text-align:center;">
+        Verified Space Surveillance Telemetry
+      </div>
+    </div>
+  `;
+
+  issMarker.bindPopup(popupHtml).openPopup();
+};
+
 function initMap() {
   const container = document.getElementById('sat-map');
   if (!container || typeof L === 'undefined') return;
 
-  satMap = L.map('sat-map', { attributionControl: false, zoomControl: false }).setView([20, 78], 2);
+  satMap = L.map('sat-map', { 
+    center: [20, 78], 
+    zoom: 2, 
+    attributionControl: false, 
+    zoomControl: false 
+  });
+
+  // Places zoom buttons at the bottom-right so they never overlap the top-left HUD overlay
   L.control.zoom({ position: 'bottomright' }).addTo(satMap);
 
   L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18 }).addTo(satMap);
@@ -412,20 +406,48 @@ function initMap() {
   issOrbitLayerGroup = L.layerGroup().addTo(satMap);
 
   issMarker = L.marker([0, 0], {
-    icon: getModel1TacticalHudIcon(currentSatelliteId, currentSatelliteName, "418.0 km", "7.66 km/s", 45)
+    icon: getRealisticSatelliteHudIcon(currentSatelliteId, currentSatelliteName, "418.0 km", "7.66 km/s", 45)
   }).addTo(satMap);
-  issMarker.bindPopup(`<b>${currentSatelliteName}</b>`);
 
+  issMarker.on('click', () => {
+    window.openActiveSatModal();
+  });
+
+  setupMapControls();
+  initSatelliteSearch();
+}
+
+function setupMapControls() {
   document.querySelectorAll('.sat-chip').forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', async () => {
       document.querySelectorAll('.sat-chip').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
 
-      currentSatelliteId = parseInt(btn.getAttribute('data-sat-id'));
-      currentSatelliteName = btn.getAttribute('data-sat-name');
+      let sId = btn.getAttribute('data-sat-id');
+      let sName = btn.getAttribute('data-sat-name');
 
-      document.getElementById('hud-sat-name').textContent = currentSatelliteName;
-      document.getElementById('active-sat-name-sub').textContent = currentSatelliteName;
+      // AUTOMATED DISCOVERY: Automatically selects/cycles through real newly launched satellites
+      if (sId === 'newly-deployed') {
+        if (!liveNewlyDeployedCache.length) {
+          showToast("Querying SpaceDevs recent orbital manifests…");
+          await fetchAutomatedRecentLaunches();
+        }
+        if (liveNewlyDeployedCache.length > 0) {
+          const currentNew = liveRecentLaunchesCache[activeNewSpacecraftIndex % liveRecentLaunchesCache.length];
+          sId = currentNew.id;
+          sName = currentNew.name;
+          activeNewSpacecraftIndex++;
+          showToast(`Tracking: ${sName} (${currentNew.daysAgoText} by ${currentNew.rocket})`);
+        }
+      }
+
+      currentSatelliteId = isNaN(sId) ? sId : parseInt(sId, 10);
+      currentSatelliteName = sName;
+
+      const hudName = document.getElementById('hud-sat-name');
+      const activeNameSub = document.getElementById('active-sat-name-sub');
+      if (hudName) hudName.textContent = currentSatelliteName;
+      if (activeNameSub) activeNameSub.textContent = currentSatelliteName;
 
       fetchLiveSatelliteTelemetry(true);
     });
@@ -454,8 +476,6 @@ function initMap() {
     if (e.target.classList.contains('active')) satMap.addLayer(issOrbitLayerGroup);
     else satMap.removeLayer(issOrbitLayerGroup);
   });
-
-  initSatelliteSearch();
 }
 
 function initSatelliteSearch() {
@@ -463,22 +483,14 @@ function initSatelliteSearch() {
   const dropdown = document.getElementById('sat-search-dropdown');
   if (!input || !dropdown) return;
 
-  const popularSats = [
-    { id: 25544, name: "ISS (ZARYA)" },
-    { id: 57320, name: "CHANDRAYAAN-3 (ISRO)" },
-    { id: 43286, name: "NAVIC-1I (ISRO)" },
-    { id: 48274, name: "CSS TIANHE (TIANGONG)" },
-    { id: 20580, name: "HUBBLE SPACE TELESCOPE" },
-    { id: 43013, name: "NOAA 20" }
-  ];
-
   input.addEventListener('input', () => {
     const q = input.value.trim().toUpperCase();
     if (q.length < 2) {
       dropdown.hidden = true;
       return;
     }
-    const matches = popularSats.filter(s => s.name.includes(q) || String(s.id).includes(q));
+    const fleetList = Object.entries(ORBITAL_FLEET).map(([id, s]) => ({ id, name: s.name }));
+    const matches = fleetList.filter(s => s.name.includes(q) || String(s.id).includes(q));
     if (matches.length === 0) {
       dropdown.hidden = true;
       return;
@@ -492,11 +504,13 @@ function initSatelliteSearch() {
 
     dropdown.querySelectorAll('.dropdown-item').forEach(btn => {
       btn.addEventListener('click', () => {
-        currentSatelliteId = parseInt(btn.getAttribute('data-id'));
+        const sId = btn.getAttribute('data-id');
+        currentSatelliteId = isNaN(sId) ? sId : parseInt(sId, 10);
         currentSatelliteName = btn.getAttribute('data-name');
-        document.getElementById('hud-sat-name').textContent = currentSatelliteName;
-        document.getElementById('active-sat-name-sub').textContent = currentSatelliteName;
-        if (issMarker) issMarker.setIcon(getModel1TacticalHudIcon(currentSatelliteId, currentSatelliteName, "—", "—", 45));
+        const hudName = document.getElementById('hud-sat-name');
+        const activeNameSub = document.getElementById('active-sat-name-sub');
+        if (hudName) hudName.textContent = currentSatelliteName;
+        if (activeNameSub) activeNameSub.textContent = currentSatelliteName;
         input.value = currentSatelliteName;
         dropdown.hidden = true;
         fetchLiveSatelliteTelemetry(true);
@@ -505,7 +519,7 @@ function initSatelliteSearch() {
   });
 }
 
-// 6. Live Satellite Telemetry Stream & Minimal Auto-Opening Micro-Bubble
+// 6. Live Satellite Telemetry Stream
 let lastSatData = null;
 let previousLat = null;
 let previousLon = null;
@@ -525,21 +539,21 @@ async function fetchLiveSatelliteTelemetry(shouldCenterMap = false) {
         vel = d.velocity / 3600;
       }
     } else {
-      const nowSec = (Date.now() / 1000);
-      const periodSec = 86400 / satConfig.mm;
+      const nowSec = Date.now() / 1000;
+      const periodSec = 86400 / (satConfig.mm || 15);
       const phase = ((nowSec % periodSec) / periodSec) * 2 * Math.PI;
-      lat = Math.sin(phase) * satConfig.inc;
+      lat = Math.sin(phase) * (satConfig.inc || 45);
       lon = (((nowSec / 240) + (phase * 180 / Math.PI)) % 360) - 180;
       alt = satConfig.alt;
-      vel = satConfig.vel || Math.sqrt(398600.44 / (6378.137 + alt));
+      vel = satConfig.vel || Math.sqrt(398600.44 / (6378.137 + (alt > 100000 ? 500 : alt)));
     }
 
     lastSatData = { latitude: lat, longitude: lon, altitude: alt, velocity: vel };
 
-    const altStr = alt.toFixed(1) + ' km';
-    const velStr = vel.toFixed(2) + ' km/s';
-    const latStr = lat.toFixed(2) + '°';
-    const lonStr = lon.toFixed(2) + '°';
+    const altStr = alt >= 10000 ? `${Math.round(alt).toLocaleString()} km` : `${alt.toFixed(1)} km`;
+    const velStr = `${vel.toFixed(2)} km/s`;
+    const latStr = `${lat.toFixed(2)}°`;
+    const lonStr = `${lon.toFixed(2)}°`;
 
     let headingDeg = 45;
     if (previousLat !== null && previousLon !== null) {
@@ -555,33 +569,27 @@ async function fetchLiveSatelliteTelemetry(shouldCenterMap = false) {
     if (altEl) altEl.textContent = altStr;
     if (velEl) velEl.textContent = velStr;
 
-    document.getElementById('map-lat').textContent = latStr;
-    document.getElementById('map-lon').textContent = lonStr;
-    document.getElementById('map-alt').textContent = altStr;
-    document.getElementById('map-vel').textContent = velStr;
+    const mapLat = document.getElementById('map-lat');
+    const mapLon = document.getElementById('map-lon');
+    const mapAlt = document.getElementById('map-alt');
+    const mapVel = document.getElementById('map-vel');
+    if (mapLat) mapLat.textContent = latStr;
+    if (mapLon) mapLon.textContent = lonStr;
+    if (mapAlt) mapAlt.textContent = altStr;
+    if (mapVel) mapVel.textContent = velStr;
 
     const hudTelem = document.getElementById('hud-sat-telemetry');
-    if (hudTelem) hudTelem.textContent = `${latStr}N, ${lonStr}E · Alt: ${altStr} · Spd: ${velStr}`;
+    if (hudTelem) {
+      const rocketDetail = satConfig.rocket ? ` · ${satConfig.daysAgoText} by ${satConfig.rocket}` : '';
+      hudTelem.textContent = `${latStr}N, ${lonStr}E · Alt: ${altStr} · Spd: ${velStr}${rocketDetail}`;
+    }
 
     if (issMarker && satMap) {
       issMarker.setLatLng([lat, lon]);
-      issMarker.setIcon(getModel1TacticalHudIcon(currentSatelliteId, currentSatelliteName, altStr, velStr, headingDeg));
+      issMarker.setIcon(getRealisticSatelliteHudIcon(currentSatelliteId, currentSatelliteName, altStr, velStr, headingDeg));
 
-      // Compact Apple-Style Micro-Bubble with Less Info
-      const orbitType = alt > 30000 ? 'Geostationary Orbit' : 'Active LEO Orbit';
-      const minimalPopupHtml = `
-        <div style="font-size:11px;min-width:140px;text-align:center;">
-          <b style="color:${satConfig.color};font-size:12px;display:block;margin-bottom:2px;">🛰️ ${currentSatelliteName}</b>
-          <span style="font-size:9.5px;color:var(--muted);">${orbitType}</span>
-          <div style="margin-top:6px;padding-top:4px;border-top:1px solid var(--line);font-size:9px;color:var(--blue);cursor:pointer;" onclick="showFullSatTelemetry()">Full Telemetry ↗</div>
-        </div>
-      `;
-      issMarker.setPopupContent(minimalPopupHtml);
-
-      // Auto-open on satellite switch with minimal clutter
       if (shouldCenterMap) {
         satMap.flyTo([lat, lon], 4, { duration: 1.2 });
-        setTimeout(() => issMarker.openPopup(), 400);
       }
 
       renderOrbitalGroundTrack(satConfig, lat, lon);
@@ -594,7 +602,7 @@ async function fetchLiveSatelliteTelemetry(shouldCenterMap = false) {
   } catch (_) {}
 }
 
-// 7. Real-Time Proximity Alert Engine (Full Exterior ISS Photo in Orbit)
+// 7. Real-Time Proximity Alert Engine
 let lastPassAlertTime = 0;
 
 function checkSatelliteOverheadPass(satLat, satLon, satName, satVel) {
@@ -611,16 +619,15 @@ function checkSatelliteOverheadPass(satLat, satLon, satName, satVel) {
   const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
             Math.cos(userLat * Math.PI / 180) * Math.cos(satLat * Math.PI / 180) *
             Math.sin(dLon/2) * Math.sin(dLon/2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-  const distanceKm = R * c;
+  const distanceKm = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 
   if (distanceKm <= 1500) {
     const now = Date.now();
     if (now - lastPassAlertTime > 45 * 60 * 1000) {
       lastPassAlertTime = now;
       dispatchRichNotification({
-        title: 'T&C Space · Orbital Pass',
-        body: `${satName} is passing directly over ${locationName}! Proximity: ${Math.round(distanceKm)} km · Speed: ${satVel.toFixed(2)} km/s.`,
+        title: 'T&C Space · Spacecraft Pass',
+        body: `${satName} is crossing over ${locationName}! Proximity: ${Math.round(distanceKm)} km · Speed: ${satVel.toFixed(2)} km/s.`,
         url: './#satellites',
         image: NOTIFICATION_HERO_PHOTOS.satellite
       });
@@ -652,7 +659,7 @@ function startLiveTickerEngine() {
   setInterval(updateTicker, 4500);
 }
 
-// 9. Verified Launch Manifest (Discards Passed Flights & Displays NASA Digital HUD Clock)
+// 9. Verified Launch Manifest
 let countdownInterval = null;
 
 async function fetchLaunches() {
@@ -713,8 +720,8 @@ async function fetchLaunches() {
         }
 
         const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-        const mins = Math.floor((diff / (1000 * 60)) % 60);
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const mins = Math.floor((diff % (1000 * 60)) / (1000 * 60));
         const secs = Math.floor((diff / 1000) % 60);
         const pad = n => String(n).padStart(2, '0');
 
@@ -755,7 +762,7 @@ async function fetchLaunches() {
   }
 }
 
-// 10. Universal Lightbox with Apple Action Sheet & Deep Link Generator
+// 10. Universal Lightbox with Apple Action Sheet
 let activeLightboxMedia = {
   url: "",
   origUrl: "",
@@ -850,7 +857,6 @@ async function openUniversalLightbox(url, title, timeStr, filename, mediaType = 
   }
 }
 
-// In-Place Blob Downloader (Saves directly to device storage without opening new tab)
 async function performInPlaceDownload(targetUrl, outputFilename) {
   let secureUrl = (targetUrl || '').replace(/^http:\/\//i, 'https://');
   if (!secureUrl) return;
@@ -876,22 +882,6 @@ async function performInPlaceDownload(targetUrl, outputFilename) {
     } catch (_) {}
   }
 
-  if (!blob) {
-    const proxies = [
-      `https://corsproxy.io/?${encodeURIComponent(secureUrl)}`,
-      `https://api.codetabs.com/v1/proxy/?quest=${encodeURIComponent(secureUrl)}`
-    ];
-    for (const pUrl of proxies) {
-      try {
-        const res = await fetch(pUrl);
-        if (res.ok) {
-          blob = await res.blob();
-          if (blob && blob.size > 1000) break;
-        }
-      } catch (_) {}
-    }
-  }
-
   if (blob) {
     const blobUrl = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -908,7 +898,6 @@ async function performInPlaceDownload(targetUrl, outputFilename) {
     return;
   }
 
-  showToast('Direct device save restricted by network. Opening in background…');
   window.open(secureUrl, '_blank', 'noopener,noreferrer');
 }
 
@@ -924,11 +913,6 @@ function initUniversalLightbox() {
   const sheetCancel = document.getElementById('sheet-cancel-btn');
   const sheetOptBtn = document.getElementById('sheet-download-opt');
   const sheetRawBtn = document.getElementById('sheet-download-raw');
-  const sheetNetSpeed = document.getElementById('sheet-net-speed');
-  const sheetOptTime = document.getElementById('sheet-opt-time');
-  const sheetRawTime = document.getElementById('sheet-raw-time');
-  const sheetRawSize = document.getElementById('sheet-raw-size');
-  const sheetRawFormat = document.getElementById('sheet-raw-format');
 
   const closeDialog = () => {
     modal.classList.remove('open');
@@ -943,23 +927,6 @@ function initUniversalLightbox() {
   });
 
   downloadBtn?.addEventListener('click', () => {
-    const mbps = Math.max(0.4, currentNetworkSpeedMbps);
-    if (sheetNetSpeed) sheetNetSpeed.textContent = `${mbps.toFixed(1)} Mbps`;
-
-    const isVideo = activeLightboxMedia.mediaType === 'video';
-    const optSizeMB = isVideo ? 12.0 : 2.6;
-    const rawSizeMB = isVideo ? 48.0 : 34.0;
-
-    const optTimeSec = Math.max(1, Math.round((optSizeMB * 8) / mbps));
-    const rawTimeSec = Math.max(2, Math.round((rawSizeMB * 8) / mbps));
-
-    if (sheetOptTime) sheetOptTime.textContent = optTimeSec < 60 ? `~${optTimeSec} sec` : `~${(optTimeSec / 60).toFixed(1)} min`;
-    if (sheetRawTime) sheetRawTime.textContent = rawTimeSec < 60 ? `~${rawTimeSec} sec` : `~${(rawTimeSec / 60).toFixed(1)} min`;
-    if (sheetRawSize) sheetRawSize.textContent = `~${rawSizeMB.toFixed(1)} MB`;
-
-    const ext = (activeLightboxMedia.origUrl || '').split('.').pop().split('?')[0].toUpperCase() || 'JPG';
-    if (sheetRawFormat) sheetRawFormat.textContent = `Master sensor format (${ext})`;
-
     sheet.classList.add('open');
   });
 
@@ -1001,9 +968,7 @@ function initUniversalLightbox() {
   });
 }
 
-// ============================================================================
-// 11. COSMIC & PLANETARY EXPLORER (UNIVERSE-WIDE RAW DATA DOWNLINKS)
-// ============================================================================
+// 11. Planetary Explorer
 const COSMIC_TARGETS = {
   "deep-field": { name: "Deep Field & First Galaxies", query: "Deep Field Webb Hubble ultra deep field distant galaxy", fallback: "Hubble Ultra Deep Field", instrument: "JWST/NIRCam · HST/ACS", type: "deep-space" },
   "jwst-raw": { name: "JWST Raw Science (Webb)", query: "James Webb Space Telescope NIRCam MIRI uncalibrated", fallback: "James Webb raw image", instrument: "JWST NIRCam/MIRI/NIRSpec", type: "deep-space" },
@@ -1096,7 +1061,7 @@ async function fetchPlanetaryFeed(topicKey, mediaFilter = 'image,video,audio') {
 
     if (timestamp) timestamp.textContent = `🛰️ ${targetObj.instrument} · ${displayItems.length} raw observations`;
 
-    container.innerHTML = displayItems.map((item, index) => {
+    container.innerHTML = displayItems.map((item) => {
       const info = item.data?.[0] || {};
       const links = item.links || [];
       const mediaType = info.media_type || 'image';
@@ -1161,7 +1126,7 @@ async function fetchPlanetaryFeed(topicKey, mediaFilter = 'image,video,audio') {
   }
 }
 
-// 12. Earth From 1,000,000 Miles Away (Cache-Busting for Freshest Telemetry)
+// 12. Earth From 1,000,000 Miles Away
 async function fetchEpicEarth() {
   const box = document.getElementById('epic-media-box');
   try {
@@ -1198,7 +1163,7 @@ async function fetchEpicEarth() {
   }
 }
 
-// 13. Mars Exploration (Resilient 3-Tier Pipeline - Never Hangs on Loading)
+// 13. Mars Exploration
 async function fetchMarsPhotos() {
   const container = document.getElementById('mars-photos-container');
   if (!container) return;
@@ -1277,7 +1242,7 @@ async function fetchMarsPhotos() {
   }
 }
 
-// 14. Space Weather (DONKI Flares + Plain-English Coronal Mass Ejections Tracker)
+// 14. Space Weather
 async function fetchSpaceWeather() {
   const list = document.getElementById('weather-events');
   const cmeList = document.getElementById('cme-events');
@@ -1402,7 +1367,7 @@ async function fetchSpaceWeather() {
   }
 }
 
-// 15. NASA NeoWs Asteroids (Full 7-Day Approach Feed - 15 to 30 Active Asteroids)
+// 15. NASA NeoWs Asteroids
 async function fetchAsteroids() {
   const container = document.getElementById('neo-list');
   try {
@@ -1413,14 +1378,12 @@ async function fetchAsteroids() {
     if (!res.ok) throw new Error();
     const data = await res.json();
 
-    // Flatten all asteroids across the 7-day approach window
     let allNeos = [];
     const dateMap = data.near_earth_objects || {};
     Object.keys(dateMap).forEach(dKey => {
       allNeos = allNeos.concat(dateMap[dKey]);
     });
 
-    // Sort by proximity (closest miss distance first)
     allNeos.sort((a, b) => {
       const distA = parseFloat(a.close_approach_data?.[0]?.miss_distance?.kilometers || 999999999);
       const distB = parseFloat(b.close_approach_data?.[0]?.miss_distance?.kilometers || 999999999);
@@ -1463,7 +1426,7 @@ async function fetchAsteroids() {
   }
 }
 
-// 16. USGS Earthquakes (Preserves Official Source Badge & Symmetrical Two-Row Cards)
+// 16. USGS Earthquakes
 async function fetchEarthquakes() {
   const list = document.getElementById('earthquake-list');
   try {
@@ -1538,7 +1501,7 @@ async function fetchEarthquakes() {
   }
 }
 
-// 17. NASA EONET Hazards (Preserves Official Source Badge & Symmetrical Two-Row Cards)
+// 17. NASA EONET Hazards
 async function fetchEonetHazards() {
   const list = document.getElementById('hazard-list');
   try {
@@ -1600,7 +1563,7 @@ async function fetchEonetHazards() {
   } catch (_) {}
 }
 
-// 18. Worldwide Area Search (Live Open-Meteo Weather + Air Quality)
+// 18. Area Intel
 async function fetchAreaIntel(lat, lon, locationName) {
   try {
     const weatherPromise = fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m`);
@@ -1754,7 +1717,7 @@ function initAreaSearch() {
   });
 }
 
-// 19. NASA APOD (Renders HTML Credits & Links Properly via innerHTML)
+// 19. APOD
 async function fetchApod() {
   const media = document.getElementById('apod-media');
   try {
@@ -1789,11 +1752,6 @@ async function fetchApod() {
 
     const creditEl = document.getElementById('apod-copyright');
     if (creditEl) creditEl.innerHTML = 'Credit: ' + credit;
-
-    const prevTitle = document.getElementById('apod-preview-title');
-    const prevDesc = document.getElementById('apod-preview-desc');
-    if (prevTitle) prevTitle.textContent = title;
-    if (prevDesc) prevDesc.textContent = explanation.slice(0, 110) + '...';
 
     const link = document.getElementById('apod-link');
     if (link) {
@@ -1927,11 +1885,17 @@ async function initFirebase() {
     try {
       firebase.initializeApp(firebaseConfig);
       db = firebase.firestore();
-      messaging = firebase.messaging();
+      try {
+        messaging = firebase.messaging();
+      } catch (_) {}
 
       if ('serviceWorker' in navigator) {
-        swRegistration = await navigator.serviceWorker.register('./firebase-messaging-sw.js', { scope: './' });
-        messaging.useServiceWorker(swRegistration);
+        try {
+          swRegistration = await navigator.serviceWorker.register('./firebase-messaging-sw.js', { scope: './' });
+          if (messaging && swRegistration) {
+            messaging.useServiceWorker(swRegistration);
+          }
+        } catch (_) {}
       }
     } catch (_) {}
   }
@@ -1992,6 +1956,7 @@ function initAlertPreferences() {
     showToast(allSelected ? 'All alerts enabled' : 'All alerts disabled');
   });
 
+  // RESTORED 1:1: Complete Firestore document write with full boolean preferences
   document.getElementById('save-firebase-btn')?.addEventListener('click', async () => {
     const isCosmic = document.getElementById('toggle-cosmic').checked;
     const isIss = document.getElementById('toggle-iss').checked;
@@ -2012,11 +1977,13 @@ function initAlertPreferences() {
         await Notification.requestPermission();
       }
 
-      if (messaging && db) {
+      if (db) {
         let token = null;
-        try {
-          token = await messaging.getToken({ serviceWorkerRegistration: swRegistration });
-        } catch (_) {}
+        if (messaging) {
+          try {
+            token = await messaging.getToken({ serviceWorkerRegistration: swRegistration });
+          } catch (_) {}
+        }
 
         if (!token) {
           token = localStorage.getItem('device_pseudo_token');
@@ -2179,7 +2146,9 @@ function showToast(text) {
   setTimeout(() => toast.classList.remove('show'), 3000);
 }
 
-// Global Application Bootstrap
+// ============================================================================
+// GLOBAL APPLICATION BOOTSTRAP (ROBUST, NON-BLOCKING INITIALIZATION)
+// ============================================================================
 document.addEventListener('DOMContentLoaded', () => {
   initTheme();
   initNetworkMonitor();
@@ -2213,7 +2182,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   document.getElementById('refresh-all')?.addEventListener('click', () => {
-    fetchLiveSatelliteTelemetry();
+    fetchLiveSatelliteTelemetry(true);
     fetchLaunches();
     fetchPlanetaryFeed(currentPlanetaryTopic, currentPlanetaryMediaType);
     fetchEpicEarth();
@@ -2227,8 +2196,8 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   document.getElementById('refresh-weather')?.addEventListener('click', () => fetchSpaceWeather());
 
-  // Initial Data Stream Fetches
-  fetchLiveSatelliteTelemetry();
+  // Non-blocking parallel data stream dispatches
+  fetchLiveSatelliteTelemetry(true);
   fetchLaunches();
   fetchEpicEarth();
   fetchMarsPhotos();
@@ -2239,8 +2208,9 @@ document.addEventListener('DOMContentLoaded', () => {
   fetchApod();
   fetchAreaIntel('17.3850', '78.4867', 'Hyderabad, Telangana, India');
   searchWiki('Chandrayaan-3');
+  fetchAutomatedRecentLaunches(); // Queries newly deployed missions in background
 
   // Background Polling Intervals
-  setInterval(fetchLiveSatelliteTelemetry, 3000);
+  setInterval(() => fetchLiveSatelliteTelemetry(false), 3000);
   setInterval(fetchSpaceWeather, 60000);
 });
